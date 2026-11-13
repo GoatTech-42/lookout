@@ -37,3 +37,11 @@ Targeted input follow-up: all four actual native PlayerCommand.Action enums lack
 ## 1.21.11 remap warning
 
 The fresh-project-cache build reproduces `Cannot remap modifiers because it does not exist in any of the targets [] or their parents.` before compileJava. Cached forced builds do not reproduce that configuration-stage warning. A dependency scan finds the matching accessor in Fabric API fabric-entity-events-v1 3.1.1+1d0ab4303e, ContextChainAccessor.getModifiers(), targeting com.mojang.brigadier.context.ContextChain with @Accessor("modifiers"). The actual Brigadier class has a private modifiers field; both bytecode records are retained. This identifies a concrete matching dependency entry, not a proof that it is the sole warning emitter or harmless at runtime. No warning was suppressed and no dependency was changed. No 1.21.11 runtime is admitted or claimed.
+
+## Bounded review follow-up
+
+Common-listener send(Packet) declarations are now explicitly retained for all four versions; common-send-targets.log reruns the actual declared-target check. A deliberate scope divergence remains: this port sends one initial anchor per PlayerData. Upstream unconditionally schedules an anchor on each JOIN_GAME. Same-player duplicate/reentrant login callbacks do not reanchor here, and configuration-to-play reentry that retains the same PlayerData would not reanchor. A newly initialized player session has a fresh guard and anchor. Reconfiguration/transfer runtime behavior remains unqualified; this change is not a claim of exact parity for repeated JOIN_GAME events.
+
+The existing join-PONG branch also is not idempotent: a duplicate matching anchor after handshake can enter ordinary confirmation handling even though the anchor was never queued. This also follows the pinned upstream branch structure. Exactly-once ingress must be established separately; no silent duplicate-PONG policy change is included here.
+
+Input refinement after the first evidence packet: PacketEvents v2.14.0 marks sneak EntityAction constants removed since1.21.6 (ID=-1 on newer servers); PlayerInput is separate. Upstream's pinned PacketListener does not consume PlayerInput. Missing modern sneak feed is explicit unsupported behavior, not automatically a defect in faithful porting. Do not synthesize detector inputs from shift bits without separate behavioral qualification.
