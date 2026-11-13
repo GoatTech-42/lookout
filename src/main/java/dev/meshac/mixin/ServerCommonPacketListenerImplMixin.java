@@ -1,21 +1,36 @@
 package dev.meshac.mixin;
-import dev.meshac.Fingerprints;
-import net.minecraft.server.MinecraftServer;
+
+import dev.meshac.packet.MeshPacketType;
+import dev.meshac.packet.PacketDispatcher;
+import net.minecraft.network.protocol.common.ServerboundKeepAlivePacket;
+import net.minecraft.network.protocol.common.ServerboundPongPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
-import net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.common.custom.BrandPayload;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+/** Common-listener hooks: keepalive + pong (transaction confirmations). */
 @Mixin(ServerCommonPacketListenerImpl.class)
 public abstract class ServerCommonPacketListenerImplMixin {
- @Shadow @Final protected MinecraftServer server;
- @Shadow public abstract com.mojang.authlib.GameProfile getOwner();
- @Inject(method="handleCustomPayload",at=@At("HEAD"))
- private void meshac$identity(ServerboundCustomPayloadPacket packet,CallbackInfo ci) {
-  if(packet.payload() instanceof BrandPayload brand) { var id=getOwner().id(); var value=brand.brand(); if(server.isSameThread()) Fingerprints.brand(id,value); else server.execute(() -> Fingerprints.brand(id,value)); }
- }
+
+	@Inject(method = "handleKeepAlive", at = @At("HEAD"))
+	private void meshac$keepAlive(ServerboundKeepAlivePacket p, CallbackInfo ci) {
+		ServerPlayer player = meshac$player();
+		if (player != null) PacketDispatcher.onKeepAlive(player, p);
+	}
+
+	@Inject(method = "handlePong", at = @At("HEAD"))
+	private void meshac$pong(ServerboundPongPacket p, CallbackInfo ci) {
+		ServerPlayer player = meshac$player();
+		if (player != null) PacketDispatcher.onConfirmation(player, p.getId(), MeshPacketType.PONG, p);
+	}
+
+	/** Resolves the ServerPlayer on the game-listener subclass; null during configuration phase. */
+	private ServerPlayer meshac$player() {
+		Object self = this;
+		if (self instanceof net.minecraft.server.network.ServerGamePacketListenerImpl game) return game.player;
+		return null;
+	}
 }

@@ -1,0 +1,49 @@
+package dev.meshac.check.impl.movement.elytra;
+
+import dev.meshac.packet.MeshPacketEvent;
+import me.frep.vulcan.spigot.check.AbstractCheck;
+import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.ExemptType;
+import dev.meshac.check.ExemptionManager;
+import dev.meshac.player.CollisionState;
+import dev.meshac.player.MotionState;
+import dev.meshac.data.PlayerData;
+
+@CheckInfo(name = "Elytra", type = 'G', complexType = "Acceleration", description = "Invalid acceleration.")
+public class ElytraG extends AbstractCheck {
+
+    public ElytraG(PlayerData playerData) {
+        super(playerData);
+    }
+
+    public void handlePacket(MeshPacketEvent packetEvent) {
+        if (this.isPositionUpdatePacket(packetEvent)) {
+            if (ExemptionManager.isBefore1_9()) {
+                return;
+            }
+            MotionState motionState = this.playerData.getMotionState();
+            if (!motionState.isGliding()) {
+                return;
+            }
+            CollisionState collisionState = this.playerData.getCollisionState();
+            double deltaY = collisionState.getDeltaY();
+            CollisionState collisionState2 = this.playerData.getCollisionState();
+            double deltaXZ = collisionState2.getDeltaXZ();
+            double previousDeltaXZ = this.playerData.getCollisionState().getPreviousDeltaXZ();
+            double accel = deltaXZ - previousDeltaXZ;
+            boolean condition = accel > 0.031 && deltaY > -0.5 && deltaXZ > 0.65;
+            boolean exempt = this.isExempt(new ExemptType[] { ExemptType.FIREWORK, ExemptType.EXPLOSION, ExemptType.RIPTIDE, ExemptType.CHUNK, ExemptType.DRAGON_DAMAGE, ExemptType.FLIGHT, ExemptType.VELOCITY, ExemptType.SLIME, ExemptType.DOLPHINS_GRACE });
+            if (condition && !exempt) {
+                if (this.increaseBuffer() > this.maximumBuffer) {
+                    this.fail("accel=" + accel + " deltaXZ=" + deltaXZ + " deltaY=" + deltaY);
+                }
+            } else {
+                this.decayBuffer();
+            }
+        }
+    }
+
+    @Override
+    public void update() {
+    }
+}

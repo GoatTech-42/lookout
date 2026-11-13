@@ -1,40 +1,36 @@
 package dev.meshac;
 
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import dev.meshac.config.MeshConfig;
+import dev.meshac.config.MeshSettings;
+import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class Meshac implements ModInitializer {
-	public static final Logger LOG = LoggerFactory.getLogger("meshac");
+/**
+ * meshac - Vulcan-based anticheat for Fabric. Credits: Vulcan by frep / Skid-Technology OpenVulcan
+ * deobfuscation (Vulcan 2.9.7.28), original meshac by Luke. Server-side only.
+ */
+public class Meshac implements DedicatedServerModInitializer {
 
-	/** Bedrock players joining through Geyser/Floodgate are not checked: their movement arrives translated by Geyser and does not look like a Java client's. Floodgate UUIDs have a zero high half and its names carry a prefix, which Mojang names cannot (a Java name never starts with a dot). */
-	public static boolean skip(net.minecraft.server.level.ServerPlayer pl) {
-		return pl.getUUID().getMostSignificantBits() == 0L || pl.getGameProfile().name().startsWith(".");
-	}
-
-	/** Bedrock movement types not yet proven clean with a Bedrock client: gliding, vehicles, climbing, levitation, slow falling, riptide. Movement checks stay off for a Bedrock player while one of these applies. */
-	public static boolean bedrockUnproven(net.minecraft.server.level.ServerPlayer pl) {
-		return skip(pl) && (pl.isFallFlying() || pl.isPassenger() || pl.onClimbable() || pl.isAutoSpinAttack() || pl.hasEffect(net.minecraft.world.effect.MobEffects.LEVITATION) || pl.hasEffect(net.minecraft.world.effect.MobEffects.SLOW_FALLING));
-	}
+	public static final String MOD_ID = "meshac";
+	private static final Logger LOGGER = LoggerFactory.getLogger("meshac");
 
 	@Override
-	public void onInitialize() {
-		Config.load();
-		Config.applyVeil();
-		Cases.load();
-		CommandRegistrationCallback.EVENT.register((d, reg, env) -> MeshCommands.register(d));
-		// A banned player who reconnects is shown the ban screen again with the time that is left.
-		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-			dev.meshac.veil.Veil.grace(handler.player, server.getTickCount());
-			Cases.Case c = Cases.activeBan(handler.player.getUUID());
-			if (c != null) handler.disconnect(Screens.ban(c)); else Fingerprints.check(handler.player);
+	public void onInitializeServer() {
+		LOGGER.info("[meshac] loading (Vulcan 2.9.7.28 port, credits: frep, OpenVulcan)");
+		MeshConfig.load();
+		MeshSettings.loadSettings();
+		ServerLifecycleEvents.SERVER_STARTED.register(MeshServices::init);
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			MeshServices.tick();
+			dev.meshac.veil.Veil.tick(server);
 		});
-		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(server -> { for (var pl : new java.util.ArrayList<>(server.getPlayerList().getPlayers())) { if (!bedrockUnproven(pl)) Movement.tick(pl); if (skip(pl)) continue; Combat.tick(pl, server.getTickCount()); Fingerprints.check(pl); } dev.meshac.veil.Veil.tick(server); });
-		net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents.END_SERVER_TICK.register(Fish::tick);
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> { Fingerprints.forget(handler.player.getUUID()); Movement.forget(handler.player.getUUID()); Verdict.forget(handler.player.getUUID()); dev.meshac.veil.Veil.forgetPlayer(handler.player); Combat.forget(handler.player.getUUID()); Vehicle.forget(handler.player.getUUID()); Mining.forget(handler.player.getUUID()); Interact.forget(handler.player.getUUID()); Inventory.forget(handler.player.getUUID()); Totem.forget(handler.player.getUUID()); Glide.forget(handler.player.getUUID()); Ticks.forget(handler.player.getUUID()); Chatter.forget(handler.player.getUUID()); Fish.forget(handler.player.getUUID()); });
-		CombatLog.init();
-		LOG.info("meshac loaded");
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+				dev.meshac.data.PlayerDataManager.onJoin(handler.getPlayer()));
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+				dev.meshac.data.PlayerDataManager.onQuit(handler.getPlayer()));
 	}
 }
