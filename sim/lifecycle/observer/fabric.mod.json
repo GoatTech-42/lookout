@@ -1,0 +1,1 @@
+{"schemaVersion":1,"id":"meshac-lifecycle-observer","version":"test-only-1","name":"TEST ONLY meshac lifecycle observer","environment":"server","entrypoints":{"server":["test.meshac.LifecycleObserver"]},"depends":{"fabricloader":">=0.19.5","minecraft":"26.3","fabric-api":"*","meshac":"*"}}

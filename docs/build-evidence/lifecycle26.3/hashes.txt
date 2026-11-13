@@ -1,0 +1,4 @@
+86f16178a3cecc887a85a4cfe9a79d92fa7341d8f39b5951a4d6ad800ab657a6  /tmp/meshac-smoke-26.3/server/mods/fabric-api-0.161.0+26.3-f6886cee.jar
+04fcd24381fbceecd619633c9dbce105128977731ff58426b9e6a70c4599a770  /tmp/meshac-smoke-26.3/server/mods/meshac-26.3-2.9.7.28-meshac-0.1.0.jar
+01b97ec2b681d730f9f12764f438d385dec3a5a4bb806070d09385f500bcfcce  /tmp/meshac-smoke-26.3/server/mods/test-only-lifecycle-observer.jar
+37c53c19d9eb419e442a41d2c731673ff7765805729002c494d89033c082bc96  /tmp/meshac-smoke-26.3/server/config/meshac-cases.json
