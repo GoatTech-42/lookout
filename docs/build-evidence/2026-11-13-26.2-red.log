@@ -1,0 +1,204 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :
+Fabric Loom: 1.18.4
+
+> Task :compileJava
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:12: error: cannot find symbol
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+                                          ^
+  symbol:   class ServerboundPunchPacket
+  location: package net.minecraft.network.protocol.game
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:76: error: cannot find symbol
+	private void meshac$animate(ServerboundPunchPacket p, CallbackInfo ci) {
+	                            ^
+  symbol:   class ServerboundPunchPacket
+  location: class ServerGamePacketListenerImplMixin
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java:6: error: cannot find symbol
+import net.minecraft.network.protocol.game.VecDelta;
+                                          ^
+  symbol:   class VecDelta
+  location: package net.minecraft.network.protocol.game
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java:15: error: cannot find symbol
+	VecDelta meshac$getDelta();
+	^
+  symbol:   class VecDelta
+  location: interface ClientboundMoveEntityPacketAccessor
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1246: error: cannot find symbol
+        this.vehicleX = wrapperPlayClientVehicleMove.movingTo().position().x;
+                                                    ^
+  symbol:   method movingTo()
+  location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1247: error: cannot find symbol
+        this.vehicleY = wrapperPlayClientVehicleMove.movingTo().position().y;
+                                                    ^
+  symbol:   method movingTo()
+  location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1248: error: cannot find symbol
+        this.vehicleZ = wrapperPlayClientVehicleMove.movingTo().position().z;
+                                                    ^
+  symbol:   method movingTo()
+  location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:52: error: cannot find symbol
+			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+			                                                                                     ^
+  symbol:   method x()
+  location: variable chunk of type ClientboundLevelChunkWithLightPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:52: error: cannot find symbol
+			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+			                                                                                                ^
+  symbol:   method z()
+  location: variable chunk of type ClientboundLevelChunkWithLightPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:159: error: cannot find symbol
+			data.getEntityTracker().handleDestroy(removed.entityIds().toIntArray());
+			                                             ^
+  symbol:   method entityIds()
+  location: variable removed of type ClientboundRemoveEntitiesPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:124: error: cannot find symbol
+		var placedItem = player.getItemInHand(p.hand());
+		                                       ^
+  symbol:   method hand()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:126: error: cannot find symbol
+			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+			                                         ^
+  symbol:   method hitResult()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:126: error: cannot find symbol
+			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+			                                                                              ^
+  symbol:   method hitResult()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:66: error: cannot find symbol
+			case CHANGE_DESTROY_DIRECTION -> Digging.Action.CHANGE_DESTROY_DIRECTION;
+			     ^
+  symbol:   variable CHANGE_DESTROY_DIRECTION
+  location: class Packets
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:79: error: cannot find symbol
+		BlockHitResult hit = p.hitResult();
+		                      ^
+  symbol:   method hitResult()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:80: error: cannot find symbol
+		return new Placement(hit.getBlockPos(), hit.getDirection(), p.hand(),
+		                                                             ^
+  symbol:   method hand()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:82: error: cannot find symbol
+				hit.isInside(), p.sequence());
+				                 ^
+  symbol:   method sequence()
+  location: variable p of type ServerboundUseItemOnPacket
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+17 errors
+
+> Task :compileJava FAILED
+
+[Incubating] Problems report is available at: file:///home/sandbox/meshac-repo/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
+> Compilation failed; see the compiler output below.
+  Note: Recompile with -Xlint:deprecation for details.
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:12: error: cannot find symbol
+  import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+                                            ^
+    symbol:   class ServerboundPunchPacket
+    location: package net.minecraft.network.protocol.game
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:76: error: cannot find symbol
+  	private void meshac$animate(ServerboundPunchPacket p, CallbackInfo ci) {
+  	                            ^
+    symbol:   class ServerboundPunchPacket
+    location: class ServerGamePacketListenerImplMixin
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java:6: error: cannot find symbol
+  import net.minecraft.network.protocol.game.VecDelta;
+                                            ^
+    symbol:   class VecDelta
+    location: package net.minecraft.network.protocol.game
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java:15: error: cannot find symbol
+  	VecDelta meshac$getDelta();
+  	^
+    symbol:   class VecDelta
+    location: interface ClientboundMoveEntityPacketAccessor
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:66: error: cannot find symbol
+  			case CHANGE_DESTROY_DIRECTION -> Digging.Action.CHANGE_DESTROY_DIRECTION;
+  			     ^
+    symbol:   variable CHANGE_DESTROY_DIRECTION
+    location: class Packets
+  Note: Recompile with -Xlint:unchecked for details.
+  Note: Some input files use or override a deprecated API.
+  Note: Some input files use unchecked or unsafe operations.
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1246: error: cannot find symbol
+          this.vehicleX = wrapperPlayClientVehicleMove.movingTo().position().x;
+                                                      ^
+    symbol:   method movingTo()
+    location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1247: error: cannot find symbol
+          this.vehicleY = wrapperPlayClientVehicleMove.movingTo().position().y;
+                                                      ^
+    symbol:   method movingTo()
+    location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1248: error: cannot find symbol
+          this.vehicleZ = wrapperPlayClientVehicleMove.movingTo().position().z;
+                                                      ^
+    symbol:   method movingTo()
+    location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:52: error: cannot find symbol
+  			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+  			                                                                                     ^
+    symbol:   method x()
+    location: variable chunk of type ClientboundLevelChunkWithLightPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:52: error: cannot find symbol
+  			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+  			                                                                                                ^
+    symbol:   method z()
+    location: variable chunk of type ClientboundLevelChunkWithLightPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:159: error: cannot find symbol
+  			data.getEntityTracker().handleDestroy(removed.entityIds().toIntArray());
+  			                                             ^
+    symbol:   method entityIds()
+    location: variable removed of type ClientboundRemoveEntitiesPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:124: error: cannot find symbol
+  		var placedItem = player.getItemInHand(p.hand());
+  		                                       ^
+    symbol:   method hand()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:126: error: cannot find symbol
+  			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+  			                                         ^
+    symbol:   method hitResult()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:126: error: cannot find symbol
+  			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+  			                                                                              ^
+    symbol:   method hitResult()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:79: error: cannot find symbol
+  		BlockHitResult hit = p.hitResult();
+  		                      ^
+    symbol:   method hitResult()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:80: error: cannot find symbol
+  		return new Placement(hit.getBlockPos(), hit.getDirection(), p.hand(),
+  		                                                             ^
+    symbol:   method hand()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:82: error: cannot find symbol
+  				hit.isInside(), p.sequence());
+  				                 ^
+    symbol:   method sequence()
+    location: variable p of type ServerboundUseItemOnPacket
+  17 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 32s
+1 actionable task: 1 executed

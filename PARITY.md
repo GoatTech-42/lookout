@@ -254,3 +254,15 @@ The earlier statement that LOG_ONLY could no longer poison persistent punishment
 - The real registered commands, store/config/Discord/Effects and Verdict REMOVE now have headless behavioral tests. The production dispatch bodies have synthetic-check behavioral tests on all four evaluation boundaries plus placement/digging callers. All four missing-guard mutations are rejected; five product safety mutations are rejected. See docs/SAFETY-TESTS.md for exact scope and limits. These are compiled fixture-jar tests, NOT full shipping-mod/Minecraft runtime qualification.
 - Analyzer --check now fails stale/missing generated metadata without writing it. The regression suite no longer relies on Git status or ignores a Git failure. The initial Containment mode assertion now inspects the fresh class before changing mode.
 - No world-context changes in this batch. The 928f010 live-at-send snapshot, lossy emitted-map key, consume-on-read multi-recipient fault, JOIN/confirmation lifecycle, world-reader parity and veil issues remain unresolved. World eligibility stays closed. No launch, no client session, no live deployment.
+
+## 2026-11-13 - 26.x compile-time version seams
+
+Actual baseline build attempts at 2eb56ce failed: 26.2 had 17 compiler errors; 26.1.2 had 39. The earlier "renamed accessors only" description was incomplete for 26.1.2.
+
+Added explicit mc26.1.2/mc26.2/mc26.3 source adapters selected by exact minecraft_version. Common code now delegates only API differences: placement/chunk/entity-removal/vehicle accessors, short-delta vs VecDelta decode, native entity-type constants, potent-sulfur presence, and three newer movement attributes. AnimationMixin uses the exact target packet descriptor (Swing for 26.1.2/26.2; Punch for 26.3). Digging maps the same native enum names via a string switch so a newer optional action need not exist in an older compile target; unknown values throw rather than silently translate.
+
+26.1.2's native jar has no potent-sulfur block or BOUNCINESS/AIR_DRAG_MODIFIER/FRICTION_MODIFIER attributes. Its adapter reports native feature absence, not a synthetic detection result. These branches need independent semantic review. No check threshold, punishment threshold or ContextGate eligibility changed. 1.21.11 is not supported by these adapters and remains unbuilt.
+
+All three 26.x builds now compile/package. Packaged checks validate target-specific fabric.mod.json, Java 25 class major version and all declared mixin class files. processResources tracks mc/java inputs so switching target cannot reuse stale metadata. Output names include the MC version. These checks do not validate mixin application or gameplay.
+
+Independent QA accepted the headless 2eb56ce safety batch and its exact reload-test delta (SHA256 23caceaa5f2c9bd6d3dfd02f08470efa1f405ce4130f9b7575893eb5bdb269b6). The unchanged reload-test delta is included here. No private-boot or client clearance inferred; world gate remains closed and veil off.

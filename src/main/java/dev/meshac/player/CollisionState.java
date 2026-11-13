@@ -974,13 +974,13 @@ public class CollisionState {
                     boolean boat3 = this.boat;
                     this.boat = boat3 | net.minecraft.world.entity.EntityType.getKey(trackedEntity.getEntityType()).getPath().endsWith("_boat");
                     boat3 = this.shulker;
-                    this.shulker = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.SHULKER;
+                    this.shulker = boat3 | trackedEntity.getEntityType() == dev.meshac.compat.VersionBridge.SHULKER;
                     boat3 = this.happyGhast;
-                    this.happyGhast = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
-                    if (trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.PLAYER || trackedEntity.getEntityType().canSerialize() /* VERIFY: living-entity predicate */) {
+                    this.happyGhast = boat3 | trackedEntity.getEntityType() == dev.meshac.compat.VersionBridge.HAPPY_GHAST;
+                    if (trackedEntity.getEntityType() == dev.meshac.compat.VersionBridge.PLAYER || trackedEntity.getEntityType().canSerialize() /* VERIFY: living-entity predicate */) {
                         this.touchedEntity = true;
                     }
-                    if (trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.ENDER_DRAGON) {
+                    if (trackedEntity.getEntityType() == dev.meshac.compat.VersionBridge.ENDER_DRAGON) {
                         MotionState motionState2 = this.playerData.getMotionState();
                         motionState2.setTicksSinceDragonDamage(0);
                     }
@@ -1243,9 +1243,9 @@ public class CollisionState {
         if (this.previousVehicle != this.vehicle) {
             this.ticksInVehicle = 0;
         }
-        this.vehicleX = wrapperPlayClientVehicleMove.movingTo().position().x;
-        this.vehicleY = wrapperPlayClientVehicleMove.movingTo().position().y;
-        this.vehicleZ = wrapperPlayClientVehicleMove.movingTo().position().z;
+        this.vehicleX = dev.meshac.compat.VersionBridge.vehiclePosition(wrapperPlayClientVehicleMove).x;
+        this.vehicleY = dev.meshac.compat.VersionBridge.vehiclePosition(wrapperPlayClientVehicleMove).y;
+        this.vehicleZ = dev.meshac.compat.VersionBridge.vehiclePosition(wrapperPlayClientVehicleMove).z;
         Double vehicleX2 = null;
         Double vehicleY2 = null;
         Double vehicleZ2 = this.vehicleZ;
@@ -2879,7 +2879,7 @@ public class CollisionState {
     }
 
     private static boolean isHappyGhast(TrackedEntity trackedEntity) {
-        net.minecraft.world.entity.EntityType<?> happyGhast2 = net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+        net.minecraft.world.entity.EntityType<?> happyGhast2 = dev.meshac.compat.VersionBridge.HAPPY_GHAST;
         return happyGhast2.equals(trackedEntity.getEntityType());
     }
 

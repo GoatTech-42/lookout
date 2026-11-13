@@ -1,12 +1,12 @@
 package dev.meshac.geometry.box;
 
-import net.minecraft.world.entity.EntityTypes;
+import dev.meshac.compat.VersionBridge;
 import net.minecraft.world.entity.EntityType;
 
 /** Entity bounding sizes. Ported from Vulcan's EntitySize. */
 public enum EntitySize {
 
-	HAPPY_GHAST(EntityTypes.HAPPY_GHAST, 4.0, 4.0), DEFAULT(null, 0.6, 1.8);
+	HAPPY_GHAST(VersionBridge.HAPPY_GHAST, 4.0, 4.0), DEFAULT(null, 0.6, 1.8);
 
 	private final EntityType<?> entityType;
 	private final double width;

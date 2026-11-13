@@ -15,6 +15,8 @@ dependencies {
 
 processResources {
 	inputs.property "version", project.version
+	inputs.property "mc", project.mc_range
+	inputs.property "java", project.java_min
 	filesMatching("fabric.mod.json") { expand "version": project.version, "mc": project.mc_range, "java": project.java_min }
 }
 
@@ -25,3 +27,12 @@ java {
 	sourceCompatibility = JavaVersion.VERSION_25
 	targetCompatibility = JavaVersion.VERSION_25
 }
+
+// Keep protocol/API seams explicit. Unknown future targets do not inherit a guessed adapter.
+def variant = project.minecraft_version.toString()
+if (!(variant in ["26.1.2", "26.2", "26.3"])) {
+    throw new GradleException("No verified source adapter for Minecraft " + variant)
+}
+sourceSets.main.java.srcDir "src/mc${variant}/java"
+
+base { archivesName = "meshac-${project.minecraft_version}" }

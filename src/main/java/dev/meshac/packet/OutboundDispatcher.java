@@ -49,7 +49,7 @@ public final class OutboundDispatcher {
 		}
 		if (packet instanceof net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket chunk) {
 			// Faithful mirror point: the chunk the client is being sent, veil-adjusted inside the tracker.
-			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(dev.meshac.compat.VersionBridge.chunkX(chunk), dev.meshac.compat.VersionBridge.chunkZ(chunk));
 			data.getWorldBlockTracker().handleChunkColumn(player.level().dimension(), levelChunk);
 			return;
 		}
@@ -127,13 +127,8 @@ public final class OutboundDispatcher {
 			int moveId = acc.meshac$getEntityId();
 			dev.meshac.tracker.TrackedEntity tracked = data.getEntityTracker().getTrackedEntity(moveId);
 			if (tracked == null) return;
-			// VERIFY(26.3): relative-move packets now carry an opaque VecDelta; decode against
-			// the tracked base position like the vanilla client's per-entity codec does.
-			net.minecraft.network.protocol.game.VecDeltaCodec codec = new net.minecraft.network.protocol.game.VecDeltaCodec();
-			net.minecraft.world.phys.Vec3 base = new net.minecraft.world.phys.Vec3(tracked.getX(), tracked.getY(), tracked.getZ());
-			codec.setBase(base);
-			net.minecraft.world.phys.Vec3 end = acc.meshac$hasPos() ? acc.meshac$getDelta().decode(codec).endPosition() : base;
-			double dx = end.x - base.x, dy = end.y - base.y, dz = end.z - base.z;
+			var delta = dev.meshac.compat.VersionBridge.relativeDelta(acc, tracked);
+			double dx = delta.x, dy = delta.y, dz = delta.z;
 			if (acc.meshac$hasRot()) {
 				float yaw = acc.meshac$getYRot() * 360.0f / 256.0f;
 				float pitch = acc.meshac$getXRot() * 360.0f / 256.0f;
@@ -156,7 +151,7 @@ public final class OutboundDispatcher {
 			return;
 		}
 		if (packet instanceof ClientboundRemoveEntitiesPacket removed) {
-			data.getEntityTracker().handleDestroy(removed.entityIds().toIntArray());
+			data.getEntityTracker().handleDestroy(dev.meshac.compat.VersionBridge.removedIds(removed));
 			return;
 		}
 		if (packet instanceof ClientboundSetPassengersPacket passengers) {

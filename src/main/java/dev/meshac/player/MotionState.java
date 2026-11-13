@@ -211,16 +211,16 @@ public class MotionState {
 	}
 
 	public void recordEntityDamage(net.minecraft.world.entity.EntityType<?> entityType) {
-		if (entityType == net.minecraft.world.entity.EntityTypes.ENDER_DRAGON) {
+		if (entityType == dev.meshac.compat.VersionBridge.ENDER_DRAGON) {
 			this.ticksSinceDragonDamage = 0;
-		} else if (entityType == net.minecraft.world.entity.EntityTypes.FIREBALL
-				|| entityType == net.minecraft.world.entity.EntityTypes.SMALL_FIREBALL
-				|| entityType == net.minecraft.world.entity.EntityTypes.DRAGON_FIREBALL) {
+		} else if (entityType == dev.meshac.compat.VersionBridge.FIREBALL
+				|| entityType == dev.meshac.compat.VersionBridge.SMALL_FIREBALL
+				|| entityType == dev.meshac.compat.VersionBridge.DRAGON_FIREBALL) {
 			this.ticksSinceFireball = 0;
-		} else if (entityType == net.minecraft.world.entity.EntityTypes.END_CRYSTAL) {
+		} else if (entityType == dev.meshac.compat.VersionBridge.END_CRYSTAL) {
 			this.ticksSinceCrystalDamage = 0;
 		}
-		if (ExemptionManager.isAtLeast1_14() && entityType == net.minecraft.world.entity.EntityTypes.RAVAGER) {
+		if (ExemptionManager.isAtLeast1_14() && entityType == dev.meshac.compat.VersionBridge.RAVAGER) {
 			this.ticksSinceRavagerDamage = 0;
 		}
 	}
@@ -653,11 +653,11 @@ public class MotionState {
 				movementSpeed = AttributeUtils.getMovementSpeedWithoutSprint(snapshot);
 			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.ENTITY_INTERACTION_RANGE) {
 				entityInteractionRange = snapshot.base();
-			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.BOUNCINESS) {
+			} else if (dev.meshac.compat.VersionBridge.isBOUNCINESS(attribute)) {
 				bounciness = snapshot.base();
-			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.AIR_DRAG_MODIFIER) {
+			} else if (dev.meshac.compat.VersionBridge.isAIR_DRAG_MODIFIER(attribute)) {
 				airDragModifier = snapshot.base();
-			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.FRICTION_MODIFIER) {
+			} else if (dev.meshac.compat.VersionBridge.isFRICTION_MODIFIER(attribute)) {
 				frictionModifier = snapshot.base();
 			}
 		}

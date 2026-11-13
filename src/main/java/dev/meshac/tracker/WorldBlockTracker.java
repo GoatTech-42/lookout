@@ -11,9 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.PotentSulfurBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.PotentSulfurState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 
@@ -180,8 +178,7 @@ public class WorldBlockTracker {
 	}
 
 	private static boolean isWetPotentSulfur(BlockState state) {
-		return state != null && state.getBlock() instanceof PotentSulfurBlock
-				&& state.getValue(PotentSulfurBlock.STATE) != PotentSulfurState.DRY;
+		return dev.meshac.compat.VersionBridge.wetSulfur(state);
 	}
 
 	private static long chunkKey(int chunkX, int chunkZ) {

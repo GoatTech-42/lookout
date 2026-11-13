@@ -34,7 +34,14 @@ public class ProductSafetyTest {
   // Nonblank inherited webhook must be blocked before URI/request construction, even for direct calls.
   cf.discordWebhook="invalid-fixture:must-not-build-an-http-request";
   try {Discord.post(seed);Discord.hold("fixture","fly","test");}catch(Exception e){check(false,"LOG_ONLY webhook escaped: "+e.getClass().getSimpleName());}
-  cf.veilXray=true; cf.veilEsp=true; Config.applyVeil();
+  // Exercise the registered reload path with persisted inherited settings, not only field assignment.
+  Path config=Path.of(System.getProperty("fixture.config"),"meshac.json");
+  Files.writeString(config,"{\"veilXray\":true,\"veilEsp\":true,\"monitorOnly\":false,\"discordWebhook\":\"invalid-fixture:inherited\"}");
+  d.execute("mesh reload",s); cf=Config.get();
+  check(Boolean.TRUE.equals(cf.veilXray) && Boolean.TRUE.equals(cf.veilEsp) && !cf.monitor(),"persisted config was not loaded");
+  check(cf.discordWebhook.equals("invalid-fixture:inherited"),"inherited webhook not loaded");
+  try {Discord.post(Cases.find(seed.id));}catch(Exception e){check(false,"reloaded webhook bypassed log-only");}
+  check(Files.readString(store).equals(before),"reload changed persistent case store");
   check(!dev.meshac.veil.Veil.xrayOn && !dev.meshac.veil.Veil.espOn,"inherited config enabled unqualified veil");
   cf.holdAt=0.5; cf.removeAt=1.0; cf.requireClusters=1; cf.requireClustersTierA=1;
   String verdictBefore=Files.readString(store);

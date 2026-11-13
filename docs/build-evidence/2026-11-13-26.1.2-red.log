@@ -1,0 +1,424 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :
+Fabric Loom: 1.18.4
+
+> Task :compileJava
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:14: error: cannot find symbol
+import net.minecraft.world.level.block.PotentSulfurBlock;
+                                      ^
+  symbol:   class PotentSulfurBlock
+  location: package net.minecraft.world.level.block
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:16: error: cannot find symbol
+import net.minecraft.world.level.block.state.properties.PotentSulfurState;
+                                                       ^
+  symbol:   class PotentSulfurState
+  location: package net.minecraft.world.level.block.state.properties
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:12: error: cannot find symbol
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+                                          ^
+  symbol:   class ServerboundPunchPacket
+  location: package net.minecraft.network.protocol.game
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:76: error: cannot find symbol
+	private void meshac$animate(ServerboundPunchPacket p, CallbackInfo ci) {
+	                            ^
+  symbol:   class ServerboundPunchPacket
+  location: class ServerGamePacketListenerImplMixin
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java:6: error: cannot find symbol
+import net.minecraft.network.protocol.game.VecDelta;
+                                          ^
+  symbol:   class VecDelta
+  location: package net.minecraft.network.protocol.game
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java:15: error: cannot find symbol
+	VecDelta meshac$getDelta();
+	^
+  symbol:   class VecDelta
+  location: interface ClientboundMoveEntityPacketAccessor
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/geometry/box/EntitySize.java:3: error: cannot find symbol
+import net.minecraft.world.entity.EntityTypes;
+                                 ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:183: error: cannot find symbol
+		return state != null && state.getBlock() instanceof PotentSulfurBlock
+		                                                    ^
+  symbol:   class PotentSulfurBlock
+  location: class WorldBlockTracker
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:184: error: cannot find symbol
+				&& state.getValue(PotentSulfurBlock.STATE) != PotentSulfurState.DRY;
+				                  ^
+  symbol:   variable PotentSulfurBlock
+  location: class WorldBlockTracker
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:184: error: cannot find symbol
+				&& state.getValue(PotentSulfurBlock.STATE) != PotentSulfurState.DRY;
+				                                              ^
+  symbol:   variable PotentSulfurState
+  location: class WorldBlockTracker
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:214: error: cannot find symbol
+		if (entityType == net.minecraft.world.entity.EntityTypes.ENDER_DRAGON) {
+		                                            ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:216: error: cannot find symbol
+		} else if (entityType == net.minecraft.world.entity.EntityTypes.FIREBALL
+		                                                   ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:217: error: cannot find symbol
+				|| entityType == net.minecraft.world.entity.EntityTypes.SMALL_FIREBALL
+				                                           ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:218: error: cannot find symbol
+				|| entityType == net.minecraft.world.entity.EntityTypes.DRAGON_FIREBALL) {
+				                                           ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:220: error: cannot find symbol
+		} else if (entityType == net.minecraft.world.entity.EntityTypes.END_CRYSTAL) {
+		                                                   ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:223: error: cannot find symbol
+		if (ExemptionManager.isAtLeast1_14() && entityType == net.minecraft.world.entity.EntityTypes.RAVAGER) {
+		                                                                                ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:656: error: cannot find symbol
+			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.BOUNCINESS) {
+			                                                                           ^
+  symbol:   variable BOUNCINESS
+  location: class Attributes
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:658: error: cannot find symbol
+			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.AIR_DRAG_MODIFIER) {
+			                                                                           ^
+  symbol:   variable AIR_DRAG_MODIFIER
+  location: class Attributes
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:660: error: cannot find symbol
+			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.FRICTION_MODIFIER) {
+			                                                                           ^
+  symbol:   variable FRICTION_MODIFIER
+  location: class Attributes
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:977: error: cannot find symbol
+                    this.shulker = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.SHULKER;
+                                                                                                      ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:979: error: cannot find symbol
+                    this.happyGhast = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+                                                                                                         ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:980: error: cannot find symbol
+                    if (trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.PLAYER || trackedEntity.getEntityType().canSerialize() /* VERIFY: living-entity predicate */) {
+                                                                                   ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:983: error: cannot find symbol
+                    if (trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.ENDER_DRAGON) {
+                                                                                   ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1246: error: cannot find symbol
+        this.vehicleX = wrapperPlayClientVehicleMove.movingTo().position().x;
+                                                    ^
+  symbol:   method movingTo()
+  location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1247: error: cannot find symbol
+        this.vehicleY = wrapperPlayClientVehicleMove.movingTo().position().y;
+                                                    ^
+  symbol:   method movingTo()
+  location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1248: error: cannot find symbol
+        this.vehicleZ = wrapperPlayClientVehicleMove.movingTo().position().z;
+                                                    ^
+  symbol:   method movingTo()
+  location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:2882: error: cannot find symbol
+        net.minecraft.world.entity.EntityType<?> happyGhast2 = net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+                                                                                         ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:52: error: cannot find symbol
+			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+			                                                                                     ^
+  symbol:   method x()
+  location: variable chunk of type ClientboundLevelChunkWithLightPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:52: error: cannot find symbol
+			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+			                                                                                                ^
+  symbol:   method z()
+  location: variable chunk of type ClientboundLevelChunkWithLightPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:159: error: cannot find symbol
+			data.getEntityTracker().handleDestroy(removed.entityIds().toIntArray());
+			                                             ^
+  symbol:   method entityIds()
+  location: variable removed of type ClientboundRemoveEntitiesPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:124: error: cannot find symbol
+		var placedItem = player.getItemInHand(p.hand());
+		                                       ^
+  symbol:   method hand()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:126: error: cannot find symbol
+			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+			                                         ^
+  symbol:   method hitResult()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:126: error: cannot find symbol
+			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+			                                                                              ^
+  symbol:   method hitResult()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:66: error: cannot find symbol
+			case CHANGE_DESTROY_DIRECTION -> Digging.Action.CHANGE_DESTROY_DIRECTION;
+			     ^
+  symbol:   variable CHANGE_DESTROY_DIRECTION
+  location: class Packets
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:79: error: cannot find symbol
+		BlockHitResult hit = p.hitResult();
+		                      ^
+  symbol:   method hitResult()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:80: error: cannot find symbol
+		return new Placement(hit.getBlockPos(), hit.getDirection(), p.hand(),
+		                                                             ^
+  symbol:   method hand()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:82: error: cannot find symbol
+				hit.isInside(), p.sequence());
+				                 ^
+  symbol:   method sequence()
+  location: variable p of type ServerboundUseItemOnPacket
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/geometry/box/EntitySize.java:9: error: cannot find symbol
+	HAPPY_GHAST(EntityTypes.HAPPY_GHAST, 4.0, 4.0), DEFAULT(null, 0.6, 1.8);
+	            ^
+  symbol:   variable EntityTypes
+  location: class EntitySize
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/world/EntityTypeMatcher.java:28: error: cannot find symbol
+		return entity.getType() == net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+		                                                     ^
+  symbol:   class EntityTypes
+  location: package net.minecraft.world.entity
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+39 errors
+
+> Task :compileJava FAILED
+
+[Incubating] Problems report is available at: file:///home/sandbox/meshac-repo/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
+> Compilation failed; see the compiler output below.
+  Note: Recompile with -Xlint:deprecation for details.
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:14: error: cannot find symbol
+  import net.minecraft.world.level.block.PotentSulfurBlock;
+                                        ^
+    symbol:   class PotentSulfurBlock
+    location: package net.minecraft.world.level.block
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:16: error: cannot find symbol
+  import net.minecraft.world.level.block.state.properties.PotentSulfurState;
+                                                         ^
+    symbol:   class PotentSulfurState
+    location: package net.minecraft.world.level.block.state.properties
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:12: error: cannot find symbol
+  import net.minecraft.network.protocol.game.ServerboundPunchPacket;
+                                            ^
+    symbol:   class ServerboundPunchPacket
+    location: package net.minecraft.network.protocol.game
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:76: error: cannot find symbol
+  	private void meshac$animate(ServerboundPunchPacket p, CallbackInfo ci) {
+  	                            ^
+    symbol:   class ServerboundPunchPacket
+    location: class ServerGamePacketListenerImplMixin
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java:6: error: cannot find symbol
+  import net.minecraft.network.protocol.game.VecDelta;
+                                            ^
+    symbol:   class VecDelta
+    location: package net.minecraft.network.protocol.game
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java:15: error: cannot find symbol
+  	VecDelta meshac$getDelta();
+  	^
+    symbol:   class VecDelta
+    location: interface ClientboundMoveEntityPacketAccessor
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/geometry/box/EntitySize.java:3: error: cannot find symbol
+  import net.minecraft.world.entity.EntityTypes;
+                                   ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:183: error: cannot find symbol
+  		return state != null && state.getBlock() instanceof PotentSulfurBlock
+  		                                                    ^
+    symbol:   class PotentSulfurBlock
+    location: class WorldBlockTracker
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:184: error: cannot find symbol
+  				&& state.getValue(PotentSulfurBlock.STATE) != PotentSulfurState.DRY;
+  				                  ^
+    symbol:   variable PotentSulfurBlock
+    location: class WorldBlockTracker
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:184: error: cannot find symbol
+  				&& state.getValue(PotentSulfurBlock.STATE) != PotentSulfurState.DRY;
+  				                                              ^
+    symbol:   variable PotentSulfurState
+    location: class WorldBlockTracker
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:214: error: cannot find symbol
+  		if (entityType == net.minecraft.world.entity.EntityTypes.ENDER_DRAGON) {
+  		                                            ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:216: error: cannot find symbol
+  		} else if (entityType == net.minecraft.world.entity.EntityTypes.FIREBALL
+  		                                                   ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:217: error: cannot find symbol
+  				|| entityType == net.minecraft.world.entity.EntityTypes.SMALL_FIREBALL
+  				                                           ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:218: error: cannot find symbol
+  				|| entityType == net.minecraft.world.entity.EntityTypes.DRAGON_FIREBALL) {
+  				                                           ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:220: error: cannot find symbol
+  		} else if (entityType == net.minecraft.world.entity.EntityTypes.END_CRYSTAL) {
+  		                                                   ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:223: error: cannot find symbol
+  		if (ExemptionManager.isAtLeast1_14() && entityType == net.minecraft.world.entity.EntityTypes.RAVAGER) {
+  		                                                                                ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:656: error: cannot find symbol
+  			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.BOUNCINESS) {
+  			                                                                           ^
+    symbol:   variable BOUNCINESS
+    location: class Attributes
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:658: error: cannot find symbol
+  			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.AIR_DRAG_MODIFIER) {
+  			                                                                           ^
+    symbol:   variable AIR_DRAG_MODIFIER
+    location: class Attributes
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/MotionState.java:660: error: cannot find symbol
+  			} else if (attribute == net.minecraft.world.entity.ai.attributes.Attributes.FRICTION_MODIFIER) {
+  			                                                                           ^
+    symbol:   variable FRICTION_MODIFIER
+    location: class Attributes
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:977: error: cannot find symbol
+                      this.shulker = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.SHULKER;
+                                                                                                        ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:979: error: cannot find symbol
+                      this.happyGhast = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+                                                                                                           ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:980: error: cannot find symbol
+                      if (trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.PLAYER || trackedEntity.getEntityType().canSerialize() /* VERIFY: living-entity predicate */) {
+                                                                                     ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:983: error: cannot find symbol
+                      if (trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.ENDER_DRAGON) {
+                                                                                     ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:2882: error: cannot find symbol
+          net.minecraft.world.entity.EntityType<?> happyGhast2 = net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+                                                                                           ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:66: error: cannot find symbol
+  			case CHANGE_DESTROY_DIRECTION -> Digging.Action.CHANGE_DESTROY_DIRECTION;
+  			     ^
+    symbol:   variable CHANGE_DESTROY_DIRECTION
+    location: class Packets
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/geometry/box/EntitySize.java:9: error: cannot find symbol
+  	HAPPY_GHAST(EntityTypes.HAPPY_GHAST, 4.0, 4.0), DEFAULT(null, 0.6, 1.8);
+  	            ^
+    symbol:   variable EntityTypes
+    location: class EntitySize
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/world/EntityTypeMatcher.java:28: error: cannot find symbol
+  		return entity.getType() == net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+  		                                                     ^
+    symbol:   class EntityTypes
+    location: package net.minecraft.world.entity
+  Note: Recompile with -Xlint:unchecked for details.
+  Note: Some input files use or override a deprecated API.
+  Note: Some input files use unchecked or unsafe operations.
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1246: error: cannot find symbol
+          this.vehicleX = wrapperPlayClientVehicleMove.movingTo().position().x;
+                                                      ^
+    symbol:   method movingTo()
+    location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1247: error: cannot find symbol
+          this.vehicleY = wrapperPlayClientVehicleMove.movingTo().position().y;
+                                                      ^
+    symbol:   method movingTo()
+    location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/player/CollisionState.java:1248: error: cannot find symbol
+          this.vehicleZ = wrapperPlayClientVehicleMove.movingTo().position().z;
+                                                      ^
+    symbol:   method movingTo()
+    location: variable wrapperPlayClientVehicleMove of type ServerboundMoveVehiclePacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:52: error: cannot find symbol
+  			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+  			                                                                                     ^
+    symbol:   method x()
+    location: variable chunk of type ClientboundLevelChunkWithLightPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:52: error: cannot find symbol
+  			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+  			                                                                                                ^
+    symbol:   method z()
+    location: variable chunk of type ClientboundLevelChunkWithLightPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/OutboundDispatcher.java:159: error: cannot find symbol
+  			data.getEntityTracker().handleDestroy(removed.entityIds().toIntArray());
+  			                                             ^
+    symbol:   method entityIds()
+    location: variable removed of type ClientboundRemoveEntitiesPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:124: error: cannot find symbol
+  		var placedItem = player.getItemInHand(p.hand());
+  		                                       ^
+    symbol:   method hand()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:126: error: cannot find symbol
+  			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+  			                                         ^
+    symbol:   method hitResult()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/PacketDispatcher.java:126: error: cannot find symbol
+  			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+  			                                                                              ^
+    symbol:   method hitResult()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:79: error: cannot find symbol
+  		BlockHitResult hit = p.hitResult();
+  		                      ^
+    symbol:   method hitResult()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:80: error: cannot find symbol
+  		return new Placement(hit.getBlockPos(), hit.getDirection(), p.hand(),
+  		                                                             ^
+    symbol:   method hand()
+    location: variable p of type ServerboundUseItemOnPacket
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/packet/Packets.java:82: error: cannot find symbol
+  				hit.isInside(), p.sequence());
+  				                 ^
+    symbol:   method sequence()
+    location: variable p of type ServerboundUseItemOnPacket
+  39 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 31s
+1 actionable task: 1 executed

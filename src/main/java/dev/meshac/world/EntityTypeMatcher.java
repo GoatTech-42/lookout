@@ -25,6 +25,6 @@ public class EntityTypeMatcher {
 	}
 
 	public static boolean isHappyGhast(net.minecraft.world.entity.Entity entity) {
-		return entity.getType() == net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+		return entity.getType() == dev.meshac.compat.VersionBridge.HAPPY_GHAST;
 	}
 }

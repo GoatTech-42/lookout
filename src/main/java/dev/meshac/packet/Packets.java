@@ -61,25 +61,26 @@ public final class Packets {
 	}
 
 public static Digging toDigging(ServerboundPlayerActionPacket p) {
-		Digging.Action action = switch (p.getAction()) {
-			case START_DESTROY_BLOCK -> Digging.Action.START_DIGGING;
-			case CHANGE_DESTROY_DIRECTION -> Digging.Action.CHANGE_DESTROY_DIRECTION;
-			case STAB -> Digging.Action.STAB;
-			case ABORT_DESTROY_BLOCK -> Digging.Action.CANCELLED_DIGGING;
-			case STOP_DESTROY_BLOCK -> Digging.Action.FINISHED_DIGGING;
-			case RELEASE_USE_ITEM -> Digging.Action.RELEASE_USE_ITEM;
-			case DROP_ALL_ITEMS -> Digging.Action.DROP_ITEM_STACK;
-			case DROP_ITEM -> Digging.Action.DROP_ITEM;
-			case SWAP_ITEM_WITH_OFFHAND -> Digging.Action.SWAP_ITEM_WITH_OFFHAND;
+		Digging.Action action = switch (p.getAction().name()) {
+			case "START_DESTROY_BLOCK" -> Digging.Action.START_DIGGING;
+			case "CHANGE_DESTROY_DIRECTION" -> Digging.Action.CHANGE_DESTROY_DIRECTION;
+			case "STAB" -> Digging.Action.STAB;
+			case "ABORT_DESTROY_BLOCK" -> Digging.Action.CANCELLED_DIGGING;
+			case "STOP_DESTROY_BLOCK" -> Digging.Action.FINISHED_DIGGING;
+			case "RELEASE_USE_ITEM" -> Digging.Action.RELEASE_USE_ITEM;
+			case "DROP_ALL_ITEMS" -> Digging.Action.DROP_ITEM_STACK;
+			case "DROP_ITEM" -> Digging.Action.DROP_ITEM;
+			case "SWAP_ITEM_WITH_OFFHAND" -> Digging.Action.SWAP_ITEM_WITH_OFFHAND;
+			default -> throw new IllegalArgumentException("Unsupported native digging action: " + p.getAction());
 		};
 		return new Digging(action, p.getPos(), p.getDirection(), p.getSequence());
 	}
 
 	public static Placement toPlacement(ServerboundUseItemOnPacket p) {
-		BlockHitResult hit = p.hitResult();
-		return new Placement(hit.getBlockPos(), hit.getDirection(), p.hand(),
+		BlockHitResult hit = dev.meshac.compat.VersionBridge.hit(p);
+		return new Placement(hit.getBlockPos(), hit.getDirection(), dev.meshac.compat.VersionBridge.hand(p),
 				(float) hit.getLocation().x, (float) hit.getLocation().y, (float) hit.getLocation().z,
-				hit.isInside(), p.sequence());
+				hit.isInside(), dev.meshac.compat.VersionBridge.sequence(p));
 	}
 
 	public static HeldItemChange toHeldItemChange(ServerboundSetCarriedItemPacket p) {
