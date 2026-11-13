@@ -1,0 +1,60 @@
+{
+  "sourceCodeCommit": "d7ffae827ef77593e50d78e4aef573b3ece7e6d9",
+  "shippingJarSHA256": "2f7b63892b17c87b5de0111c32e0263b145df6cc95d5f8878ab8f2e9888f0ec8",
+  "installedJarSHA256": "2f7b63892b17c87b5de0111c32e0263b145df6cc95d5f8878ab8f2e9888f0ec8",
+  "observerJarSHA256": "2db532863a0720d5149503ce8e04aebaf2147ec97f26ce6677b0cefcdcc2ec47",
+  "caseHashes": {
+    "anchor-case-before.json": "37c53c19d9eb419e442a41d2c731673ff7765805729002c494d89033c082bc96",
+    "anchor-case-after.json": "37c53c19d9eb419e442a41d2c731673ff7765805729002c494d89033c082bc96"
+  },
+  "shippingMixinsApplied": [
+    "ServerLevelVeilMixin",
+    "ServerCommonPacketListenerImplAccessor",
+    "ServerCommonPacketListenerImplMixin",
+    "ServerGamePacketListenerSendMixin",
+    "ServerGamePacketListenerImplMixin",
+    "AnimationMixin",
+    "AttackMixin",
+    "ServerPlayerGameModeMixin",
+    "ConnectionMixin",
+    "ConnectionAccessor",
+    "ChunkMapMixin",
+    "PacketEncoderAccessor",
+    "ServerHandshakePacketListenerImplMixin",
+    "ChunkDataMixin",
+    "ClientboundMoveEntityPacketAccessor",
+    "TrackedEntityMixin"
+  ],
+  "serverPropertiesSubset": {
+    "accepts-transfers": "false",
+    "enable-query": "false",
+    "enable-rcon": "false",
+    "enforce-secure-profile": "false",
+    "level-name": "disposable-world",
+    "level-type": "minecraft\\:flat",
+    "management-server-enabled": "false",
+    "online-mode": "false",
+    "server-ip": "127.0.0.1",
+    "server-port": "25587"
+  },
+  "testIdentity": {
+    "name": "MeshRigA",
+    "offlineUUID": "ba891028-6122-3aa5-ac27-c1fb44aa79f7",
+    "endpoint": "127.0.0.1:25587",
+    "realAccount": false
+  },
+  "qualifies": "26.3 changed-artifact normal boot and initial anchor/PONG admission, contained rendered join only",
+  "notQualified": [
+    "detectors",
+    "global tracker ownership",
+    "inbound exactly-once",
+    "velocity/explosion after-send",
+    "duplicate PONG policy",
+    "Meadow behavior",
+    "other version runtimes",
+    "configuration reentry",
+    "public redistribution",
+    "native stale-callback exclusion",
+    "concurrent atomic session ownership"
+  ]
+}
