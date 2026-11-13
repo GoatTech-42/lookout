@@ -1,0 +1,7 @@
+REJECTED: wrong-abilitiesIngress-descriptor
+REJECTED: late-abilitiesIngress-shift
+REJECTED: missing-channel-dispatch
+REJECTED: replayed-head-dispatch
+REJECTED: missing-abilities-listener-guard
+REJECTED: missing-abilities-transport-guard
+Finite abilities mutation checks PASS

@@ -1,0 +1,22 @@
+===run_move_ingress
+MoveIngressTest PASS: real dispatcher once per admitted channel read, zero on native rejection/close/stale/phase; server replay capture separate (modeled boundary, not weave)
+===run_rest_ingress
+RestIngressTest PASS finite held-item actual-hook/dispatcher replay boundary; modeled native acceptance/handoff, not global ownership or runtime weave
+===test_move_mutations
+REJECTED: wrong-movementIngress-descriptor
+REJECTED: late-movementIngress-shift
+REJECTED: no-ingress
+REJECTED: duplicate-handler-dispatch
+REJECTED: network-capture
+REJECTED: no-current-player-listener
+REJECTED: no-transport-admission
+REJECTED: wrong-ingress-target
+Movement ingress mutation checks PASS
+===test_rest_ingress_mutations
+REJECTED: wrong-heldIngress-descriptor
+REJECTED: late-heldIngress-shift
+REJECTED: missing-channel-dispatch
+Traceback (most recent call last):
+  File "/tmp/meshac-abilities/sim/ownership/test_rest_ingress_mutations.py", line 17, in <module>
+    p=t/'src/main/java/dev/meshac/mixin'/(cls+'.java');original=p.read_text();assert original.count(old)==1,(name,original.count(old));p.write_text(original.replace(old,new))
+AssertionError: ('replayed-head-dispatch', 0)

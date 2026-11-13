@@ -1,0 +1,197 @@
+HOTBAR_INPUT 2
+HOTBAR_INPUT 3
+HOTBAR_INPUT 5
+HOTBAR_INPUT 1
+CASE_BYTES_UNCHANGED True
+SERVER TAIL
+ raw=ClientboundRotateHeadPacket id=1144009894 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1792261688 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=73892455 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1696621682 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=552659316 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1462083884 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1869178133 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=160210814 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=772832370 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1413907549 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1881346573 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=498668568 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=812058673 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1357055500 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=951637351 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Rot id=1836326844 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundRotateHeadPacket id=1700439203 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=759237986 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1403844160 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=510171766 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=774326948 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=187197471 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Rot id=1065521612 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundRotateHeadPacket id=1709377376 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundPingPacket id=1896153874 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=967177661 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=310517684 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1873269379 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=920867318 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=545079946 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=578852494 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1944218519 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=1604511996 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=360814736 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=865290312 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1397564286 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=467715299 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=45914647 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=734282496 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=296276949 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=208853727 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1794671972 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1672288120 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundPingPacket id=877414051 thread=Netty Epoll IO #1
+[14:52:41] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundPingPacket id=787662551 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=9418184 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=185754742 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1564295913 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1698821095 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=412957554 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=3464643 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=933883174 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=1570635519 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=740952213 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=181801494 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1919815351 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1077308419 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1009035824 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=114837760 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=79819994 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=2003093045 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Rot id=1846056899 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundRotateHeadPacket id=719078219 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=556795374 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1882466963 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1520963033 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Rot id=312921052 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundRotateHeadPacket id=865641235 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1655273281 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=2029352968 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1546237153 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=710874188 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=56982841 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1342402661 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundPingPacket id=1092372536 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=322165027 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=999809737 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1885093254 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=1394796093 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1582684091 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=1515251474 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1265717715 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=254170510 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=2143200222 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=571188044 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1672843543 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=1585590986 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1411963543 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=726012573 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1689523147 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=728721909 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundPingPacket id=956424813 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=575196458 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=1722202339 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=911627523 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=Pos id=7527214 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=1689745303 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundSetEntityMotionPacket id=931510850 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundEntityPositionSyncPacket id=863965180 thread=Netty Epoll IO #1
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundRotateHeadPacket id=633473302 thread=Netty Epoll IO #1
+[14:52:42] [Server thread/INFO]: System chat: Stopping the server
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundPingPacket id=2048313846 thread=Netty Epoll IO #1
+[14:52:42] [Server thread/INFO]: Stopping server
+[14:52:42] [Server thread/INFO]: Saving players
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [OUTBOUND-OBSERVER] PREPARE raw=ClientboundDisconnectPacket id=1616587612 thread=Netty Epoll IO #1
+[14:52:42] [Server thread/INFO]: Saving worlds
+[14:52:42] [Netty Epoll IO #1/INFO]: [STDOUT]: [TEST-OBSERVER] DISCONNECT callback uuid=ba891028-6122-3aa5-ac27-c1fb44aa79f7
+[14:52:42] [Server thread/INFO]: Saving chunks for level 'ServerLevel[disposable-world]'/minecraft:overworld
+[14:52:42] [Server thread/INFO]: Saving chunks for level 'ServerLevel[disposable-world]'/minecraft:the_end
+[14:52:42] [Server thread/INFO]: Saving chunks for level 'ServerLevel[disposable-world]'/minecraft:the_nether
+
+CLIENT TAIL
+ient.RealmsClient.fetchFeatureFlags(RealmsClient.java:204)
+	at java.base/java.util.concurrent.CompletableFuture$AsyncSupply.run(CompletableFuture.java:1789)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[14:51:49] [Render thread/INFO]: Reloading ResourceManager: vanilla, vanilla
+[14:51:51] [Worker-Main-1/INFO]: Found unifont_all_no_pua-17.0.01.hex, loading
+[14:51:52] [Worker-Main-1/INFO]: Found unifont_jp_patch-17.0.01.hex, loading
+[14:51:52] [Worker-Main-1/INFO]: Found unifont_pua-17.0.01.hex, loading
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1334:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5701:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM default
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1334:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5701:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM default
+[14:52:03] [Render thread/ERROR]: Error starting SoundSystem. Turning off sounds & music
+java.lang.IllegalStateException: Failed to open OpenAL device
+	at com.mojang.blaze3d.audio.Library.openDeviceOrFallback(Library.java:274)
+	at com.mojang.blaze3d.audio.Library.init(Library.java:149)
+	at net.minecraft.client.sounds.SoundEngine.loadLibrary(SoundEngine.java:121)
+	at net.minecraft.client.sounds.SoundEngine.reload(SoundEngine.java:110)
+	at net.minecraft.client.sounds.SoundManager.apply(SoundManager.java:122)
+	at net.minecraft.client.sounds.SoundManager.apply(SoundManager.java:41)
+	at net.minecraft.server.packs.resources.SimplePreparableReloadListener.lambda$reload$1(SimplePreparableReloadListener.java:15)
+	at java.base/java.util.concurrent.CompletableFuture$UniAccept.tryFire(CompletableFuture.java:739)
+	at java.base/java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:503)
+	at net.minecraft.server.packs.resources.SimpleReloadInstance.lambda$prepareTasks$3(SimpleReloadInstance.java:59)
+	at net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:173)
+	at net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:23)
+	at net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:147)
+	at net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:127)
+	at net.minecraft.client.Minecraft.runTick(Minecraft.java:1240)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:967)
+	at net.minecraft.client.main.Main.main(Main.java:292)
+[14:52:03] [Render thread/INFO]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[14:52:03] [Render thread/INFO]: Created: 256x128x0 minecraft:textures/atlas/celestials.png-atlas
+[14:52:03] [Render thread/INFO]: Created: 128x128x0 minecraft:textures/atlas/decorated_pot.png-atlas
+[14:52:03] [Render thread/INFO]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[14:52:03] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/shield_patterns.png-atlas
+[14:52:03] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/banner_patterns.png-atlas
+[14:52:03] [Render thread/INFO]: Created: 2048x2048x4 minecraft:textures/atlas/blocks.png-atlas
+[14:52:04] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/items.png-atlas
+[14:52:04] [Render thread/INFO]: Created: 1024x1024x0 minecraft:textures/atlas/gui.png-atlas
+[14:52:04] [Render thread/INFO]: Created: 128x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[14:52:04] [Render thread/INFO]: Created: 512x512x0 minecraft:textures/atlas/chest.png-atlas
+[14:52:04] [Render thread/INFO]: Created: 512x512x0 minecraft:textures/atlas/shulker_boxes.png-atlas
+[14:52:05] [Download-2/WARN]: Services are unavailable, unable to fetch uri for PLAYER/getBlocklist
+[14:52:05] [Download-1/WARN]: Services are unavailable, unable to fetch uri for PLAYER/getCertificates
+[14:52:05] [Render thread/INFO]: Connecting to 127.0.0.1, 25587
+[14:52:06] [Server Connector #1/WARN]: Failed to find a usable hardware address from the network interfaces; using random bytes: 97:c7:a7:b7:af:be:b4:55
+[14:52:17] [Render thread/WARN]: Ignoring chat session from MeshRigA due to missing Services public key
+[14:52:17] [Render thread/INFO]: Loaded 2 advancements
+[14:52:18] [Render thread/WARN]: Requested post effect does not exist: minecraft:end_of_frame
+[14:52:20] [Render thread/INFO]: Resizing Dynamic Transforms UBO, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[14:52:22] [Render thread/INFO]: Resizing Dynamic Transforms UBO, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[14:52:25] [Render thread/INFO]: Resizing Chunk Sections Command Buffer, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[14:52:25] [Render thread/INFO]: Resizing Chunk Sections Instanced, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[14:52:28] [Render thread/INFO]: Resizing Chunk Sections Command Buffer, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[14:52:28] [Render thread/INFO]: Resizing Chunk Sections Instanced, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[14:52:31] [Render thread/INFO]: Resizing Chunk Sections Command Buffer, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[14:52:31] [Render thread/INFO]: Resizing Chunk Sections Instanced, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[14:52:35] [Render thread/INFO]: Resizing Chunk Sections Command Buffer, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[14:52:35] [Render thread/INFO]: Resizing Chunk Sections Instanced, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[14:52:43] [Render thread/WARN]: Client disconnected with reason: Server closed
+
+Traceback (most recent call last):
+  File "/tmp/meshac-smoke-26.3/run_abilities.py", line 52, in <module>
+    else:raise RuntimeError('hotbar slot not observed '+str(slot))
+RuntimeError: hotbar slot not observed 0

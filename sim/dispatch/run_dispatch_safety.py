@@ -79,7 +79,7 @@ packets={
 'ClientboundSetPassengersPacket':'public int getVehicle(){return 1;} public int[] getPassengers(){return new int[0];}',
 'ServerboundUseItemOnPacket':'public Object hand(){return null;} public ServerboundUseItemOnPacket hitResult(){return this;} public net.minecraft.core.BlockPos getBlockPos(){return new net.minecraft.core.BlockPos(0,0,0);} public Object getDirection(){return null;}'
 }
-for name in ['ServerboundInteractPacket','ServerboundMovePlayerPacket','ServerboundPlayerActionPacket','ServerboundPlayerCommandPacket','ServerboundSetCarriedItemPacket','ServerboundAttackPacket']: packets[name]=''
+for name in ['ServerboundInteractPacket','ServerboundMovePlayerPacket','ServerboundPlayerActionPacket','ServerboundPlayerCommandPacket','ServerboundSetCarriedItemPacket','ServerboundPlayerAbilitiesPacket','ServerboundAttackPacket']: packets[name]=''
 for name,body in packets.items():put('net/minecraft/network/protocol/game/'+name,'public class '+name+' implements net.minecraft.network.protocol.Packet<Object> {'+body+'}')
 put('net/minecraft/network/protocol/common/ClientboundPingPacket','public class ClientboundPingPacket implements net.minecraft.network.protocol.Packet<Object> {public int getId(){return -1;}}')
 with tempfile.TemporaryDirectory(prefix='meshac-dispatch-') as tmp:

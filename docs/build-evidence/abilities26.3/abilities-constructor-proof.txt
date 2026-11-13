@@ -1,0 +1,74 @@
+Compiled from "ServerboundPlayerAbilitiesPacket.java"
+public class net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket implements net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ServerGamePacketListener> {
+  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.FriendlyByteBuf, net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket> STREAM_CODEC;
+
+  private static final int FLAG_FLYING;
+
+  private final boolean isFlying;
+
+  public net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket(net.minecraft.world.entity.player.Abilities);
+    Code:
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: aload_0
+         5: aload_1
+         6: getfield      #7                  // Field net/minecraft/world/entity/player/Abilities.flying:Z
+         9: putfield      #13                 // Field isFlying:Z
+        12: return
+
+  private net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket(net.minecraft.network.FriendlyByteBuf);
+    Code:
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: aload_1
+         5: invokevirtual #18                 // Method net/minecraft/network/FriendlyByteBuf.readByte:()B
+         8: istore_2
+         9: aload_0
+        10: iload_2
+        11: iconst_2
+        12: iand
+        13: ifeq          20
+        16: iconst_1
+        17: goto          21
+        20: iconst_0
+        21: putfield      #13                 // Field isFlying:Z
+        24: return
+
+  private void write(net.minecraft.network.FriendlyByteBuf);
+    Code:
+         0: iconst_0
+         1: istore_2
+         2: aload_0
+         3: getfield      #13                 // Field isFlying:Z
+         6: ifeq          14
+         9: iload_2
+        10: iconst_2
+        11: ior
+        12: i2b
+        13: istore_2
+        14: aload_1
+        15: iload_2
+        16: invokevirtual #24                 // Method net/minecraft/network/FriendlyByteBuf.writeByte:(I)Lnet/minecraft/network/FriendlyByteBuf;
+        19: pop
+        20: return
+
+  public net.minecraft.network.protocol.PacketType<net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket> type();
+    Code:
+         0: getstatic     #28                 // Field net/minecraft/network/protocol/game/GamePacketTypes.SERVERBOUND_PLAYER_ABILITIES:Lnet/minecraft/network/protocol/PacketType;
+         3: areturn
+
+  public void handle(net.minecraft.network.protocol.game.ServerGamePacketListener);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: invokeinterface #34,  2           // InterfaceMethod net/minecraft/network/protocol/game/ServerGamePacketListener.handlePlayerAbilities:(Lnet/minecraft/network/protocol/game/ServerboundPlayerAbilitiesPacket;)V
+         7: return
+
+  public boolean isFlying();
+    Code:
+         0: aload_0
+         1: getfield      #13                 // Field isFlying:Z
+         4: ireturn
+
+  public void handle(net.minecraft.network.PacketListener);
+    Code:

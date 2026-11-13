@@ -1,0 +1,16 @@
+REJECTED: duplicate-dispatch
+REJECTED: missing-dispatch
+REJECTED: altered-field
+REJECTED: reordered-stages
+REJECTED: wrong-thread
+REJECTED: wrong-direction
+REJECTED: no-live-entry
+REJECTED: no-shutdown
+REJECTED: no-client-close
+REJECTED: truncated-runner
+REJECTED: blocked-abilities-interrupted
+REJECTED: blocked-abilities-failed-input
+REJECTED: blocked-abilities-failed-hotbar
+REJECTED: blocked-failed-readiness
+REJECTED: constructed-first-no-movement
+Native-constructed abilities validator mutation checks PASS

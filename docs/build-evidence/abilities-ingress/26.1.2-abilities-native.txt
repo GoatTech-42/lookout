@@ -1,0 +1,26 @@
+  public void handlePlayerAbilities(net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket);
+    descriptor: (Lnet/minecraft/network/protocol/game/ServerboundPlayerAbilitiesPacket;)V
+    Code:
+         0: aload_1
+         1: aload_0
+         2: aload_0
+         3: getfield      #67                 // Field player:Lnet/minecraft/server/level/ServerPlayer;
+         6: invokevirtual #395                // Method net/minecraft/server/level/ServerPlayer.level:()Lnet/minecraft/server/level/ServerLevel;
+         9: invokestatic  #399                // Method net/minecraft/network/protocol/PacketUtils.ensureRunningOnSameThread:(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/server/level/ServerLevel;)V
+        12: aload_0
+        13: getfield      #67                 // Field player:Lnet/minecraft/server/level/ServerPlayer;
+        16: invokevirtual #1949               // Method net/minecraft/server/level/ServerPlayer.getAbilities:()Lnet/minecraft/world/entity/player/Abilities;
+        19: aload_1
+        20: invokevirtual #3215               // Method net/minecraft/network/protocol/game/ServerboundPlayerAbilitiesPacket.isFlying:()Z
+        23: ifeq          43
+        26: aload_0
+        27: getfield      #67                 // Field player:Lnet/minecraft/server/level/ServerPlayer;
+        30: invokevirtual #1949               // Method net/minecraft/server/level/ServerPlayer.getAbilities:()Lnet/minecraft/world/entity/player/Abilities;
+        33: getfield      #1953               // Field net/minecraft/world/entity/player/Abilities.mayfly:Z
+        36: ifeq          43
+        39: iconst_1
+        40: goto          44
+        43: iconst_0
+        44: putfield      #3220               // Field net/minecraft/world/entity/player/Abilities.flying:Z
+        47: return
+

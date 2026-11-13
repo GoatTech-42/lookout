@@ -61,11 +61,6 @@ public abstract class ServerGamePacketListenerImplMixin {
 		PacketDispatcher.onPlacement(player, p);
 	}
 
-	@Inject(method = "handlePlayerAbilities", at = @At("HEAD"))
-	private void meshac$abilities(net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket p, CallbackInfo ci) {
-		PacketDispatcher.onAbilities(player, p);
-	}
-
 	@Inject(method = "handleClientCommand", at = @At("HEAD"))
 	private void meshac$clientCommand(ServerboundClientCommandPacket p, CallbackInfo ci) {
 		if (p.getAction() == ServerboundClientCommandPacket.Action.PERFORM_RESPAWN)

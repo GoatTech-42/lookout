@@ -1,0 +1,22 @@
+{
+  "1.21.11": {
+    "nativeSHA256": "2899e5906e93b21929bab7dc844d742fa7606f2007e8b48290eb7b8b4b454288",
+    "builtSHA256": "d90cdbe2b305a8507fa4a7549eba79b9474916bbf3fed6857ec577ff39c6e038"
+  },
+  "26.1.2": {
+    "nativeSHA256": "37e34f5c0c1331a8ef3efd1c61dbe5c2e774f5400a192e7b4b934ace39876c9d",
+    "builtSHA256": "a1da39bb7afc49d7e94566bee03ec4994464a7c19e92d9403493f71578b10bb8"
+  },
+  "26.2": {
+    "nativeSHA256": "06ac7c4a86c0b89eb340f8ce7363579db11b10a1a26b392782ce214d70d5cb1f",
+    "builtSHA256": "634af09c79a1f907d6e1522eab29116db0756cca3c8e4e56ed1c6249c2f8d03a"
+  },
+  "26.3": {
+    "nativeSHA256": "10c148d35a8bf137f9303364a2412857addff03793a8ddffa62c1a347facac92",
+    "builtSHA256": "a9a1d272ae0f87192b142b400bb53b15db1b6ac5990105acb80cdd9b18496b5d"
+  },
+  "source": {
+    "src/main/java/dev/meshac/mixin/ConnectionMixin.java": "ab9014abbaa626d46d64c8ae7cd9d24cf5f8f09f58bd4786c3a82ba6bf992b43",
+    "src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java": "cfbf06d621bb14fcb566fb8d5bd79688ba7ac1e1adf1ac943deae8e9288b0a01"
+  }
+}

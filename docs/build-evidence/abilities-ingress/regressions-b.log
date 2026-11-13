@@ -1,0 +1,67 @@
+=== sim/ownership/test_move_mutations.py
+REJECTED: wrong-movementIngress-descriptor
+REJECTED: late-movementIngress-shift
+REJECTED: no-ingress
+REJECTED: duplicate-handler-dispatch
+REJECTED: network-capture
+REJECTED: no-current-player-listener
+REJECTED: no-transport-admission
+REJECTED: wrong-ingress-target
+Movement ingress mutation checks PASS
+=== sim/ownership/test_movement_validator.py
+FINAL GREEN {'packets': 62, 'dispatches': 62, 'handlerHEAD': 124, 'serverCaptureTailEvents': 62, 'changedPositions': 47}
+REJECTED: swap-admission-dispatch ('1', 'native stage order', ['DISPATCH', 'ADMITTED_CHANNEL', 'HANDLER_HEAD:network', 'HANDLER_HEAD:server', 'SERVER_CAPTURE', 'HANDLER_TAIL'])
+REJECTED: truncate-before-stop deliberate server shutdown missing
+REJECTED: missing-client-close client did not observe deliberate server close
+REJECTED: missing-runner-completion runner completion/cleanup markers missing
+REJECTED: failed-native-run native movement exception observed
+Movement validator mutation checks PASS
+=== sim/ownership/run_ground_materials.py
+Note: /tmp/meshac-abilities/src/main/java/dev/meshac/player/CollisionState.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /tmp/meshac-abilities/src/main/java/dev/meshac/player/CollisionState.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.joml.MemUtil$MemUtilUnsafe (file:/tmp/meshac-smoke-26.3/server/libraries/org/joml/joml/1.10.9/joml-1.10.9.jar)
+WARNING: Please consider reporting this to the maintainers of class org.joml.MemUtil$MemUtilUnsafe
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[14:55:48] [main/INFO]: [STDOUT]: GroundMaterialsTest PASS actual CollisionState and real native block states, no server/thread execution
+=== sim/safety/run_product_safety.py
+SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=kick fixture
+[meshac] contained effect (log-only): disconnect target=fixture detail=simulated staff ban: test
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=pardon
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=unban
+[meshac] contained effect (log-only): disconnect target=fixture detail=Unusual fly (fly forced isolated REMOVE)
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+ProductSafetyTest PASS (registered kick/ban/pardon/unban; persistence, escalation, disconnect, egress, inherited veil)
+=== sim/safety/test_mutations.py
+REJECTED: kick-command-guard
+REJECTED: case-add-guard
+REJECTED: case-pardon-guard
+REJECTED: discord-egress-guard
+REJECTED: veil-qualification-hold
+Product mutation checks PASS (temporary copies only)
+=== sim/version/run_version_contract.py
+VersionContractTest PASS (native initialization, UNKNOWN -1, known chronology)
+=== sim/version/test_mutations.py
+REJECTED: native-init
+REJECTED: unknown-newest
+REJECTED: known-order
+Version contract mutation checks PASS
+=== sim/world/run_world_snapshot.py
+WorldSnapshotTest PASS (payload freeze, negative coordinates, updates, reset generation)
+=== sim/world/test_mutations.py
+REJECTED: late-payload-read
+REJECTED: reset-generation
+REJECTED: mutable-update-pos
+REJECTED: unmodifiable-live-cache
+REJECTED: unsigned-negative-z
+REJECTED: unsigned-negative-y
+World snapshot mutation checks PASS
+PART_B_SUITE_COUNT_PASS 9

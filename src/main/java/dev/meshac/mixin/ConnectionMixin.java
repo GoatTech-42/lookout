@@ -42,6 +42,17 @@ public abstract class ConnectionMixin {
             dev.meshac.packet.PacketDispatcher.onHeldItemChange(game.player, held);
     }
 
+    @Inject(method = "channelRead0(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Connection;genericsFtw(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;)V"))
+    private void meshac$abilitiesIngress(io.netty.channel.ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
+        if (!(packet instanceof net.minecraft.network.protocol.game.ServerboundPlayerAbilitiesPacket abilities)
+                || !(getPacketListener() instanceof ServerGamePacketListenerImpl game)
+                || game.player.connection != game) return;
+        PlayerData data = PlayerDataManager.get(game.player);
+        if (data != null && dev.meshac.tracker.ConfirmationTransport.isPlay(data, (Connection) (Object) this))
+            dev.meshac.packet.PacketDispatcher.onAbilities(game.player, abilities);
+    }
+
     @Inject(method = "doSendPacket(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V", at = @At("TAIL"))
     private void meshac$afterSend(Packet<?> packet, ChannelFutureListener listener, boolean flush, CallbackInfo ci) {
         if (!(packet instanceof ClientboundLoginPacket login)

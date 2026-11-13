@@ -1,0 +1,55 @@
+=== scripts/test_analyze_deps.py
+checks: 3 needsVersion: 1 needsWorld: 1
+ok: call site getClientVersion seeds version need
+ok: world-only check does not gain version need
+ok: declaration file does not seed
+ok: call site getWorldBlockTracker seeds world need
+ok: comment mention does not seed world need
+ok: plain check is known
+ok: plain check has no propagated needs through declaration-only PlayerData
+ok: metadata is current (read-only comparison): checks: 180 needsVersion: 179 needsWorld: 179
+test_analyze_deps: PASS
+=== scripts/test_analyzer_cli.py
+checks: 1 needsVersion: 0 needsWorld: 0
+test_analyzer_cli: PASS (stale/missing fail, check does not write, no Git required)
+=== sim/dispatch/run_dispatch_safety.py
+PASS: inbound-packet world/unknown suppressed, eligible control executed
+PASS: event-dispatch world/unknown suppressed, eligible control executed
+PASS: placement-packet world/unknown suppressed, eligible control executed
+PASS: digging-and-event world/unknown suppressed, eligible control executed
+PASS: outbound-position world/unknown suppressed, eligible control executed
+PASS: movement-event world/unknown suppressed, eligible control executed
+=== sim/dispatch/test_mutations.py
+REJECTED missing production guard: inbound
+REJECTED missing production guard: event
+REJECTED missing production guard: outbound
+REJECTED missing production guard: move
+Dispatcher mutation checks PASS
+=== sim/lifecycle/run_join_identity.py
+JoinIdentityTest PASS (missed-login, UUID/name, copy/stale-copy, two sessions, quit/rejoin)
+=== sim/lifecycle/test_join_mutations.py
+REJECTED: uuid
+REJECTED: name
+REJECTED: copy
+REJECTED: stale-copy
+Session identity mutation checks PASS
+=== sim/lifecycle/run_join_anchor.py
+JoinAnchorTest PASS (real session/tracker/dispatch/hooks; deterministic channel boundaries, not weave/runtime)
+=== sim/lifecycle/test_anchor_mutations.py
+REJECTED: handshake-default
+REJECTED: missing-early-publication
+REJECTED: replace-fabric-session
+REJECTED: anchor-before-login-write
+REJECTED: no-anchor
+REJECTED: duplicate-anchor
+REJECTED: anchor-ID-after-send
+REJECTED: ignored-event-loop
+REJECTED: no-play-guard
+REJECTED: no-close-recheck
+REJECTED: skip-ban-on-reuse
+Join anchor mutations PASS
+=== sim/ownership/run_session_pong.py
+SessionPongTest PASS (real common hook, session/listener/phase/close boundary, ordinary policy retained)
+=== sim/ownership/run_move_ingress.py
+MoveIngressTest PASS: real dispatcher once per admitted channel read, zero on native rejection/close/stale/phase; server replay capture separate (modeled boundary, not weave)
+=== sim/ownership/test_move_mutations.py

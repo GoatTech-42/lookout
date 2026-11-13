@@ -1,0 +1,31 @@
+=== sim/ownership/run_outbound_encoded.py
+EncodedHookTest PASS actual operation callback, real native codec encode-failure and delayed/failed/sync/void/reentrant/bundle promise; argument capture modeled, no weave claim
+=== sim/ownership/run_outbound_write.py
+OutboundOrderTest PASS actual callback factory/dispatcher/velocity/confirmation; actual encoded-write callback and real Netty promise through isolated loader; native invocation capture and Minecraft API modeled
+=== sim/ownership/test_outbound_mutations.py
+REJECTED: no-task
+REJECTED: method-return
+REJECTED: late-registration
+REJECTED: success-only
+REJECTED: void-not-unvoided
+REJECTED: native-promise-replaced
+REJECTED: non-native-encoder
+REJECTED: empty-buffer
+REJECTED: no-session-recheck
+REJECTED: no-listener-recheck
+REJECTED: immediate-velocity-confirmation
+REJECTED: no-self-entity-filter
+Outbound encoded-write mutation checks PASS
+=== sim/ownership/run_rest_ingress.py
+RestIngressTest PASS finite held-item actual-hook/dispatcher replay boundary; modeled native acceptance/handoff, not global ownership or runtime weave
+=== sim/ownership/test_rest_ingress_mutations.py
+REJECTED: wrong-heldIngress-descriptor
+REJECTED: late-heldIngress-shift
+REJECTED: missing-channel-dispatch
+REJECTED: replayed-head-dispatch
+REJECTED: missing-held-listener-guard
+REJECTED: missing-held-transport-guard
+Finite held-item mutation checks PASS
+=== sim/ownership/run_abilities_ingress.py
+AbilitiesIngressTest PASS finite abilities actual-hook/dispatcher replay boundary; modeled native acceptance/handoff, not global ownership or runtime weave
+=== sim/ownership/test_abilities_mutations.py
