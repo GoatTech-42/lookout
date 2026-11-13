@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public final class Veil {
 	// TODO wire to Config.veil (presets). Current intended defaults: fake ores on, mobs culled.
-	public static volatile boolean xrayOn = true, espOn = true, cullMobs = true;
+	public static volatile boolean xrayOn = false, espOn = false, cullMobs = false; // fail-closed: Config.applyVeil turns on only from explicit owner config
 	public static volatile double fakeRatio = 0.02;
 	public static final int TICK_PERIOD = 4, RAYS_PER_TICK = 200, JOIN_GRACE_TICKS = 40;
 
