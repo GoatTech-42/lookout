@@ -5,7 +5,6 @@ import dev.meshac.data.PlayerData;
 import dev.meshac.data.PlayerDataManager;
 import dev.meshac.player.CollisionState;
 import dev.meshac.util.Vec3d;
-import java.util.Optional;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundExplodePacket;
@@ -24,6 +23,7 @@ import net.minecraft.network.protocol.game.ClientboundUpdateAttributesPacket;
 import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.network.protocol.common.ClientboundPingPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -69,16 +69,6 @@ public final class OutboundDispatcher {
 		}
 		if (packet instanceof ClientboundPingPacket ping) {
 			if (ping.getId() < 0) data.getConfirmationTracker().recordSentConfirmation(ping.getId());
-			return;
-		}
-		if (packet instanceof ClientboundExplodePacket explosion) {
-			Optional<Vec3> knockback = explosion.playerKnockback();
-			knockback.ifPresent(v -> data.getVelocityTracker().handleExplosion(new Vec3d(v.x, v.y, v.z)));
-			return;
-		}
-		if (packet instanceof ClientboundSetEntityMotionPacket motion) {
-			if (dev.meshac.compat.VersionBridge.motionEntity(motion) == data.getEntityId())
-				data.getVelocityTracker().handleVelocity(new Vec3d(dev.meshac.compat.VersionBridge.motion(motion).x, dev.meshac.compat.VersionBridge.motion(motion).y, dev.meshac.compat.VersionBridge.motion(motion).z));
 			return;
 		}
 		if (packet instanceof ClientboundUpdateAttributesPacket attributes) {
@@ -157,5 +147,34 @@ public final class OutboundDispatcher {
 		}
 		// All other server packet types do not change tracked state here.
 	}
+
+
+	/** Prepare upstream acknowledgement state, returning only this write's after-send task. */
+	public static Runnable beforeVelocityWrite(PlayerData data, Packet<?> packet) {
+		if (packet instanceof ClientboundExplodePacket explosion) {
+			return explosion.playerKnockback().map(v -> data.getVelocityTracker().handleExplosion(new Vec3d(v.x, v.y, v.z))).orElse(null);
+		}
+		if (packet instanceof ClientboundSetEntityMotionPacket motion
+				&& dev.meshac.compat.VersionBridge.motionEntity(motion) == data.getEntityId()) {
+			Vec3 velocity = dev.meshac.compat.VersionBridge.motion(motion);
+			return data.getVelocityTracker().handleVelocity(new Vec3d(velocity.x, velocity.y, velocity.z));
+		}
+		return null;
+	}
+
+    public static Runnable beforeVelocityWrite(net.minecraft.network.Connection connection, Object message) {
+        if (!(message instanceof net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket
+                || message instanceof net.minecraft.network.protocol.game.ClientboundExplodePacket)
+                || !(connection.getPacketListener() instanceof ServerGamePacketListenerImpl game)
+                || game.player.connection != game) return null;
+        PlayerData data = PlayerDataManager.get(game.player);
+        if (data == null || !dev.meshac.tracker.ConfirmationTransport.isPlay(data, connection)) return null;
+        Runnable task = dev.meshac.packet.OutboundDispatcher.beforeVelocityWrite(data, (Packet<?>) message);
+        // Defensive session/phase policy; upstream tasks themselves run even on failed promises.
+        return task == null ? null : () -> {
+            if (dev.meshac.tracker.ConfirmationTransport.isPlay(data, connection)
+                    && data.getPlayer().connection == connection.getPacketListener()) task.run();
+        };
+    }
 
 }

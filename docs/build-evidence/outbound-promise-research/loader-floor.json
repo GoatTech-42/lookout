@@ -1,0 +1,18 @@
+{
+  "0.19.0": {
+    "sha256": "97afcb471fdde8cca40de3f3fbcebb443711975573ef9a52bc80636c651305d4",
+    "bundledJars": [
+      {
+        "file": "META-INF/jars/mixinextras-fabric-0.5.3.jar"
+      }
+    ]
+  },
+  "0.19.5": {
+    "sha256": "93044e4dd46de5d8136701292f05e868da096d2c9fddb4793e4fdbcc63efc695",
+    "bundledJars": [
+      {
+        "file": "META-INF/jars/mixinextras-fabric-0.5.5.jar"
+      }
+    ]
+  }
+}

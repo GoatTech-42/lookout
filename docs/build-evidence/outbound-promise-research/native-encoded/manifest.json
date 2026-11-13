@@ -1,0 +1,30 @@
+{
+  "1.21.11": {
+    "nettyCoordinate": "io.netty:netty-codec-base:4.2.7.Final",
+    "nettyJarSHA256": "6360415b7c87160afcde5e7d4946c35539b9f043e8166c91a7fff95cc6067d9f",
+    "nativeJarSHA256": "2899e5906e93b21929bab7dc844d742fa7606f2007e8b48290eb7b8b4b454288",
+    "builtJarSHA256": "5ceee1188c154367ca97198ed0de10b055bf7df17a78c8a33802eac623de8817",
+    "receiptSHA256": "f9d2ca2e27b495e492831dd749699da8b56c2c13270da75e3a87734f9a66a120"
+  },
+  "26.1.2": {
+    "nettyCoordinate": "io.netty:netty-codec-base:4.2.7.Final",
+    "nettyJarSHA256": "6360415b7c87160afcde5e7d4946c35539b9f043e8166c91a7fff95cc6067d9f",
+    "nativeJarSHA256": "37e34f5c0c1331a8ef3efd1c61dbe5c2e774f5400a192e7b4b934ace39876c9d",
+    "builtJarSHA256": "96a3560c548de3b2589c5504fdf0378961023b7f9330f0213b80285c1faa6a8e",
+    "receiptSHA256": "61031db3ec6db45a27d56a40a64768cf2d760f6f728cbdb9844b00bad908a4cd"
+  },
+  "26.2": {
+    "nettyCoordinate": "io.netty:netty-codec-base:4.2.15.Final",
+    "nettyJarSHA256": "2c6d39d7270628b8cfc3166fbd7a93d595958e59c461bc32ddb383c8c91bf811",
+    "nativeJarSHA256": "06ac7c4a86c0b89eb340f8ce7363579db11b10a1a26b392782ce214d70d5cb1f",
+    "builtJarSHA256": "7c53b6d776495fd20abbbcdfbf90fc4e6fff9add43ef42355149249730fa6747",
+    "receiptSHA256": "61031db3ec6db45a27d56a40a64768cf2d760f6f728cbdb9844b00bad908a4cd"
+  },
+  "26.3": {
+    "nettyCoordinate": "io.netty:netty-codec-base:4.2.16.Final",
+    "nettyJarSHA256": "feb410225938d9970de6b624a0c031d079804fa5cc5e1ec6e9298f16db5998a7",
+    "nativeJarSHA256": "10c148d35a8bf137f9303364a2412857addff03793a8ddffa62c1a347facac92",
+    "builtJarSHA256": "50ee984dcc14027464d72021e017806c01097253ce3d9e64f542cdfc4557fd53",
+    "receiptSHA256": "61031db3ec6db45a27d56a40a64768cf2d760f6f728cbdb9844b00bad908a4cd"
+  }
+}

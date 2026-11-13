@@ -1,0 +1,216 @@
+  public void write(io.netty.channel.ChannelHandlerContext, java.lang.Object, io.netty.channel.ChannelPromise) throws java.lang.Exception;
+    descriptor: (Lio/netty/channel/ChannelHandlerContext;Ljava/lang/Object;Lio/netty/channel/ChannelPromise;)V
+    Code:
+         0: aconst_null
+         1: astore        4
+         3: aload_0
+         4: aload_2
+         5: invokevirtual #11                 // Method acceptOutboundMessage:(Ljava/lang/Object;)Z
+         8: ifeq          100
+        11: aload_2
+        12: astore        5
+        14: aload_0
+        15: aload_1
+        16: aload         5
+        18: aload_0
+        19: getfield      #8                  // Field preferDirect:Z
+        22: invokevirtual #12                 // Method allocateBuffer:(Lio/netty/channel/ChannelHandlerContext;Ljava/lang/Object;Z)Lio/netty/buffer/ByteBuf;
+        25: astore        4
+        27: aload_0
+        28: aload_1
+        29: aload         5
+        31: aload         4
+        33: invokevirtual #13                 // Method encode:(Lio/netty/channel/ChannelHandlerContext;Ljava/lang/Object;Lio/netty/buffer/ByteBuf;)V
+        36: aload         5
+        38: invokestatic  #14                 // Method io/netty/util/ReferenceCountUtil.release:(Ljava/lang/Object;)Z
+        41: pop
+        42: goto          56
+        45: astore        6
+        47: aload         5
+        49: invokestatic  #14                 // Method io/netty/util/ReferenceCountUtil.release:(Ljava/lang/Object;)Z
+        52: pop
+        53: aload         6
+        55: athrow
+        56: aload         4
+        58: invokevirtual #15                 // Method io/netty/buffer/ByteBuf.isReadable:()Z
+        61: ifeq          77
+        64: aload_1
+        65: aload         4
+        67: aload_3
+        68: invokeinterface #16,  3           // InterfaceMethod io/netty/channel/ChannelHandlerContext.write:(Ljava/lang/Object;Lio/netty/channel/ChannelPromise;)Lio/netty/channel/ChannelFuture;
+        73: pop
+        74: goto          94
+        77: aload         4
+        79: invokevirtual #17                 // Method io/netty/buffer/ByteBuf.release:()Z
+        82: pop
+        83: aload_1
+        84: getstatic     #18                 // Field io/netty/buffer/Unpooled.EMPTY_BUFFER:Lio/netty/buffer/ByteBuf;
+        87: aload_3
+        88: invokeinterface #16,  3           // InterfaceMethod io/netty/channel/ChannelHandlerContext.write:(Ljava/lang/Object;Lio/netty/channel/ChannelPromise;)Lio/netty/channel/ChannelFuture;
+        93: pop
+        94: aconst_null
+        95: astore        4
+        97: goto          109
+       100: aload_1
+       101: aload_2
+       102: aload_3
+       103: invokeinterface #16,  3           // InterfaceMethod io/netty/channel/ChannelHandlerContext.write:(Ljava/lang/Object;Lio/netty/channel/ChannelPromise;)Lio/netty/channel/ChannelFuture;
+       108: pop
+       109: aload         4
+       111: ifnull        156
+       114: aload         4
+       116: invokevirtual #17                 // Method io/netty/buffer/ByteBuf.release:()Z
+       119: pop
+       120: goto          156
+       123: astore        5
+       125: aload         5
+       127: athrow
+       128: astore        5
+       130: new           #19                 // class io/netty/handler/codec/EncoderException
+       133: dup
+       134: aload         5
+       136: invokespecial #21                 // Method io/netty/handler/codec/EncoderException."<init>":(Ljava/lang/Throwable;)V
+       139: athrow
+       140: astore        7
+       142: aload         4
+       144: ifnull        153
+       147: aload         4
+       149: invokevirtual #17                 // Method io/netty/buffer/ByteBuf.release:()Z
+       152: pop
+       153: aload         7
+       155: athrow
+       156: return
+      Exception table:
+         from    to  target type
+            27    36    45   any
+            45    47    45   any
+             3   109   123   Class io/netty/handler/codec/EncoderException
+             3   109   128   Class java/lang/Throwable
+             3   109   140   any
+           123   142   140   any
+
+Compiled from "PacketEncoder.java"
+public class net.minecraft.network.PacketEncoder<T extends net.minecraft.network.PacketListener> extends io.netty.handler.codec.MessageToByteEncoder<net.minecraft.network.protocol.Packet<T>> {
+  private static final org.slf4j.Logger LOGGER;
+    descriptor: Lorg/slf4j/Logger;
+
+  private final net.minecraft.network.ProtocolInfo<T> protocolInfo;
+    descriptor: Lnet/minecraft/network/ProtocolInfo;
+
+  public net.minecraft.network.PacketEncoder(net.minecraft.network.ProtocolInfo<T>);
+    descriptor: (Lnet/minecraft/network/ProtocolInfo;)V
+    Code:
+         0: aload_0
+         1: invokespecial #17                 // Method io/netty/handler/codec/MessageToByteEncoder."<init>":()V
+         4: aload_0
+         5: aload_1
+         6: putfield      #19                 // Field protocolInfo:Lnet/minecraft/network/ProtocolInfo;
+         9: return
+
+  protected void encode(io.netty.channel.ChannelHandlerContext, net.minecraft.network.protocol.Packet<T>, io.netty.buffer.ByteBuf) throws java.lang.Exception;
+    descriptor: (Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V
+    Code:
+         0: aload_2
+         1: invokeinterface #38,  1           // InterfaceMethod net/minecraft/network/protocol/Packet.type:()Lnet/minecraft/network/protocol/PacketType;
+         6: astore        4
+         8: aload_0
+         9: getfield      #19                 // Field protocolInfo:Lnet/minecraft/network/ProtocolInfo;
+        12: invokeinterface #44,  1           // InterfaceMethod net/minecraft/network/ProtocolInfo.codec:()Lnet/minecraft/network/codec/StreamCodec;
+        17: aload_3
+        18: aload_2
+        19: invokeinterface #49,  3           // InterfaceMethod net/minecraft/network/codec/StreamCodec.encode:(Ljava/lang/Object;Ljava/lang/Object;)V
+        24: aload_3
+        25: invokevirtual #55                 // Method io/netty/buffer/ByteBuf.readableBytes:()I
+        28: istore        5
+        30: getstatic     #57                 // Field LOGGER:Lorg/slf4j/Logger;
+        33: invokeinterface #63,  1           // InterfaceMethod org/slf4j/Logger.isDebugEnabled:()Z
+        38: ifeq          98
+        41: getstatic     #57                 // Field LOGGER:Lorg/slf4j/Logger;
+        44: getstatic     #69                 // Field net/minecraft/network/Connection.PACKET_SENT_MARKER:Lorg/slf4j/Marker;
+        47: ldc           #71                 // String OUT: [{}:{}] {} -> {} bytes
+        49: iconst_4
+        50: anewarray     #73                 // class java/lang/Object
+        53: dup
+        54: iconst_0
+        55: aload_0
+        56: getfield      #19                 // Field protocolInfo:Lnet/minecraft/network/ProtocolInfo;
+        59: invokeinterface #77,  1           // InterfaceMethod net/minecraft/network/ProtocolInfo.id:()Lnet/minecraft/network/ConnectionProtocol;
+        64: invokevirtual #82                 // Method net/minecraft/network/ConnectionProtocol.id:()Ljava/lang/String;
+        67: aastore
+        68: dup
+        69: iconst_1
+        70: aload         4
+        72: aastore
+        73: dup
+        74: iconst_2
+        75: aload_2
+        76: invokeinterface #86,  1           // InterfaceMethod net/minecraft/network/protocol/Packet.getClass:()Ljava/lang/Class;
+        81: invokevirtual #91                 // Method java/lang/Class.getName:()Ljava/lang/String;
+        84: aastore
+        85: dup
+        86: iconst_3
+        87: iload         5
+        89: invokestatic  #97                 // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+        92: aastore
+        93: invokeinterface #101,  4          // InterfaceMethod org/slf4j/Logger.debug:(Lorg/slf4j/Marker;Ljava/lang/String;[Ljava/lang/Object;)V
+        98: getstatic     #111                // Field net/minecraft/util/profiling/jfr/JvmProfiler.INSTANCE:Lnet/minecraft/util/profiling/jfr/JvmProfiler;
+       101: aload_0
+       102: getfield      #19                 // Field protocolInfo:Lnet/minecraft/network/ProtocolInfo;
+       105: invokeinterface #77,  1           // InterfaceMethod net/minecraft/network/ProtocolInfo.id:()Lnet/minecraft/network/ConnectionProtocol;
+       110: aload         4
+       112: aload_1
+       113: invokeinterface #115,  1          // InterfaceMethod io/netty/channel/ChannelHandlerContext.channel:()Lio/netty/channel/Channel;
+       118: invokeinterface #121,  1          // InterfaceMethod io/netty/channel/Channel.remoteAddress:()Ljava/net/SocketAddress;
+       123: iload         5
+       125: invokeinterface #125,  5          // InterfaceMethod net/minecraft/util/profiling/jfr/JvmProfiler.onPacketSent:(Lnet/minecraft/network/ConnectionProtocol;Lnet/minecraft/network/protocol/PacketType;Ljava/net/SocketAddress;I)V
+       130: aload_1
+       131: aload_2
+       132: invokestatic  #131                // InterfaceMethod net/minecraft/network/ProtocolSwapHandler.handleOutboundTerminalPacket:(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V
+       135: goto          186
+       138: astore        5
+       140: getstatic     #57                 // Field LOGGER:Lorg/slf4j/Logger;
+       143: ldc           #133                // String Error sending packet {}
+       145: aload         4
+       147: aload         5
+       149: invokeinterface #137,  4          // InterfaceMethod org/slf4j/Logger.error:(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+       154: aload_2
+       155: invokeinterface #140,  1          // InterfaceMethod net/minecraft/network/protocol/Packet.isSkippable:()Z
+       160: ifeq          173
+       163: new           #142                // class net/minecraft/network/SkipPacketEncoderException
+       166: dup
+       167: aload         5
+       169: invokespecial #145                // Method net/minecraft/network/SkipPacketEncoderException."<init>":(Ljava/lang/Throwable;)V
+       172: athrow
+       173: aload         5
+       175: athrow
+       176: astore        6
+       178: aload_1
+       179: aload_2
+       180: invokestatic  #131                // InterfaceMethod net/minecraft/network/ProtocolSwapHandler.handleOutboundTerminalPacket:(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;)V
+       183: aload         6
+       185: athrow
+       186: return
+      Exception table:
+         from    to  target type
+             8   130   138   Class java/lang/Throwable
+             8   130   176   any
+           138   178   176   any
+
+  protected void encode(io.netty.channel.ChannelHandlerContext, java.lang.Object, io.netty.buffer.ByteBuf) throws java.lang.Exception;
+    descriptor: (Lio/netty/channel/ChannelHandlerContext;Ljava/lang/Object;Lio/netty/buffer/ByteBuf;)V
+    Code:
+         0: aload_0
+         1: aload_1
+         2: aload_2
+         3: checkcast     #34                 // class net/minecraft/network/protocol/Packet
+         6: aload_3
+         7: invokevirtual #160                // Method encode:(Lio/netty/channel/ChannelHandlerContext;Lnet/minecraft/network/protocol/Packet;Lio/netty/buffer/ByteBuf;)V
+        10: return
+
+  static {};
+    descriptor: ()V
+    Code:
+         0: invokestatic  #168                // Method com/mojang/logging/LogUtils.getLogger:()Lorg/slf4j/Logger;
+         3: putstatic     #57                 // Field LOGGER:Lorg/slf4j/Logger;
+         6: return
+}

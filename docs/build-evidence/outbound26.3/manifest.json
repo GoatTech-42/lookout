@@ -1,0 +1,10 @@
+{
+  "src/main/java/dev/meshac/mixin/ByteEncoderCompletionMixin.java": "90792532c11938c7c7213cc57ab1d60313ac4a1dd3d2af777d3efc10becbc78e",
+  "src/main/java/dev/meshac/packet/OutboundDispatcher.java": "ade26709e7ae4219a4c401d64591fe9dd7ed2dbec6f8fa52544819c73591faf0",
+  "src/main/java/dev/meshac/tracker/VelocityTracker.java": "dfb255c59333fbfd4aaefafa49223aa250191ca58bfa6944a830aad0f3fd5517",
+  "src/main/resources/fabric.mod.json": "f4a8ce45a2f6e1e28039aacb4366cd89c48e654f50e4c64ae70ef372e8149696",
+  "src/main/resources/meshac.mixins.json": "add9d5be31c8fe0969929df116e993e04ae6d077b927db1a71b3610acd5b3624",
+  "build/libs/meshac-26.3-2.9.7.28-meshac-0.1.0.jar": "50ee984dcc14027464d72021e017806c01097253ce3d9e64f542cdfc4557fd53",
+  "/tmp/meshac-smoke-26.3/server/mods/meshac-26.3-2.9.7.28-meshac-0.1.0.jar": "50ee984dcc14027464d72021e017806c01097253ce3d9e64f542cdfc4557fd53",
+  "/tmp/meshac-smoke-26.3/outbound-observer/test-only-outbound-observer.jar": "b1c614d03d9e778693b46039cda6a8ffb5a7f9f02c96b2f846827e633a85da07"
+}

@@ -9,5 +9,5 @@
 	"environment": "server",
 	"mixins": ["meshac.mixins.json"],
 	"entrypoints": { "server": ["dev.meshac.Meshac"] },
-	"depends": { "fabricloader": ">=0.19.0", "minecraft": "${mc}", "java": ">=${java}", "fabric-api": "*" }
+	"depends": { "fabricloader": ">=0.19.5", "minecraft": "${mc}", "java": ">=${java}", "fabric-api": "*", "mixinextras": ">=0.5.5" }
 }

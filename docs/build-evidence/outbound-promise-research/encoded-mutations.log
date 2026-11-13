@@ -1,0 +1,13 @@
+REJECTED: no-task
+REJECTED: method-return
+REJECTED: late-registration
+REJECTED: success-only
+REJECTED: void-not-unvoided
+REJECTED: native-promise-replaced
+REJECTED: non-native-encoder
+REJECTED: empty-buffer
+REJECTED: no-session-recheck
+REJECTED: no-listener-recheck
+REJECTED: immediate-velocity-confirmation
+REJECTED: no-self-entity-filter
+Outbound encoded-write mutation checks PASS

@@ -1,0 +1,9 @@
+# Outbound completion candidate, unlanded
+
+Main remains at dbf9a8c. Current candidate uses ByteEncoderCompletionMixin on MessageToByteEncoder.write, filtered to native PacketEncoder and readable encoded bytes. It captures the raw original method argument locally, prepares self-motion/explosion tracking only after successful encoding, unvoids the native promise only when a task exists, registers before the original ctx.write, and keeps failed/cancelled-promise completion semantics without a success filter. Current-session/PLAY/listener completion rechecks are a defensive port policy, not exact upstream behavior. Direct Connection routes now participate deliberately; unrelated outbound tracking stays caller-side.
+
+The method-return prototype and raw-pipeline prototype were rejected. Their historical logs and full backups remain outside the repository under /tmp/meshac-outbound-rejected-history and the prototype archives, and are not evidence for this candidate. The raw handler failed exact parity on native encode failures; it is removed. No handler installation/reconfiguration state remains. Movement/ConnectionMixin source is unchanged from dbf9a8c.
+
+Current evidence is in docs/build-evidence/outbound-promise-research/encoded-* and native-encoded. Real Netty tests model @Local capture/Operation invocation, rather than proving weaving. Native codec failure, completion timing, real modeled bundle fanout, and callback ownership tests do not prove arbitrary native packet/unbundler paths. No runtime or landing claim follows from builds. Native changed-artifact qualification and final review are required. All gates remain closed, Veil off, LOG_ONLY.
+
+Fabricloader floor is now0.19.5 with MixinExtras>=0.5.5, matching all build routes and the isolated rig. Stock0.19.0 bundles0.5.3 and is not claimed supported. Official0.19.0 artifact was inspected; no lower-floor retrofit is part of this finite patch.

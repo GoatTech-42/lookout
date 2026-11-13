@@ -1,0 +1,159 @@
+=== scripts/test_analyze_deps.py
+checks: 3 needsVersion: 1 needsWorld: 1
+ok: call site getClientVersion seeds version need
+ok: world-only check does not gain version need
+ok: declaration file does not seed
+ok: call site getWorldBlockTracker seeds world need
+ok: comment mention does not seed world need
+ok: plain check is known
+ok: plain check has no propagated needs through declaration-only PlayerData
+ok: metadata is current (read-only comparison): checks: 180 needsVersion: 179 needsWorld: 179
+test_analyze_deps: PASS
+=== scripts/test_analyzer_cli.py
+checks: 1 needsVersion: 0 needsWorld: 0
+test_analyzer_cli: PASS (stale/missing fail, check does not write, no Git required)
+=== sim/dispatch/run_dispatch_safety.py
+/tmp/meshac-afterwrite/src/main/java/dev/meshac/packet/OutboundDispatcher.java:26: error: package net.minecraft.server.network does not exist
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+                                   ^
+/tmp/meshac-afterwrite/src/main/java/dev/meshac/packet/OutboundDispatcher.java:165: error: cannot find symbol
+    public static Runnable beforeVelocityWrite(net.minecraft.network.Connection connection, Object message) {
+                                                                    ^
+  symbol:   class Connection
+  location: package net.minecraft.network
+/tmp/meshac-afterwrite/src/main/java/dev/meshac/packet/OutboundDispatcher.java:168: error: cannot find symbol
+                || !(connection.getPacketListener() instanceof ServerGamePacketListenerImpl game)
+                                                               ^
+  symbol:   class ServerGamePacketListenerImpl
+  location: class OutboundDispatcher
+/tmp/meshac-afterwrite/src/main/java/dev/meshac/packet/OutboundDispatcher.java:171: error: cannot find symbol
+        if (data == null || !dev.meshac.tracker.ConfirmationTransport.isPlay(data, connection)) return null;
+                                               ^
+  symbol:   class ConfirmationTransport
+  location: package dev.meshac.tracker
+/tmp/meshac-afterwrite/src/main/java/dev/meshac/packet/OutboundDispatcher.java:175: error: cannot find symbol
+            if (dev.meshac.tracker.ConfirmationTransport.isPlay(data, connection)
+                                  ^
+  symbol:   class ConfirmationTransport
+  location: package dev.meshac.tracker
+/tmp/meshac-afterwrite/src/main/java/dev/meshac/packet/OutboundDispatcher.java:176: error: cannot find symbol
+                    && data.getPlayer().connection == connection.getPacketListener()) task.run();
+                           ^
+  symbol:   method getPlayer()
+  location: variable data of type PlayerData
+6 errors
+Traceback (most recent call last):
+  File "/tmp/meshac-afterwrite/sim/dispatch/run_dispatch_safety.py", line 92, in <module>
+    subprocess.run([str(JDK/'javac'),'-d',str(t/'classes'),*files],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/javac', '-d', '/tmp/meshac-dispatch-x3a8sbbs/classes', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/compat/VersionBridge.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/check/AbstractCheck.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/MeshServices.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/data/PlayerDataManager.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/data/PlayerData.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/data/Support.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/player/CollisionState.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/config/MeshSettings.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/util/TextUtil.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/util/Vec3d.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/util/Location.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/event/MeshEvent.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/event/MeshMoveEvent.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/event/MeshBlock.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/event/MeshInteractEvent.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/world/BlockUtils.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/core/BlockPos.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/level/block/state/properties/BlockStateProperties.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/level/block/state/BlockState.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/phys/Vec3.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/phys/AABB.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/entity/Entity.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/level/chunk/LevelChunk.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/server/level/ServerLevel.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/server/level/ServerPlayer.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/InteractionHand.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/item/ItemStack.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/world/item/BlockItem.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/veil/Veil.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/tracker/TrackedEntity.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/tracker/WorldBlockTracker.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/packet/Flying.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/packet/InteractEntity.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/packet/EntityAction.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/packet/Digging.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/packet/Packets.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/packet/MeshPacketType.java', '/tmp/meshac-dispatch-x3a8sbbs/dev/meshac/packet/MeshPacketEvent.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/Packet.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundLoginPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundLevelChunkWithLightPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundForgetLevelChunkPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundBlockUpdatePacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundSectionBlocksUpdatePacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundRespawnPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundExplodePacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundSetEntityMotionPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundUpdateAttributesPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundUpdateMobEffectPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundRemoveMobEffectPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundPlayerPositionPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundPlayerAbilitiesPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundGameEventPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundMoveEntityPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/VecDeltaCodec.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundTeleportEntityPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundAddEntityPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundRemoveEntitiesPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ClientboundSetPassengersPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ServerboundUseItemOnPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ServerboundInteractPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ServerboundMovePlayerPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ServerboundPlayerActionPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/game/ServerboundAttackPacket.java', '/tmp/meshac-dispatch-x3a8sbbs/net/minecraft/network/protocol/common/ClientboundPingPacket.java', '/tmp/meshac-afterwrite/src/main/java/dev/meshac/check/ContextGate.java', '/tmp/meshac-afterwrite/src/main/java/dev/meshac/check/CheckDependencies.java', '/tmp/meshac-afterwrite/src/main/java/dev/meshac/config/MeshVersion.java', '/tmp/meshac-afterwrite/src/main/java/dev/meshac/packet/PacketDispatcher.java', '/tmp/meshac-afterwrite/src/main/java/dev/meshac/packet/OutboundDispatcher.java', '/tmp/meshac-afterwrite/src/main/java/dev/meshac/event/MoveEventDispatcher.java', '/tmp/meshac-afterwrite/sim/dispatch/DispatchSafetyTest.java']' returned non-zero exit status 1.
+=== sim/dispatch/test_mutations.py
+Traceback (most recent call last):
+  File "/tmp/meshac-afterwrite/sim/dispatch/test_mutations.py", line 16, in <module>
+    assert r.returncode!=0 and 'FAIL gated check evaluated' in r.stderr,(route,r.stderr)
+AssertionError: ('inbound', '/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/packet/OutboundDispatcher.java:26: error: package net.minecraft.server.network does not exist\nimport net.minecraft.server.network.ServerGamePacketListenerImpl;\n                                   ^\n/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/packet/OutboundDispatcher.java:165: error: cannot find symbol\n    public static Runnable beforeVelocityWrite(net.minecraft.network.Connection connection, Object message) {\n                                                                    ^\n  symbol:   class Connection\n  location: package net.minecraft.network\n/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/packet/OutboundDispatcher.java:168: error: cannot find symbol\n                || !(connection.getPacketListener() instanceof ServerGamePacketListenerImpl game)\n                                                               ^\n  symbol:   class ServerGamePacketListenerImpl\n  location: class OutboundDispatcher\n/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/packet/OutboundDispatcher.java:171: error: cannot find symbol\n        if (data == null || !dev.meshac.tracker.ConfirmationTransport.isPlay(data, connection)) return null;\n                                               ^\n  symbol:   class ConfirmationTransport\n  location: package dev.meshac.tracker\n/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/packet/OutboundDispatcher.java:175: error: cannot find symbol\n            if (dev.meshac.tracker.ConfirmationTransport.isPlay(data, connection)\n                                  ^\n  symbol:   class ConfirmationTransport\n  location: package dev.meshac.tracker\n/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/packet/OutboundDispatcher.java:176: error: cannot find symbol\n                    && data.getPlayer().connection == connection.getPacketListener()) task.run();\n                           ^\n  symbol:   method getPlayer()\n  location: variable data of type PlayerData\n6 errors\nTraceback (most recent call last):\n  File "/tmp/meshac-dispatch-mutation-y1w9d6du/sim/dispatch/run_dispatch_safety.py", line 92, in <module>\n    subprocess.run([str(JDK/\'javac\'),\'-d\',str(t/\'classes\'),*files],check=True)\n  File "/usr/lib/python3.10/subprocess.py", line 526, in run\n    raise CalledProcessError(retcode, process.args,\nsubprocess.CalledProcessError: Command \'[\'/home/sandbox/jdk25/bin/javac\', \'-d\', \'/tmp/meshac-dispatch-vul0yps7/classes\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/compat/VersionBridge.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/check/AbstractCheck.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/MeshServices.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/data/PlayerDataManager.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/data/PlayerData.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/data/Support.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/player/CollisionState.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/config/MeshSettings.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/util/TextUtil.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/util/Vec3d.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/util/Location.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/event/MeshEvent.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/event/MeshMoveEvent.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/event/MeshBlock.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/event/MeshInteractEvent.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/world/BlockUtils.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/core/BlockPos.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/level/block/state/properties/BlockStateProperties.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/level/block/state/BlockState.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/phys/Vec3.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/phys/AABB.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/entity/Entity.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/level/chunk/LevelChunk.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/server/level/ServerLevel.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/server/level/ServerPlayer.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/InteractionHand.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/item/ItemStack.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/world/item/BlockItem.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/veil/Veil.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/tracker/TrackedEntity.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/tracker/WorldBlockTracker.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/mixin/ClientboundMoveEntityPacketAccessor.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/packet/Flying.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/packet/InteractEntity.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/packet/EntityAction.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/packet/Digging.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/packet/Packets.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/packet/MeshPacketType.java\', \'/tmp/meshac-dispatch-vul0yps7/dev/meshac/packet/MeshPacketEvent.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/Packet.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundLoginPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundLevelChunkWithLightPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundForgetLevelChunkPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundBlockUpdatePacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundSectionBlocksUpdatePacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundRespawnPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundExplodePacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundSetEntityMotionPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundUpdateAttributesPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundUpdateMobEffectPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundRemoveMobEffectPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundPlayerPositionPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundSetEntityDataPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundPlayerAbilitiesPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundGameEventPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundMoveEntityPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/VecDeltaCodec.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundTeleportEntityPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundAddEntityPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundRemoveEntitiesPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ClientboundSetPassengersPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ServerboundUseItemOnPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ServerboundInteractPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ServerboundMovePlayerPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ServerboundPlayerActionPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/game/ServerboundAttackPacket.java\', \'/tmp/meshac-dispatch-vul0yps7/net/minecraft/network/protocol/common/ClientboundPingPacket.java\', \'/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/check/ContextGate.java\', \'/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/check/CheckDependencies.java\', \'/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/config/MeshVersion.java\', \'/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/packet/PacketDispatcher.java\', \'/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/packet/OutboundDispatcher.java\', \'/tmp/meshac-dispatch-mutation-y1w9d6du/src/main/java/dev/meshac/event/MoveEventDispatcher.java\', \'/tmp/meshac-dispatch-mutation-y1w9d6du/sim/dispatch/DispatchSafetyTest.java\']\' returned non-zero exit status 1.\n')
+=== sim/lifecycle/run_join_identity.py
+JoinIdentityTest PASS (missed-login, UUID/name, copy/stale-copy, two sessions, quit/rejoin)
+=== sim/lifecycle/test_join_mutations.py
+REJECTED: uuid
+REJECTED: name
+REJECTED: copy
+REJECTED: stale-copy
+Session identity mutation checks PASS
+=== sim/lifecycle/run_join_anchor.py
+JoinAnchorTest PASS (real session/tracker/dispatch/hooks; deterministic channel boundaries, not weave/runtime)
+=== sim/lifecycle/test_anchor_mutations.py
+REJECTED: handshake-default
+REJECTED: missing-early-publication
+REJECTED: replace-fabric-session
+REJECTED: anchor-before-login-write
+REJECTED: no-anchor
+REJECTED: duplicate-anchor
+REJECTED: anchor-ID-after-send
+REJECTED: ignored-event-loop
+REJECTED: no-play-guard
+REJECTED: no-close-recheck
+REJECTED: skip-ban-on-reuse
+Join anchor mutations PASS
+=== sim/ownership/run_session_pong.py
+SessionPongTest PASS (real common hook, session/listener/phase/close boundary, ordinary policy retained)
+=== sim/ownership/run_move_ingress.py
+MoveIngressTest PASS: real dispatcher once per admitted channel read, zero on native rejection/close/stale/phase; server replay capture separate (modeled boundary, not weave)
+=== sim/ownership/test_move_mutations.py
+REJECTED: no-ingress
+REJECTED: duplicate-handler-dispatch
+REJECTED: network-capture
+REJECTED: no-current-player-listener
+REJECTED: no-transport-admission
+REJECTED: wrong-ingress-target
+Movement ingress mutation checks PASS
+=== sim/ownership/test_movement_validator.py
+FINAL GREEN {'packets': 62, 'dispatches': 62, 'handlerHEAD': 124, 'serverCaptureTailEvents': 62, 'changedPositions': 47}
+REJECTED: swap-admission-dispatch ('1', 'native stage order', ['DISPATCH', 'ADMITTED_CHANNEL', 'HANDLER_HEAD:network', 'HANDLER_HEAD:server', 'SERVER_CAPTURE', 'HANDLER_TAIL'])
+REJECTED: truncate-before-stop deliberate server shutdown missing
+REJECTED: missing-client-close client did not observe deliberate server close
+REJECTED: missing-runner-completion runner completion/cleanup markers missing
+REJECTED: failed-native-run native movement exception observed
+Movement validator mutation checks PASS
+=== sim/ownership/run_ground_materials.py
+Note: /tmp/meshac-afterwrite/src/main/java/dev/meshac/player/CollisionState.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /tmp/meshac-afterwrite/src/main/java/dev/meshac/player/CollisionState.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.joml.MemUtil$MemUtilUnsafe (file:/tmp/meshac-smoke-26.3/server/libraries/org/joml/joml/1.10.9/joml-1.10.9.jar)
+WARNING: Please consider reporting this to the maintainers of class org.joml.MemUtil$MemUtilUnsafe
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[14:02:56] [main/INFO]: [STDOUT]: GroundMaterialsTest PASS actual CollisionState and real native block states, no server/thread execution
+=== sim/safety/run_product_safety.py
+SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=kick fixture
+[meshac] contained effect (log-only): disconnect target=fixture detail=simulated staff ban: test
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=pardon
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=unban
+[meshac] contained effect (log-only): disconnect target=fixture detail=Unusual fly (fly forced isolated REMOVE)
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+ProductSafetyTest PASS (registered kick/ban/pardon/unban; persistence, escalation, disconnect, egress, inherited veil)
+=== sim/safety/test_mutations.py
+REJECTED: kick-command-guard
+REJECTED: case-add-guard
+REJECTED: case-pardon-guard
+REJECTED: discord-egress-guard
+REJECTED: veil-qualification-hold
+Product mutation checks PASS (temporary copies only)
+=== sim/version/run_version_contract.py
+VersionContractTest PASS (native initialization, UNKNOWN -1, known chronology)
+=== sim/version/test_mutations.py
+REJECTED: native-init
+REJECTED: unknown-newest
+REJECTED: known-order
+Version contract mutation checks PASS
+=== sim/world/run_world_snapshot.py
+WorldSnapshotTest PASS (payload freeze, negative coordinates, updates, reset generation)
+=== sim/world/test_mutations.py
+REJECTED: late-payload-read
+REJECTED: reset-generation
+REJECTED: mutable-update-pos
+REJECTED: unmodifiable-live-cache
+REJECTED: unsigned-negative-z
+REJECTED: unsigned-negative-y
+World snapshot mutation checks PASS
+=== sim/ownership/run_outbound_encoded.py
+EncodedHookTest PASS actual operation callback, real native codec encode-failure and delayed/failed/sync/void/reentrant/bundle promise; argument capture modeled, no weave claim
+=== sim/ownership/run_outbound_write.py
+OutboundOrderTest PASS actual callback factory/dispatcher/velocity/confirmation; actual encoded-write callback and real Netty promise through isolated loader; native invocation capture and Minecraft API modeled
+=== sim/ownership/test_outbound_mutations.py
+REJECTED: no-task
+REJECTED: method-return
+REJECTED: late-registration
+REJECTED: success-only
+Traceback (most recent call last):
+  File "/tmp/meshac-afterwrite/sim/ownership/test_outbound_mutations.py", line 25, in <module>
+    assert result.returncode and ('AssertionError' in result.stderr or (name=='void-not-unvoided' and 'IllegalStateException: void future' in result.stderr)),(name,result.stdout,result.stderr)
+AssertionError: ('void-not-unvoided', '', 'Exception in thread "main" io.netty.util.IllegalReferenceCountException: refCnt: 0, decrement: 1\n\tat io.netty.util.internal.RefCnt.throwIllegalRefCountOnRelease(RefCnt.java:239)\n\tat io.netty.util.internal.RefCnt$VarHandleRefCnt.release0(RefCnt.java:367)\n\tat io.netty.util.internal.RefCnt$VarHandleRefCnt.release(RefCnt.java:352)\n\tat io.netty.util.internal.RefCnt.release(RefCnt.java:146)\n\tat io.netty.buffer.AbstractReferenceCountedByteBuf.release(AbstractReferenceCountedByteBuf.java:83)\n\tat io.netty.util.ReferenceCountUtil.release(ReferenceCountUtil.java:90)\n\tat fixture.EncodedHookTest.main(EncodedHookTest.java:33)\nTraceback (most recent call last):\n  File "/tmp/meshac-encoded-mutations-b4awfosf/sim/ownership/run_outbound_encoded.py", line 60, in <module>\n    subprocess.run([str(jdk/\'java\'),\'-cp\',str(t/\'classes\')+os.pathsep+cp,\'fixture.EncodedHookTest\'],check=True)\n  File "/usr/lib/python3.10/subprocess.py", line 526, in run\n    raise CalledProcessError(retcode, process.args,\nsubprocess.CalledProcessError: Command \'[\'/home/sandbox/jdk25/bin/java\', \'-cp\', \'/tmp/meshac-encoded-hook-1g0u471b/classes:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-buffer/4.2.16.Final/5397ef65dcb60670e0e0dba4854522873af3070/netty-buffer-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-codec-base/4.2.16.Final/1a01d45a9efc228c6d747525848b065e0656b5f/netty-codec-base-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-codec-compression/4.2.16.Final/bdbbcfcdbe217b95c14a04df4fc5d31213d5c27c/netty-codec-compression-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-codec-http/4.2.16.Final/b5e0715df90047ee5a0138c8f704f43c751009e4/netty-codec-http-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-common/4.2.16.Final/c2bc7fa5acfa2afc777e944d84f0aa65559cc81e/netty-common-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-handler/4.2.16.Final/cc82873ae4b6d14effe480740ad838de09add70d/netty-handler-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-resolver/4.2.16.Final/fcea6d64273b59ab9127b68c16ae98af34642139/netty-resolver-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-transport/4.2.16.Final/ae87a3bec51d503475a19fbd718bf777f2fc06c6/netty-transport-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-transport-classes-epoll/4.2.16.Final/cf90c7b892e284ba9f1545dce170168369b3b9d6/netty-transport-classes-epoll-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-transport-classes-kqueue/4.2.16.Final/fa2bcf8c71626510f6fae173f78182117b70f7a/netty-transport-classes-kqueue-4.2.16.Final.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.2.16.Final/439c24f5c27c220deb042b42e4048d606edeb78d/netty-transport-native-epoll-4.2.16.Final-linux-x86_64.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-transport-native-epoll/4.2.16.Final/eed34f3b37b4c46a0cbb49456ccc4e3bd7195e4c/netty-transport-native-epoll-4.2.16.Final-linux-aarch_64.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-transport-native-kqueue/4.2.16.Final/dd9d41b06355a6a1815d902ee087a693aab83755/netty-transport-native-kqueue-4.2.16.Final-osx-x86_64.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-transport-native-kqueue/4.2.16.Final/ddb942cad6c0e978caa2215757512b36c5ffacec/netty-transport-native-kqueue-4.2.16.Final-osx-aarch_64.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/io.netty/netty-transport-native-unix-common/4.2.16.Final/3cf32390f1b80af890ac44aa0698c2ff58c2a4d7/netty-transport-native-unix-common-4.2.16.Final.jar\', \'fixture.EncodedHookTest\']\' returned non-zero exit status 1.\n')

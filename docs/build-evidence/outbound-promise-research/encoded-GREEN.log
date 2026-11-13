@@ -1,0 +1,1 @@
+EncodedHookTest PASS actual operation callback, real native codec encode-failure and delayed/failed/sync/void promise; argument capture modeled, no weave claim

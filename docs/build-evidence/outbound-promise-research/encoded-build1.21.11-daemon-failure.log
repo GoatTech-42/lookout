@@ -1,0 +1,53 @@
+
+> Configure project :
+Fabric Loom: 1.18.4
+
+> Task :compileJava
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :processResources
+> Task :classes
+> Task :jar
+> Task :processIncludeJars UP-TO-DATE
+The message received from the daemon indicates that the daemon has disappeared.
+Build request sent: Build{id=57b323e4-d05f-4b3b-82eb-2ca14bc921c0, currentDir=/tmp/meshac-afterwrite}
+Attempting to read last messages from the daemon log...
+Daemon pid: 9219
+  log file: /home/sandbox/.gradle-meshac/daemon/9.7.1/daemon-9219.out.log
+----- Last 20 lines from daemon log file - daemon-9219.out.log -----
+2026-11-13T14:00:52.186-0800 [INFO] [org.gradle.launcher.daemon.server.DaemonRegistryUpdater] Marking the daemon as busy, address: [09df17b2-09e2-48b3-82dc-7051c51acc3f port:42877, addresses:[localhost/127.0.0.1]]
+2026-11-13T14:00:52.186-0800 [DEBUG] [org.gradle.launcher.daemon.registry.PersistentDaemonRegistry] Marking busy by address: [09df17b2-09e2-48b3-82dc-7051c51acc3f port:42877, addresses:[localhost/127.0.0.1]]
+2026-11-13T14:00:52.186-0800 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Waiting to acquire exclusive lock on daemon addresses registry.
+2026-11-13T14:00:52.186-0800 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Lock acquired on daemon addresses registry.
+2026-11-13T14:00:52.186-0800 [DEBUG] [org.gradle.cache.internal.DefaultFileLockManager] Releasing lock on daemon addresses registry.
+2026-11-13T14:00:52.187-0800 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] resetting idle timer
+2026-11-13T14:00:52.187-0800 [DEBUG] [org.gradle.launcher.daemon.server.DaemonStateCoordinator] daemon is running. Sleeping until state changes.
+2026-11-13T14:00:52.187-0800 [INFO] [org.gradle.launcher.daemon.server.exec.StartBuildOrRespondWithBusy] Daemon is about to start building Build{id=57b323e4-d05f-4b3b-82eb-2ca14bc921c0, currentDir=/tmp/meshac-afterwrite}. Dispatching build started information...
+2026-11-13T14:00:52.187-0800 [DEBUG] [org.gradle.launcher.daemon.server.SynchronizedDispatchConnection] thread 561: dispatching org.gradle.launcher.daemon.protocol.BuildStarted@5456699f
+2026-11-13T14:00:52.191-0800 [DEBUG] [org.gradle.launcher.daemon.server.exec.LogToClient] About to start relaying all logs to the client via the connection.
+2026-11-13T14:00:52.191-0800 [INFO] [org.gradle.launcher.daemon.server.exec.LogToClient] The client will now receive all logging from the daemon (pid: 9219). The daemon log file: /home/sandbox/.gradle-meshac/daemon/9.7.1/daemon-9219.out.log
+2026-11-13T14:00:52.191-0800 [DEBUG] [org.gradle.launcher.daemon.server.exec.ApplyClientEnvironmentVariables] Configuring env variables: [PATH, ORT_INTRA_OP_NUM_THREADS, PIP_ROOT_USER_ACTION, BLIS_NUM_THREADS, UV_BREAK_SYSTEM_PACKAGES, TZ, JAVA_HOME, INSTINCT_OUTER_TOOL_USE_ID, TERM, OPENBLAS_NUM_THREADS, MODAL_CLOUD_PROVIDER, MODAL_TASK_ID, MODAL_SANDBOX_ID, MKL_NUM_THREADS, ORT_INTER_OP_NUM_THREADS, MODAL_IMAGE_ID, PIP_DEFAULT_TIMEOUT, INSTINCT_OUTER_TOOL_USE_TIMEOUT_SECONDS, GRADLE_USER_HOME, CFLAGS, MODAL_CONTAINER_ARGUMENTS_PATH, LOGNAME, SOURCE_DATE_EPOCH, PWD, PYTHONHASHSEED, _, INSTINCT_OUTER_TOOL_USE_STARTED_AT, PYTHONPATH, SSL_CERT_DIR, PIP_DISABLE_PIP_VERSION_CHECK, BASH_ENV, DEBIAN_PRIORITY, OLDPWD, PIP_NO_CACHE_DIR, USER, MODAL_REGION, OMP_NUM_THREADS, DEBIAN_FRONTEND, LC_CTYPE, SHLVL, HOME]
+2026-11-13T14:00:52.191-0800 [INFO] [org.gradle.launcher.daemon.server.exec.LogAndCheckHealth] Starting 10th build in daemon [uptime: 10 mins 38.508 secs, performance: 91%, GC rate: 0.07/s, heap usage: 5% of 2 GiB]
+2026-11-13T14:00:52.192-0800 [DEBUG] [org.gradle.launcher.daemon.server.exec.ExecuteBuild] The daemon has started executing the build.
+2026-11-13T14:00:52.192-0800 [DEBUG] [org.gradle.launcher.daemon.server.exec.ExecuteBuild] Executing build with daemon context: DefaultDaemonContext[uid=a54eb47c-ae6c-4605-bd70-2911306314d6,javaHome=/home/sandbox/jdk25,javaVersion=25,javaVendor=Eclipse Adoptium,daemonRegistryDir=/home/sandbox/.gradle-meshac/daemon,pid=9219,idleTimeout=10800000,priority=NORMAL,applyInstrumentationAgent=true,nativeServicesMode=ENABLED,daemonOpts=-Xmx3G,-Dfile.encoding=UTF-8,-Duser.country=US,-Duser.language=en,-Duser.variant]
+Fabric Loom: 1.18.4
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.----- End of the daemon log -----
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Gradle build daemon disappeared unexpectedly (it may have been killed or may have crashed)
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+> Task :remapJar

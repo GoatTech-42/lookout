@@ -1,6 +1,7 @@
 package dev.meshac.mixin;
 
 import dev.meshac.packet.OutboundDispatcher;
+
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.network.ServerCommonPacketListenerImpl;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -9,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Clientbound send hook feeding the outbound dispatcher. */
+/** Caller-side tracking except self-velocity/explosion, which require native after-write tasks. */
 @Mixin(ServerCommonPacketListenerImpl.class)
 public abstract class ServerGamePacketListenerSendMixin {
 
@@ -20,7 +21,9 @@ public abstract class ServerGamePacketListenerSendMixin {
 		if ((Object) this instanceof ServerGamePacketListenerImpl game) {
 			if (packet instanceof net.minecraft.network.protocol.game.ClientboundLoginPacket)
 				dev.meshac.data.PlayerDataManager.onJoin(game.player);
-			OutboundDispatcher.onSend(game.player, packet);
+			if (!(packet instanceof net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket)
+					&& !(packet instanceof net.minecraft.network.protocol.game.ClientboundExplodePacket))
+				OutboundDispatcher.onSend(game.player, packet);
 		}
 	}
 }

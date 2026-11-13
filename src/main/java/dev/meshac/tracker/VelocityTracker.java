@@ -43,20 +43,20 @@ public class VelocityTracker {
 	}
 
 	/** Called by the outbound interceptor when an entity-velocity packet for this player is sent. */
-	public void handleVelocity(Vec3d velocity) {
+	public Runnable handleVelocity(Vec3d velocity) {
 		ConfirmationTracker confirmations = this.playerData.getConfirmationTracker();
 		confirmations.runAfterConfirmation(() -> queueEntityVelocity(velocity));
 		confirmations.runAfterNextConfirmation(this::discardAcknowledgedVelocity);
-		confirmVelocitySent();
+		return this::confirmVelocitySent;
 	}
 
 	/** Called by the outbound interceptor when an explosion packet carrying knockback is sent. */
-	public void handleExplosion(Vec3d knockback) {
-		if (knockback == null || (knockback.getX() == 0.0 && knockback.getY() == 0.0 && knockback.getZ() == 0.0)) return;
+	public Runnable handleExplosion(Vec3d knockback) {
+		if (knockback == null || (knockback.getX() == 0.0 && knockback.getY() == 0.0 && knockback.getZ() == 0.0)) return null;
 		ConfirmationTracker confirmations = this.playerData.getConfirmationTracker();
 		confirmations.runAfterConfirmation(() -> queueExplosionKnockback(knockback));
 		confirmations.runAfterNextConfirmation(this::discardAcknowledgedExplosion);
-		confirmExplosionSent();
+		return this::confirmExplosionSent;
 	}
 
 	public void processMovement(Flying packet) {
