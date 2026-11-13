@@ -95,11 +95,11 @@ public class ConnectionTracker {
 
 	private void kickForHighPing() {
 		ServerPlayer player = this.playerData.getPlayer();
-		if (player != null) player.connection.disconnect(dev.meshac.MeshText.parse(MeshSettings.connectionMaxPingKickMessage));
+		if (player != null) player.connection.disconnect(dev.meshac.util.TextUtil.parse(MeshSettings.connectionMaxPingKickMessage));
 	}
 
 	private void kickForKeepAliveTimeout() {
 		ServerPlayer player = this.playerData.getPlayer();
-		if (player != null) player.connection.disconnect(dev.meshac.MeshText.parse(MeshSettings.connectionKeepaliveKickMessage));
+		if (player != null) player.connection.disconnect(dev.meshac.util.TextUtil.parse(MeshSettings.connectionKeepaliveKickMessage));
 	}
 }

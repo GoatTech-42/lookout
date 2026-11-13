@@ -51,7 +51,7 @@ public final class CheckUtils {
 
 	public static void sendPingPacket(PlayerData playerData, int index) {
 		ServerPlayer player = playerData.getPlayer();
-		if (player != null) player.connection.send(new net.minecraft.network.protocol.game.ClientboundPingPacket(index));
+		if (player != null) player.connection.send(new net.minecraft.network.protocol.common.ClientboundPingPacket(index));
 	}
 
 	public static boolean isSwimming(PlayerData data) {
@@ -91,7 +91,7 @@ public final class CheckUtils {
 		return m != null && !m.isEmpty() && (BlockUtils.isBubbleColumn(m.get(16)) || BlockUtils.isBubbleColumn(m.get(19)));
 	}
 
-	public static double getYawDifference(ServerPlayer first, ServerPlayer second) {
+	public static double getYawDifference(net.minecraft.world.entity.player.Player first, net.minecraft.world.entity.player.Player second) {
 		return Math.abs(180.0F - Math.abs(first.getYRot() - second.getYRot()));
 	}
 
@@ -223,11 +223,20 @@ public final class CheckUtils {
 		return m != null && !m.isEmpty() && BlockUtils.isClimbable(m.get(16)) && BlockUtils.isClimbable(m.get(19));
 	}
 
+	/** Bukkit's configurable maximumNoDamageTicks has no native Fabric equivalent yet. */
+	public static java.util.OptionalInt maximumDamageWindowTicks(net.minecraft.world.entity.player.Player player) {
+		return java.util.OptionalInt.empty();
+	}
+
 	public static int getSpeedPotionLevel(LivingEntity entity) {
 		for (MobEffectInstance effect : entity.getActiveEffects()) {
-			if (effect.getEffect().is(MobEffects.MOVEMENT_SPEED.unwrapKey().orElseThrow())) return effect.getAmplifier() + 1;
+			if (effect.getEffect().is(MobEffects.SPEED.unwrapKey().orElseThrow())) return effect.getAmplifier() + 1;
 		}
 		return 0;
+	}
+
+	public static boolean isValidBlockPlacement(dev.meshac.event.MeshBlockPlaceEvent event) {
+		return isValidBlockPlacement(new PlacementContext(event.getPlayer(), event.getBlock().getType(), event.getBlock().getPos(), event.getBlockAgainst().getPos(), event.getBlock().getFace(event.getBlockAgainst())));
 	}
 
 	public static boolean isValidBlockPlacement(PlacementContext context) {
@@ -237,7 +246,7 @@ public final class CheckUtils {
 		if (BlockUtils.isSand(context.placed())) return false;
 		if (BlockUtils.isConcretePowder(context.placed())) return false;
 		if (BlockUtils.isGravel(context.placed())) return false;
-		PlayerData playerData = MeshServices.players().getPlayerData(context.player());
+		PlayerData playerData = MeshServices.players().get(context.player().getUUID());
 		if (playerData == null) return false;
 		BlockState material = ExemptionManager.isNewerThan1_13()
 				? playerData.getCollisionState().getSubGroundMaterial()
@@ -289,7 +298,7 @@ public final class CheckUtils {
 
 	public static void sendHotbarShuffle(ServerPlayer player) {
 		int index = ThreadLocalRandom.current().nextInt(8);
-		player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket(index));
+		player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket(index));
 	}
 
 	public static float getMaxSpeed(PlayerData playerData, float amount) {
@@ -305,7 +314,7 @@ public final class CheckUtils {
 		if (player == null) return;
 		float yaw = (float) ThreadLocalRandom.current().nextDouble(360.0) - 180.0f;
 		float pitch = (float) ThreadLocalRandom.current().nextDouble(180.0) - 90.0f;
-		MeshServices.mainThread(() -> player.connection.teleport(player.getX(), player.getY(), player.getZ(), yaw, pitch, java.util.Set.of(), false));
+		MeshServices.mainThread(() -> player.connection.teleport(player.getX(), player.getY(), player.getZ(), yaw, pitch));
 	}
 
 	public static boolean isWearingNetheriteArmor(PlayerData playerData) {

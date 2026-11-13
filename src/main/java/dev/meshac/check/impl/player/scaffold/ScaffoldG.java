@@ -1,7 +1,7 @@
 package dev.meshac.check.impl.player.scaffold;
 
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.CheckUtils;
 import dev.meshac.check.ExemptType;
 import dev.meshac.player.MotionState;
@@ -24,7 +24,7 @@ public class ScaffoldG extends AbstractCheck {
     public void update() {
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshBlockPlaceEvent blockPlaceEvent) {
             if (blockPlaceEvent.isCancelled() || BlockUtils.isSlab(blockPlaceEvent.getBlock().getType())) {
                 return;
@@ -42,7 +42,7 @@ public class ScaffoldG extends AbstractCheck {
                 RotationTracker rotationTracker = this.playerData.getRotationTracker();
                 float movementLookAngle = rotationTracker.getMovementLookAngle();
                 double deltaXZChange = this.playerData.getCollisionState().getDeltaXZChange();
-                boolean scaffolding = BlockUtils.isScaffolding(blockPlaceEvent.getBlock());
+                boolean scaffolding = BlockUtils.isScaffolding(blockPlaceEvent.getBlock().getType());
                 boolean condition = deltaXZChange < 0.001 && deltaXZChange > 0.0 && currentTimeMillisDifference < 300L && movementLookAngle < 2.0F;
                 if (condition && !scaffolding) {
                     if (this.increaseBuffer() > this.maximumBuffer) {

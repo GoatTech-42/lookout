@@ -157,4 +157,8 @@ public final class MathUtils {
 	public static int distinctCount(Collection<?> values) {
 		return (int) values.stream().distinct().count();
 	}
+
+    public static int pingCompensationTicks(dev.meshac.data.PlayerData player) {
+        return FastMath.floor(player.getConfirmationTracker().getTransactionPingMillis() / 50.0) + 3;
+    }
 }

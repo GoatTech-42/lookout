@@ -3,8 +3,8 @@ package dev.meshac.check.impl.combat.autoclicker.consistency;
 import dev.meshac.check.impl.combat.autoclicker.distribution.AutoClickerT;
 import dev.meshac.packet.MeshPacketEvent;
 import java.util.Collection;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.collection.EvictingList;
 import dev.meshac.player.ClickTimingData;
@@ -23,7 +23,7 @@ public class AutoClickerQ extends AbstractCheck {
     }
 
     public void handlePacket(MeshPacketEvent packetEvent) {
-        me.frep.vulcan.spigot.collection.list.EvictingList<Long> evictingList2;
+        dev.meshac.collection.EvictingList<Long> evictingList2;
         AbstractCheck[] abstractChecks;
         abstractChecks = AutoClickerT.getAbstractChecks();
         boolean armAnimationPacket = this.isArmAnimationPacket(packetEvent);

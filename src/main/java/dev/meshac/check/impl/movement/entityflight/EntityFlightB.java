@@ -1,20 +1,20 @@
 package dev.meshac.check.impl.movement.entityflight;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.MeshServices;
 import dev.meshac.player.CollisionState;
 import dev.meshac.data.PlayerData;
 import net.minecraft.world.entity.animal.camel.Camel;
-import net.minecraft.world.entity.animal.horse.Donkey;
+import net.minecraft.world.entity.animal.equine.Donkey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.horse.SkeletonHorse;
-import net.minecraft.world.entity.animal.horse.ZombieHorse;
+import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.animal.equine.SkeletonHorse;
+import net.minecraft.world.entity.animal.equine.ZombieHorse;
 import dev.meshac.event.MeshEvent;
 import dev.meshac.event.MeshMoveEvent;
 import net.minecraft.world.effect.MobEffects;
@@ -35,14 +35,14 @@ public class EntityFlightB extends AbstractCheck {
         }
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshMoveEvent) {
             this.checkVehicleMovement();
         }
     }
 
     private void checkVehicleMovement() {
-        if ((!ExemptionManager.isBefore1_9()) && (this.playerData.getPlayer() != null) && (!this.playerData.getPlayer().isDead())) {
+        if ((!ExemptionManager.isBefore1_9()) && (this.playerData.getPlayer() != null) && (!this.playerData.getPlayer().isDeadOrDying())) {
             CollisionState collisionState = this.playerData.getCollisionState();
             if (collisionState.getVehicleY() < 0.0) {
                 return;
@@ -77,7 +77,7 @@ public class EntityFlightB extends AbstractCheck {
                     return;
                 }
             }
-            if (entity2.isLeashed()) {
+            if (entity2 instanceof net.minecraft.world.entity.Leashable leashable && leashable.isLeashed()) {
                 return;
             }
             CollisionState collisionState2 = this.playerData.getCollisionState();

@@ -43,7 +43,7 @@ public final class OutboundDispatcher {
 		if (data == null) return;
 
 		if (packet instanceof ClientboundLoginPacket login) {
-			data.setEntityId(login.entityId());
+			data.setEntityId(login.playerId());
 			return;
 		}
 		if (packet instanceof ClientboundPingPacket ping) {
@@ -56,8 +56,8 @@ public final class OutboundDispatcher {
 			return;
 		}
 		if (packet instanceof ClientboundSetEntityMotionPacket motion) {
-			if (motion.getId() == data.getEntityId())
-				data.getVelocityTracker().handleVelocity(new Vec3d(motion.getXa(), motion.getYa(), motion.getZa()));
+			if (motion.id() == data.getEntityId())
+				data.getVelocityTracker().handleVelocity(new Vec3d(motion.movement().x, motion.movement().y, motion.movement().z));
 			return;
 		}
 		if (packet instanceof ClientboundUpdateAttributesPacket attributes) {
@@ -71,8 +71,8 @@ public final class OutboundDispatcher {
 			return;
 		}
 		if (packet instanceof ClientboundRemoveMobEffectPacket removed) {
-			if (removed.getEntityId() == data.getEntityId())
-				data.getMotionState().handleRemovedPotionEffect(removed.getEffect());
+			if (removed.entityId() == data.getEntityId())
+				data.getMotionState().handleRemovedPotionEffect(removed.effect());
 			return;
 		}
 		if (packet instanceof ClientboundPlayerPositionPacket position) {
@@ -94,32 +94,46 @@ public final class OutboundDispatcher {
 			return;
 		}
 		if (packet instanceof ClientboundGameEventPacket gameEvent) {
-			data.getMotionState().handleGameState(gameEvent.getEvent(), gameEvent.getParam());
+			if (gameEvent.getEvent() == ClientboundGameEventPacket.CHANGE_GAME_MODE) data.getMotionState().handleGameState((byte) 3, gameEvent.getParam());
+			else if (gameEvent.getEvent() == ClientboundGameEventPacket.START_RAINING) data.getMotionState().handleGameState((byte) 1, gameEvent.getParam());
+			else if (gameEvent.getEvent() == ClientboundGameEventPacket.STOP_RAINING) data.getMotionState().handleGameState((byte) 2, gameEvent.getParam());
 			return;
 		}
-		if (packet instanceof ClientboundMoveEntityPacket.Pos posMove) {
-			routeEntityMove(player, data, posMove);
-			return;
-		}
-		if (packet instanceof ClientboundMoveEntityPacket.PosRot posRot) {
-			routeEntityMove(player, data, posRot);
-			return;
-		}
-		if (packet instanceof ClientboundMoveEntityPacket.Rot rot) {
-			int id = entityId(player, rot);
-			if (id >= 0) data.getEntityTracker().handleRotation(id, rot.getyRot(), rot.getxRot());
+		if (packet instanceof ClientboundMoveEntityPacket move) {
+			dev.meshac.mixin.ClientboundMoveEntityPacketAccessor acc = (dev.meshac.mixin.ClientboundMoveEntityPacketAccessor) move;
+			int moveId = acc.meshac$getEntityId();
+			dev.meshac.tracker.TrackedEntity tracked = data.getEntityTracker().getTrackedEntity(moveId);
+			if (tracked == null) return;
+			// VERIFY(26.3): relative-move packets now carry an opaque VecDelta; decode against
+			// the tracked base position like the vanilla client's per-entity codec does.
+			net.minecraft.network.protocol.game.VecDeltaCodec codec = new net.minecraft.network.protocol.game.VecDeltaCodec();
+			net.minecraft.world.phys.Vec3 base = new net.minecraft.world.phys.Vec3(tracked.getX(), tracked.getY(), tracked.getZ());
+			codec.setBase(base);
+			net.minecraft.world.phys.Vec3 end = acc.meshac$hasPos() ? acc.meshac$getDelta().decode(codec).endPosition() : base;
+			double dx = end.x - base.x, dy = end.y - base.y, dz = end.z - base.z;
+			if (acc.meshac$hasRot()) {
+				float yaw = acc.meshac$getYRot() * 360.0f / 256.0f;
+				float pitch = acc.meshac$getXRot() * 360.0f / 256.0f;
+				data.getEntityTracker().handleRelativeMoveAndRotation(moveId, dx, dy, dz, yaw, pitch);
+				data.getRelativeMoveTracker().handleTargetMove(moveId, dx, dy, dz);
+			} else if (acc.meshac$hasPos()) {
+				data.getEntityTracker().handleRelativeMove(moveId, dx, dy, dz);
+				data.getRelativeMoveTracker().handleTargetMove(moveId, dx, dy, dz);
+			} else if (acc.meshac$hasRot() == false && acc.meshac$hasPos() == false) {
+				// rotation-only variant
+			}
 			return;
 		}
 		if (packet instanceof ClientboundTeleportEntityPacket teleport) {
-			data.getEntityTracker().handleTeleport(teleport.id(), teleport.x(), teleport.y(), teleport.z(), teleport.yRot(), teleport.xRot());
+			data.getEntityTracker().handleTeleport(teleport.id(), teleport.change().position().x, teleport.change().position().y, teleport.change().position().z, teleport.change().yRot(), teleport.change().xRot());
 			return;
 		}
 		if (packet instanceof ClientboundAddEntityPacket spawn) {
-			data.getEntityTracker().handleSpawn(spawn.id(), spawn.getUUID(), spawn.getType(), spawn.getX(), spawn.getY(), spawn.getZ());
+			data.getEntityTracker().handleSpawn(spawn.getId(), spawn.getUUID(), spawn.getType(), spawn.getX(), spawn.getY(), spawn.getZ());
 			return;
 		}
 		if (packet instanceof ClientboundRemoveEntitiesPacket removed) {
-			data.getEntityTracker().handleDestroy(removed.getEntityIds().toIntArray());
+			data.getEntityTracker().handleDestroy(removed.entityIds().toIntArray());
 			return;
 		}
 		if (packet instanceof ClientboundSetPassengersPacket passengers) {
@@ -128,24 +142,4 @@ public final class OutboundDispatcher {
 		// All other server packet types do not change tracked state here.
 	}
 
-	private static void routeEntityMove(ServerPlayer player, PlayerData data, ClientboundMoveEntityPacket packet) {
-		int id = entityId(player, packet);
-		if (id < 0) return;
-		if (packet instanceof ClientboundMoveEntityPacket.PosRot posRot) {
-			data.getEntityTracker().handleRelativeMoveAndRotation(id, posRot.getXa() / 4096.0, posRot.getYa() / 4096.0, posRot.getZa() / 4096.0, posRot.getyRot(), posRot.getxRot());
-			data.getRelativeMoveTracker().handleTargetMove(id, posRot.getXa() / 4096.0, posRot.getYa() / 4096.0, posRot.getZa() / 4096.0);
-		} else if (packet instanceof ClientboundMoveEntityPacket.Pos pos) {
-			data.getEntityTracker().handleRelativeMove(id, pos.getXa() / 4096.0, pos.getYa() / 4096.0, pos.getZa() / 4096.0);
-			data.getRelativeMoveTracker().handleTargetMove(id, pos.getXa() / 4096.0, pos.getYa() / 4096.0, pos.getZa() / 4096.0);
-		}
-	}
-
-	private static int entityId(ServerPlayer player, ClientboundMoveEntityPacket packet) {
-		try {
-			net.minecraft.world.entity.Entity entity = packet.getEntity(player.level());
-			return entity != null ? entity.getId() : -1;
-		} catch (Throwable t) {
-			return -1;
-		}
-	}
 }

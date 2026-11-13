@@ -2,8 +2,8 @@ package dev.meshac.check.impl.combat.killaura;
 
 import dev.meshac.packet.MeshPacketEvent;
 import dev.meshac.config.MeshVersion;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.CheckUtils;
 import dev.meshac.check.ExemptType;
 import dev.meshac.player.ClickTimingData;
@@ -11,6 +11,7 @@ import dev.meshac.player.CollisionState;
 import dev.meshac.player.MotionState;
 import dev.meshac.data.PlayerData;
 import dev.meshac.tracker.RelativeMoveTracker;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 
 @CheckInfo(name = "Kill Aura", type = 'L', complexType = "Strafe", experimental = true, description = "Impossible strafe.")
@@ -44,11 +45,14 @@ public class KillAuraL extends AbstractCheck {
             boolean condition3;
             boolean olderThan;
             condition3 = condition2;
-            olderThan = this.playerData.getUser().getClientVersion().isOlderThan(MeshVersion.V_1_9);
-            if (this.playerData.getPlayer().getMaximumNoDamageTicks() >= 18) {
+            olderThan = this.playerData.getClientVersion().isOlderThan(MeshVersion.V_1_9);
+            java.util.OptionalInt ownDamageWindow = CheckUtils.maximumDamageWindowTicks(this.playerData.getPlayer());
+            java.util.OptionalInt targetDamageWindow = condition3 ? CheckUtils.maximumDamageWindowTicks((Player) this.playerData.getRelativeMoveTracker().getLastAttackedEntity()) : java.util.OptionalInt.empty();
+            if (ownDamageWindow.isEmpty() || (condition3 && targetDamageWindow.isEmpty())) return;
+            if (ownDamageWindow.getAsInt() >= 18) {
                 if (condition3) {
                     RelativeMoveTracker relativeMoveTracker3 = this.playerData.getRelativeMoveTracker();
-                    if (((Player) relativeMoveTracker3.getLastAttackedEntity()).getMaximumNoDamageTicks() < 18) {
+                    if (targetDamageWindow.getAsInt() < 18) {
                         condition = true;
                     } else {
                         condition = false;

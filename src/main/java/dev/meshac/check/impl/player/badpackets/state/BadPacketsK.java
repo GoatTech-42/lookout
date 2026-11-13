@@ -3,8 +3,8 @@ package dev.meshac.check.impl.player.badpackets.state;
 import dev.meshac.packet.MeshPacketEvent;
 import dev.meshac.packet.EntityAction;
 import dev.meshac.packet.EntityAction.Action;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.data.PlayerData;
 

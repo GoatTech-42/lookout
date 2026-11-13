@@ -7,14 +7,20 @@ package dev.meshac.packet;
  */
 public enum MeshPacketType {
 	// serverbound
-	FLYING, // any ServerboundMovePlayerPacket variant (position/rotation/onGround only)
+	FLYING,
+	PLAYER_FLYING, // upstream alias of FLYING // any ServerboundMovePlayerPacket variant (position/rotation/onGround only)
 	POSITION,
+	PLAYER_POSITION, // upstream alias of POSITION
 	POSITION_ROTATION,
+	PLAYER_POSITION_AND_ROTATION, // upstream alias
+	PLAYER_POSITION_AND_LOOK, // legacy upstream alias
 	ROTATION,
+	PLAYER_ROTATION, // upstream alias of ROTATION
 	GROUND_ONLY, // onGround-only flying variant
 	VEHICLE_MOVE,
 	STEER_VEHICLE,
 	INTERACT_ENTITY,
+	ATTACK, // interact-entity with attack action
 	ENTITY_ACTION,
 	PLAYER_DIGGING,
 	PLAYER_BLOCK_PLACEMENT,

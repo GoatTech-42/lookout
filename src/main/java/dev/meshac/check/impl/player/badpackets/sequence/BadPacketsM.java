@@ -1,8 +1,8 @@
 package dev.meshac.check.impl.player.badpackets.sequence;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.player.MotionState;
@@ -29,8 +29,8 @@ public class BadPacketsM extends AbstractCheck {
             }
             MotionState motionState = this.playerData.getMotionState();
             if (motionState.getTicksSinceBucketUse() >= 50) {
-                if (!this.playerData.getPlayer().getItemInHand().getType().toString().contains("BUCKET")) {
-                    if ((ExemptionManager.isAtLeast1_9()) && (this.playerData.getPlayer().getInventory().getItemInOffHand().getType().toString().contains("BUCKET"))) {
+                if (!net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(this.playerData.getPlayer().getMainHandItem().getItem()).getPath().toUpperCase(java.util.Locale.ROOT).contains("BUCKET")) {
+                    if ((ExemptionManager.isAtLeast1_9()) && (net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(this.playerData.getPlayer().getOffhandItem().getItem()).getPath().toUpperCase(java.util.Locale.ROOT).contains("BUCKET"))) {
                         condition = true;
                     } else {
                         condition = false;

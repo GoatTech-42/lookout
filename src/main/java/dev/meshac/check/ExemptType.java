@@ -8,7 +8,6 @@ import dev.meshac.player.ClickTimingData;
 import dev.meshac.player.CollisionState;
 import dev.meshac.player.MotionState;
 import dev.meshac.player.PlayerToggles;
-import dev.meshac.tick.TickProcessor;
 import dev.meshac.tracker.ConnectionTracker;
 import dev.meshac.tracker.RelativeMoveTracker;
 import dev.meshac.tracker.VelocityTracker;
@@ -256,7 +255,7 @@ public enum ExemptType {
 
 	private static Boolean matchesComboMode(PlayerData playerData) {
 		return playerData.getMotionState().getTicksSinceAttackDamage() < 25
-				&& playerData.getPlayer() != null && playerData.getMaximumNoDamageTicks() < 15;
+				&& playerData.getPlayer() != null && CheckUtils.maximumDamageWindowTicks(playerData.getPlayer()).orElse(0) < 15;
 	}
 
 	private static Boolean matchesFlight(PlayerData playerData) {
@@ -294,9 +293,9 @@ public enum ExemptType {
 				&& playerData.getMotionState().getTicksSinceBottleUse() >= 15
 				&& System.currentTimeMillis() - playerData.getMotionState().getDigCancelledAtMillis() >= 110L
 				&& System.currentTimeMillis() - playerData.getMotionState().getDigFinishedAtMillis() >= 110L
-				&& MeshServices.ticks().getTotalTicks() >= 20
-				&& MeshServices.ticks().getTotalTicks() - playerData.getMotionState().getLastProjectileLaunchTick() >= 20
-				&& MeshServices.ticks().getTotalTicks() - playerData.getRelativeMoveTracker().getLastItemFrameInteractTick() >= 20) {
+				&& MeshServices.ticks() >= 20
+				&& MeshServices.ticks() - playerData.getMotionState().getLastProjectileLaunchTick() >= 20
+				&& MeshServices.ticks() - playerData.getRelativeMoveTracker().getLastItemFrameInteractTick() >= 20) {
 			return playerData.getMotionState().getDistanceFromDiggedBlock() < 6.5
 					&& playerData.getMotionState().getDistanceFromDiggedBlock() > 0.0;
 		}
@@ -307,8 +306,8 @@ public enum ExemptType {
 		PlayerToggles toggles = playerData.getPlayerToggles();
 		if (!toggles.isAnyExempt(PLACING, DIGGING, BLOCK_BREAK, FAST, DROPPED_ITEM, WINDOW_CLICK, CANCELLED_BREAK, CREATIVE)
 				&& playerData.getMotionState().getTicksSinceBottleUse() >= 15
-				&& MeshServices.ticks().getTotalTicks() - playerData.getRelativeMoveTracker().getLastItemFrameInteractTick() >= 20
-				&& MeshServices.ticks().getTotalTicks() - playerData.getMotionState().getLastProjectileLaunchTick() >= 20) {
+				&& MeshServices.ticks() - playerData.getRelativeMoveTracker().getLastItemFrameInteractTick() >= 20
+				&& MeshServices.ticks() - playerData.getMotionState().getLastProjectileLaunchTick() >= 20) {
 			return false;
 		}
 		return true;
@@ -324,15 +323,15 @@ public enum ExemptType {
 	}
 
 	private static Boolean matchesCancelledBreak(PlayerData playerData) {
-		return MeshServices.ticks().getTotalTicks() - playerData.getMotionState().getLastCancelledBreakTick() < 40;
+		return MeshServices.ticks() - playerData.getMotionState().getLastCancelledBreakTick() < 40;
 	}
 
 	private static Boolean matchesDroppedItem(PlayerData playerData) {
-		return MeshServices.ticks().getTotalTicks() - playerData.getMotionState().getLastDroppedItemTick() < 15;
+		return MeshServices.ticks() - playerData.getMotionState().getLastDroppedItemTick() < 15;
 	}
 
 	private static Boolean matchesWindowClick(PlayerData playerData) {
-		return MeshServices.ticks().getTotalTicks() - playerData.getMotionState().getLastWindowClickTick() < 15;
+		return MeshServices.ticks() - playerData.getMotionState().getLastWindowClickTick() < 15;
 	}
 
 	private static Boolean matchesLenientScaffolding(PlayerData playerData) {
@@ -466,8 +465,8 @@ public enum ExemptType {
 	private static Boolean matchesDigging(PlayerData playerData) {
 		MotionState m = playerData.getMotionState();
 		return m.isDigging()
-				|| MeshServices.ticks().getTotalTicks() - m.getLastAbortDigTick() < 20
-				|| MeshServices.ticks().getTotalTicks() - m.getLastDigTick() < 20;
+				|| MeshServices.ticks() - m.getLastAbortDigTick() < 20
+				|| MeshServices.ticks() - m.getLastDigTick() < 20;
 	}
 
 	private static Boolean matchesFrozen(PlayerData playerData) {
@@ -524,9 +523,9 @@ public enum ExemptType {
 
 	private static Boolean matchesSleeping(PlayerData playerData) {
 		if (playerData.getPlayer() != null && playerData.getPlayer().isSleeping()) return true;
-		TickProcessor ticks = MeshServices.ticks();
-		return ticks.getTotalTicks() - playerData.getMotionState().getLastBedEnterTick() < 40
-				|| ticks.getTotalTicks() - playerData.getMotionState().getLastBedLeaveTick() < 40;
+		int ticks = MeshServices.ticks();
+		return ticks - playerData.getMotionState().getLastBedEnterTick() < 40
+				|| ticks - playerData.getMotionState().getLastBedLeaveTick() < 40;
 	}
 
 	private static Boolean matchesNearGround(PlayerData playerData) {
@@ -586,7 +585,7 @@ public enum ExemptType {
 	}
 
 	private static Boolean matchesRespawn(PlayerData playerData) {
-		return MeshServices.ticks().getTotalTicks() - playerData.getMotionState().getLastRespawnTick() < 20;
+		return MeshServices.ticks() - playerData.getMotionState().getLastRespawnTick() < 20;
 	}
 
 	private static Boolean matchesFullySubmerged(PlayerData playerData) {
@@ -605,7 +604,7 @@ public enum ExemptType {
 	}
 
 	private static Boolean matchesPickedUpItem(PlayerData playerData) {
-		return MeshServices.ticks().getTotalTicks() - playerData.getMotionState().getLastItemPickupTick() < 30;
+		return MeshServices.ticks() - playerData.getMotionState().getLastItemPickupTick() < 30;
 	}
 
 	private static Boolean matchesDoor(PlayerData playerData) {

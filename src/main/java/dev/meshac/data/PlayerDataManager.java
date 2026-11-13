@@ -22,7 +22,7 @@ public final class PlayerDataManager {
 		dev.meshac.veil.Veil.forgetPlayer(player);
 	}
 
-	public static PlayerData get(ServerPlayer player) {
-		return MeshServices.players().get(player.getUUID());
+	public static PlayerData get(net.minecraft.world.entity.player.Player player) {
+		return player == null ? null : MeshServices.players().get(player.getUUID());
 	}
 }

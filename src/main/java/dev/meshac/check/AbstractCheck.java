@@ -239,7 +239,7 @@ public abstract class AbstractCheck {
 	}
 
 	public boolean isArmAnimationPacket(MeshPacketEvent event) {
-		return event.isClient(MeshPacketType.ANIMATION) || event.isClient(MeshPacketType.PUNCH);
+		return event.isClient(MeshPacketType.ANIMATION) || event.isClient(MeshPacketType.ANIMATION);
 	}
 
 	public boolean isVehicleMovePacket(MeshPacketEvent event) {

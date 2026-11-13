@@ -44,6 +44,16 @@ public final class MeshPacketEvent {
 		return serverbound;
 	}
 
+	/** Upstream packetevents-style predicate: serverbound (client -> server) and of this type. */
+	public boolean isClient(MeshPacketType t) {
+		return serverbound && type == t;
+	}
+
+	/** Clientbound (server -> client) and of this type. */
+	public boolean isServer(MeshPacketType t) {
+		return !serverbound && type == t;
+	}
+
 	public long getTimestampNanos() {
 		return timestampNanos;
 	}

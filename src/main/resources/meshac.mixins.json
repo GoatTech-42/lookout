@@ -10,7 +10,8 @@
 		"ServerLevelVeilMixin",
 		"ChunkDataMixin",
 		"ChunkMapMixin",
-		"TrackedEntityMixin"
+		"TrackedEntityMixin",
+		"ClientboundMoveEntityPacketAccessor"
 	],
 	"injectors": { "defaultRequire": 1 }
 }

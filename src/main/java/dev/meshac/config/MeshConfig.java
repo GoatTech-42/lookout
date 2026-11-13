@@ -35,7 +35,7 @@ public final class MeshConfig {
 				throw new UncheckedIOException("cannot read " + override, e);
 			}
 		}
-		// unescape \u and \n sequences written by the flattener
+		// unescape unicode and newline sequences written by the flattener
 		Properties decoded = new Properties();
 		for (String name : values.stringPropertyNames()) {
 			decoded.setProperty(name, decode(values.getProperty(name)));

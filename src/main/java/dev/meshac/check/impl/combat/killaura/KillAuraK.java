@@ -2,12 +2,11 @@ package dev.meshac.check.impl.combat.killaura;
 
 import dev.meshac.packet.MeshPacketEvent;
 import dev.meshac.packet.InteractEntity;
-import dev.meshac.packet.InteractEntity.Action;
 import com.google.common.collect.Lists;
 import java.util.Collections;
 import java.util.List;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.data.PlayerData;
 

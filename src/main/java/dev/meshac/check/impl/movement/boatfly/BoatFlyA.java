@@ -1,15 +1,15 @@
 package dev.meshac.check.impl.movement.boatfly;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.config.MeshSettings;
 import dev.meshac.MeshServices;
 import dev.meshac.MeshServices;
 import dev.meshac.player.CollisionState;
 import dev.meshac.data.PlayerData;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import dev.meshac.event.MeshEvent;
 import dev.meshac.event.MeshMoveEvent;
 
@@ -29,7 +29,7 @@ public class BoatFlyA extends AbstractCheck {
         }
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshMoveEvent) {
             this.checkVehicleMovement();
         }
@@ -57,7 +57,7 @@ public class BoatFlyA extends AbstractCheck {
             if (this.playerData.getCollisionState().hasLivingEntityNearby()) {
                 return;
             }
-            if (ExemptionManager.isNewerThan1_13() && !vehicle.hasGravity()) {
+            if (ExemptionManager.isNewerThan1_13() && !vehicle.isNoGravity()) {
                 return;
             }
             if (dev.meshac.MeshServices.hookedBoatTicks().containsKey(vehicle.getId())) {
@@ -79,6 +79,6 @@ public class BoatFlyA extends AbstractCheck {
     }
 
     private void ejectPlayer() {
-        this.playerData.getPlayer().leaveVehicle();
+        this.playerData.getPlayer().stopRiding();
     }
 }

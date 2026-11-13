@@ -82,3 +82,52 @@ question to be resolved per check family before any faithful claim. Relabeled in
 - chunkveil + anti-ESP ported WHOLESALE from Luke's original meshac (veil/ package + 4 mixins), wired: Veil.tick in server tick, grace on join, forgetPlayer on quit, attacked on ATTACK interact. Config wiring to MeshSettings TODO (currently Veil defaults: xray on, esp on, cullMobs on, fakeRatio 0.02).
 - ServerLevel authoritative feed = NON-PARITY (open question, per parent 09:49). Event cancellation: no protection-plugin equivalent, isCancelled always false.
 - STILL MISSING for runnable slice: compile route (awaiting Luke's repo decision), CollisionState hand-verify, ContextGate qualification tests, tests themselves.
+
+## 2026-11-13 10:21 - first Java 25 build passes
+
+Evidence: `docs/build-evidence/2026-11-13-{compile,build}.log`. `compileJava`
+and full `build` passed. No remapping task exists in this unobfuscated 26.3
+Loom build, so this is type-check/package evidence, not a claimed remap test.
+Gradle reports `test NO-SOURCE`. No runtime qualification, no deployment.
+
+Port differences requiring behavioral qualification:
+- 26.3 attack is a separate ServerboundAttackPacket. Both attack and interaction
+  route through the existing INTERACT_ENTITY canonical event. Audit helper
+  `isAttackPacket`: some check consumers may assume it means attack only.
+- Sneak is absent from ServerboundPlayerCommandPacket. Input-packet sneak edge
+  feeding is still missing; dependent checks must be gated until implemented.
+- New dig actions CHANGE_DESTROY_DIRECTION and STAB retain distinct wrapper
+  values. They are not silently mapped onto existing dig/use actions.
+- Server relative entity motion now uses VecDelta decoded with a tracked base.
+  This needs comparison with the vanilla client's codec lifecycle, rotation-only
+  behavior and relative teleport flags. Runtime parity NOT established.
+- EntityType constants moved to EntityTypes; boat registry-name matching must
+  also cover rafts/chest variants. Current suffix match needs qualification.
+- MobEffects renamed SPEED/SLOWNESS/JUMP_BOOST; permission level 2 is now the
+  COMMANDS_GAMEMASTER native permission. Coarse permissions remain NON-PARITY.
+- Bukkit's configurable maximumNoDamageTicks has no verified native equivalent.
+  KillAuraL is suppressed by ContextGate and locally returns on absent data.
+  COMBO_MODE treats unknown damage-window data as exempt. Do not substitute the
+  current cooldown or an assumed 20-tick maximum. No impl currently names COMBO_MODE.
+- MeshBlock.getFace returns null for self/nonadjacent, replacing Direction.SELF.
+  Direction is currently computed from this minus other; audit Bukkit direction
+  orientation before qualifying placement checks. Reference-equality block
+  comparisons in upstream-transformed checks also need semantic review.
+- Block registry-name matching for BED and metadata-dependent PROCOSMETICS
+  exclusions were changed during porting. Their full effects remain unqualified.
+- Punch singleton maps to canonical ANIMATION. Distinct attack packet is not
+  normalized to animation; test both event streams.
+- The unreachable legacy position/look packet branch was removed. The active
+  native teleport path remains, but is NOT approved for log-only testing.
+- Player weather currently uses ServerLevel rain, not per-player packet state.
+  This is NON-PARITY until the consumer is qualified.
+
+Safety blocker before any server rig launch: HeatLadder alone is log-only.
+Direct and scheduled kick, teleport, rotation, held-slot and vehicle-ejection
+paths remain elsewhere. Audit every direct/transitive effect and scheduled
+callback, add central containment, then prove containment with tests.
+
+Outstanding: CollisionState hand-verification; dependency metadata regeneration
+and packaged/no-source/indirect dependency qualification; product layer;
+client-version resolver; client-acknowledged world cache; runtime tests; veil
+config wiring/testing. A successful jar is not a usable release yet.

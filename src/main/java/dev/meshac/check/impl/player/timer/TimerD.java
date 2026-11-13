@@ -2,8 +2,8 @@ package dev.meshac.check.impl.player.timer;
 
 import dev.meshac.packet.MeshPacketEvent;
 import dev.meshac.config.MeshVersion;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.config.MeshSettings;
@@ -45,7 +45,7 @@ public class TimerD extends AbstractCheck {
                             this.balanceMillis = -200L;
                         }
                     }
-                    if (this.playerData.getUser().getClientVersion().isNewerThanOrEquals(MeshVersion.V_1_9)) {
+                    if (this.playerData.getClientVersion().isNewerThanOrEquals(MeshVersion.V_1_9)) {
                         if (this.movementsSinceBalanceReset % 400 == 0) {
                             this.balanceMillis = -200L;
                             this.movementsSinceBalanceReset = 0;

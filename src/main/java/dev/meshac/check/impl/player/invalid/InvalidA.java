@@ -1,8 +1,8 @@
 package dev.meshac.check.impl.player.invalid;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.data.PlayerData;
 
 @CheckInfo(name = "Invalid", type = 'A', complexType = "Invalid", description = "Possible transaction disabler. Do not ban for this check.")
@@ -18,7 +18,7 @@ public class InvalidA extends AbstractCheck {
     public void handlePacket(MeshPacketEvent event) {
         if (!isPositionUpdatePacket(event))
             return;
-        if (playerData.getPlayer() != null && playerData.getCollisionState().isFlightAllowed() && !playerData.getPlayer().getAllowFlight()) {
+        if (playerData.getPlayer() != null && playerData.getCollisionState().isFlightAllowed() && !playerData.getPlayer().getAbilities().mayfly) {
             serverFlightMismatchTicks++;
         } else {
             serverFlightMismatchTicks = 0;

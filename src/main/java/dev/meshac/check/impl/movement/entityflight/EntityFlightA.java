@@ -1,8 +1,8 @@
 package dev.meshac.check.impl.movement.entityflight;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.config.MeshSettings;
 import dev.meshac.MeshServices;
@@ -10,13 +10,13 @@ import dev.meshac.MeshServices;
 import dev.meshac.player.CollisionState;
 import dev.meshac.data.PlayerData;
 import net.minecraft.world.entity.animal.camel.Camel;
-import net.minecraft.world.entity.animal.horse.Donkey;
+import net.minecraft.world.entity.animal.equine.Donkey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.horse.SkeletonHorse;
-import net.minecraft.world.entity.animal.horse.ZombieHorse;
+import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.animal.equine.SkeletonHorse;
+import net.minecraft.world.entity.animal.equine.ZombieHorse;
 import dev.meshac.event.MeshEvent;
 import dev.meshac.event.MeshMoveEvent;
 import net.minecraft.world.effect.MobEffects;
@@ -37,7 +37,7 @@ public class EntityFlightA extends AbstractCheck {
         }
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshMoveEvent) {
             this.checkVehicleMovement();
         }
@@ -71,7 +71,7 @@ public class EntityFlightA extends AbstractCheck {
                 text = "Camel";
             }
             LivingEntity entity2 = (LivingEntity) entity;
-            if (entity2.isLeashed()) {
+            if (entity2 instanceof net.minecraft.world.entity.Leashable leashable && leashable.isLeashed()) {
                 return;
             }
             if (ExemptionManager.isNewerThan1_13()) {
@@ -107,6 +107,6 @@ public class EntityFlightA extends AbstractCheck {
     }
 
     private void ejectPlayer() {
-        this.playerData.getPlayer().leaveVehicle();
+        this.playerData.getPlayer().stopRiding();
     }
 }

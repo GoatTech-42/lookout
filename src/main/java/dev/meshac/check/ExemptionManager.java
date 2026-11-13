@@ -35,8 +35,14 @@ public final class ExemptionManager {
 		MeshServices.log(message);
 	}
 
+	public static void debug(Object value) {
+		if (dev.meshac.config.MeshSettings.settingsDebug) {
+			broadcast("&c[!] &7" + value);
+		}
+	}
+
 	public static void broadcast(String message) {
-		MeshServices.broadcast(message);
+		MeshServices.broadcastToOps(dev.meshac.util.TextUtil.parse(message));
 	}
 
 	public static boolean isNewerThan1_7_10() { return serverVersion.isNewerThan(MeshVersion.V_1_7_10); }

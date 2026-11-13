@@ -2,8 +2,8 @@ package dev.meshac.check.impl.movement.jump;
 
 import dev.meshac.packet.MeshPacketEvent;
 import dev.meshac.config.MeshVersion;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.player.CollisionState;
@@ -22,7 +22,7 @@ public class JumpB extends AbstractCheck {
         if (this.isPositionUpdatePacket(packetEvent)) {
             CollisionState collisionState = this.playerData.getCollisionState();
             double deltaY = collisionState.getDeltaY();
-            this.playerData.getUser().getClientVersion().isNewerThanOrEquals(MeshVersion.V_1_9);
+            this.playerData.getClientVersion().isNewerThanOrEquals(MeshVersion.V_1_9);
             this.isExempt(new ExemptType[] { ExemptType.JOINED, ExemptType.TELEPORT, ExemptType.RIPTIDE, ExemptType.VEHICLE, ExemptType.HONEY, ExemptType.GLIDING, ExemptType.LEVITATION, ExemptType.SLAB, ExemptType.FLIGHT, ExemptType.JUMP_BOOST_RAN_OUT, ExemptType.BOAT, ExemptType.BUBBLE_COLUMN, ExemptType.WALL, ExemptType.CREATIVE, ExemptType.SHULKER_BOX, ExemptType.ANVIL, ExemptType.SLIME, ExemptType.PISTON, ExemptType.TURTLE_EGG, ExemptType.DOOR, ExemptType.DEATH, ExemptType.ENDER_PEARL, ExemptType.PLACED_SLIME, ExemptType.CHORUS_FRUIT, ExemptType.MYTHIC_MOB, ExemptType.BLOCK_BREAK, ExemptType.FISHING_ROD, ExemptType.SLEEPING, ExemptType.SHULKER });
             if (ExemptionManager.isAtLeast1_9()) {
                 MotionState motionState = this.playerData.getMotionState();

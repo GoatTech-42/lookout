@@ -36,6 +36,10 @@ public final class ContextGate {
 	 * unavailable contexts and is gated.
 	 */
 	public static boolean isGated(String checkSimpleName, PlayerData data) {
+		if (checkSimpleName.equals("KillAuraL")) {
+			logOnce(checkSimpleName, "maximum damage window dependency unavailable");
+			return true;
+		}
 		if (!CheckDependencies.KNOWN.contains(checkSimpleName)) {
 			logOnce(checkSimpleName, "no dependency metadata (fail-closed)");
 			return true;
@@ -59,6 +63,7 @@ public final class ContextGate {
 
 	/** Visible status for parity reporting. */
 	public static String statusLine(String checkSimpleName, PlayerData data) {
+		if (checkSimpleName.equals("KillAuraL")) return checkSimpleName + ": UNSUPPORTED (maximum damage window)";
 		if (!CheckDependencies.KNOWN.contains(checkSimpleName)) return checkSimpleName + ": UNSUPPORTED (no metadata)";
 		if (CheckDependencies.NEEDS_WORLD_CACHE.contains(checkSimpleName) && !worldCacheAvailable())
 			return checkSimpleName + ": UNSUPPORTED (world cache)";

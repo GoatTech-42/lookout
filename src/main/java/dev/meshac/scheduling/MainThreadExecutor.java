@@ -2,9 +2,10 @@ package dev.meshac.scheduling;
 
 import java.util.Objects;
 import dev.meshac.MeshServices;
+import net.minecraft.server.MinecraftServer;
 
 /**
- * Dispatches Bukkit work to the active server scheduler.
+ * Dispatches work to the server main thread.
  */
 public final class MainThreadExecutor {
 
@@ -12,10 +13,10 @@ public final class MainThreadExecutor {
     }
 
     public static void execute(Runnable task) {
-        Scheduler scheduler = MeshServices.getScheduler();
-        if (scheduler == null) {
-            throw new IllegalStateException("Vulcan scheduler has not been initialized");
+        MinecraftServer server = MeshServices.server();
+        if (server == null) {
+            throw new IllegalStateException("Meshac server has not been initialized");
         }
-        scheduler.runTask(Objects.requireNonNull(task, "task"));
+        server.execute(Objects.requireNonNull(task, "task"));
     }
 }

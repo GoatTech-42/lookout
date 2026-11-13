@@ -26,6 +26,8 @@ public class Location {
 	}
 
 	public ServerLevel getWorld() { return world; }
+	public int getBlockX() { return (int) Math.floor(x); }
+	public int getBlockZ() { return (int) Math.floor(z); }
 	public double getX() { return x; }
 	public double getY() { return y; }
 	public double getZ() { return z; }
@@ -55,7 +57,7 @@ public class Location {
 		return new Vector(x, y, z);
 	}
 
-	public net.minecraft.core.BlockPos getBlock() {
-		return new net.minecraft.core.BlockPos((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));
+	public dev.meshac.event.MeshBlock getBlock() {
+		return new dev.meshac.event.MeshBlock(world, new net.minecraft.core.BlockPos((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z)));
 	}
 }

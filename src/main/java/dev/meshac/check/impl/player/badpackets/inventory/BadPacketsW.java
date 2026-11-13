@@ -1,7 +1,7 @@
 package dev.meshac.check.impl.player.badpackets.inventory;
 
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.data.PlayerData;
 
 @CheckInfo(name = "Bad Packets", type = 'W', complexType = "Post WindowClick", experimental = false, description = "Post WindowClick packets.")

@@ -1,9 +1,9 @@
 package dev.meshac.check.impl.combat.autoblock;
 
+import dev.meshac.packet.InteractEntity;
 import dev.meshac.packet.MeshPacketEvent;
-import dev.meshac.packet.InteractEntity.Action;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.data.PlayerData;
 
@@ -22,7 +22,7 @@ public class AutoBlockC extends AbstractCheck {
                 if (this.playerData.getPlayer() == null) {
                     return;
                 }
-                boolean holdingSword = this.playerData.getPlayer().getItemInHand().getType().toString().contains(SWORD_MATERIAL_SUFFIX);
+                boolean holdingSword = net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(this.playerData.getPlayer().getMainHandItem().getItem()).getPath().toUpperCase(java.util.Locale.ROOT).contains(SWORD_MATERIAL_SUFFIX);
                 boolean diggingPacketReceived = this.playerData.getMotionState().isDiggingPacketReceived();
                 boolean exempt = this.isExempt(new ExemptType[] { ExemptType.CLIENT_VERSION });
                 if (diggingPacketReceived && holdingSword && !exempt) {

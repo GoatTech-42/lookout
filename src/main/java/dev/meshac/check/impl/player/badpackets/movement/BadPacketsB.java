@@ -2,8 +2,8 @@ package dev.meshac.check.impl.player.badpackets.movement;
 
 import dev.meshac.packet.MeshPacketEvent;
 import dev.meshac.packet.Flying;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.data.PlayerData;
 
@@ -22,7 +22,7 @@ public class BadPacketsB extends AbstractCheck {
         if (this.isMovementPacket(packetEvent)) {
             Flying lastFlyingPacket = this.playerData.getLastFlyingPacket();
             if (!(lastFlyingPacket.hasPositionChanged())) {
-                if (!((this.playerData.getPlayer() != null) && (this.playerData.getPlayer().isInsideVehicle()))) {
+                if (!((this.playerData.getPlayer() != null) && (this.playerData.getPlayer().isPassenger()))) {
                     boolean exempt = this.isExempt(new ExemptType[] { ExemptType.SERVER_VERSION, ExemptType.CLIENT_VERSION });
                     if (++this.stationaryMovementStreak > 20 && !exempt) {
                         this.fail(VIOLATION_DETAIL_PREFIX + this.stationaryMovementStreak);

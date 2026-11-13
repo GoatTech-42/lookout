@@ -92,7 +92,7 @@ public final class DiscordWebhook {
                 response.transferTo(OutputStream.nullOutputStream());
             }
         } catch (IOException exception) {
-            MeshServices.INSTANCE.getVulcanPlugin().getLogger().warning("Cannot send Discord webhook: " + exception.getMessage());
+            MeshServices.log("Cannot send Discord webhook: " + exception.getMessage());
         } finally {
             if (connection != null)
                 connection.disconnect();

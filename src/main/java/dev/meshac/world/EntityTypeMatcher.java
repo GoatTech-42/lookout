@@ -17,4 +17,14 @@ public class EntityTypeMatcher {
 		}
 		return false;
 	}
+
+	public static boolean isShulker(Entity entity) { return entity instanceof net.minecraft.world.entity.monster.Shulker; }
+
+	public static boolean isBoat(net.minecraft.world.entity.Entity entity) {
+		return entity instanceof net.minecraft.world.entity.vehicle.boat.AbstractBoat;
+	}
+
+	public static boolean isHappyGhast(net.minecraft.world.entity.Entity entity) {
+		return entity.getType() == net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+	}
 }

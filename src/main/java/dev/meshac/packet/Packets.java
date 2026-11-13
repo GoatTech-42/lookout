@@ -1,5 +1,6 @@
 package dev.meshac.packet;
 
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -35,43 +36,35 @@ public final class Packets {
 	}
 
 	public static InteractEntity toInteractEntity(ServerboundInteractPacket p) {
-		final InteractEntity.Action[] action = {InteractEntity.Action.INTERACT};
-		final InteractionHand[] hand = {InteractionHand.MAIN_HAND};
-		final Vec3[] target = {null};
-		p.dispatch(new ServerboundInteractPacket.Handler() {
-			@Override public void onInteraction(InteractionHand h) {
-				action[0] = InteractEntity.Action.INTERACT;
-				hand[0] = h;
-			}
-			@Override public void onInteraction(InteractionHand h, Vec3 pos) {
-				action[0] = InteractEntity.Action.INTERACT_AT;
-				hand[0] = h;
-				target[0] = pos;
-			}
-			@Override public void onAttack() {
-				action[0] = InteractEntity.Action.ATTACK;
-			}
-		});
-		return new InteractEntity(p.getEntityId(), action[0], hand[0], target[0], p.isUsingSecondaryAction());
+		// 26.3: interact is a flat record; attack moved to ServerboundAttackPacket (see toAttackEntity).
+		InteractEntity.Action action = p.location() == null ? InteractEntity.Action.INTERACT : InteractEntity.Action.INTERACT_AT;
+		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+	}
+
+	public static InteractEntity toAttackEntity(ServerboundAttackPacket p) {
+		return new InteractEntity(p.entityId(), InteractEntity.Action.ATTACK, InteractionHand.MAIN_HAND, null, false);
 	}
 
 	public static EntityAction toEntityAction(ServerboundPlayerCommandPacket p) {
+		// 26.3: sneak moved out of this packet into ServerboundPlayerInputPacket (see PARITY.md).
 		EntityAction.Action action = switch (p.getAction()) {
-			case START_SNEAKING -> EntityAction.Action.START_SNEAKING;
-			case STOP_SNEAKING -> EntityAction.Action.STOP_SNEAKING;
 			case START_SPRINTING -> EntityAction.Action.START_SPRINTING;
 			case STOP_SPRINTING -> EntityAction.Action.STOP_SPRINTING;
-			case START_JUMP_HORSE -> EntityAction.Action.START_JUMP_HORSE;
-			case STOP_JUMP_HORSE -> EntityAction.Action.STOP_JUMP_HORSE;
+			case START_RIDING_JUMP -> EntityAction.Action.START_JUMP_HORSE;
+			case STOP_RIDING_JUMP -> EntityAction.Action.STOP_JUMP_HORSE;
 			case OPEN_INVENTORY -> EntityAction.Action.OPEN_INVENTORY;
 			case START_FALL_FLYING -> EntityAction.Action.START_FLYING_WITH_ELYTRA;
+			case STOP_SLEEPING -> null;
 		};
+		if (action == null) return null;
 		return new EntityAction(action, p.getData());
 	}
 
-	public static Digging toDigging(ServerboundPlayerActionPacket p) {
+public static Digging toDigging(ServerboundPlayerActionPacket p) {
 		Digging.Action action = switch (p.getAction()) {
 			case START_DESTROY_BLOCK -> Digging.Action.START_DIGGING;
+			case CHANGE_DESTROY_DIRECTION -> Digging.Action.CHANGE_DESTROY_DIRECTION;
+			case STAB -> Digging.Action.STAB;
 			case ABORT_DESTROY_BLOCK -> Digging.Action.CANCELLED_DIGGING;
 			case STOP_DESTROY_BLOCK -> Digging.Action.FINISHED_DIGGING;
 			case RELEASE_USE_ITEM -> Digging.Action.RELEASE_USE_ITEM;
@@ -83,10 +76,10 @@ public final class Packets {
 	}
 
 	public static Placement toPlacement(ServerboundUseItemOnPacket p) {
-		BlockHitResult hit = p.getHitResult();
-		return new Placement(hit.getBlockPos(), hit.getDirection(), p.getHand(),
+		BlockHitResult hit = p.hitResult();
+		return new Placement(hit.getBlockPos(), hit.getDirection(), p.hand(),
 				(float) hit.getLocation().x, (float) hit.getLocation().y, (float) hit.getLocation().z,
-				hit.isInside(), p.getSequence());
+				hit.isInside(), p.sequence());
 	}
 
 	public static HeldItemChange toHeldItemChange(ServerboundSetCarriedItemPacket p) {

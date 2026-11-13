@@ -1,7 +1,7 @@
 package dev.meshac.check.impl.player.scaffold;
 
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.data.PlayerData;
 import dev.meshac.event.MeshEvent;
@@ -18,7 +18,7 @@ public class ScaffoldC extends AbstractCheck {
     public void update() {
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshBlockPlaceEvent blockPlaceEvent) {
             if (blockPlaceEvent.isCancelled()) {
                 return;

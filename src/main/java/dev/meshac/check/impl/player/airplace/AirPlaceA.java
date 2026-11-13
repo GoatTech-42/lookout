@@ -1,7 +1,7 @@
 package dev.meshac.check.impl.player.airplace;
 
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.config.MeshSettings;
 import dev.meshac.data.PlayerData;
@@ -23,7 +23,7 @@ public class AirPlaceA extends AbstractCheck {
     public void update() {
     }
 
-    public void handleEvent(Event event) {
+    public void handleEvent(MeshEvent event) {
         MeshBlockPlaceEvent blockPlaceEvent;
         if (!(event instanceof MeshBlockPlaceEvent))
             return;

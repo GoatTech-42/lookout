@@ -2,9 +2,8 @@ package dev.meshac.check.impl.combat.reach;
 
 import dev.meshac.packet.MeshPacketEvent;
 import dev.meshac.packet.InteractEntity;
-import dev.meshac.packet.InteractEntity.Action;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.config.MeshSettings;
 import dev.meshac.data.PlayerDataManager;
@@ -19,6 +18,7 @@ import dev.meshac.tracker.RelativeMoveTracker;
 import dev.meshac.collection.tuple.Pair;
 import dev.meshac.util.MathUtils;
 import dev.meshac.util.Location;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.server.level.ServerPlayer;
 import dev.meshac.util.Vector;
@@ -46,8 +46,8 @@ public class ReachA extends AbstractCheck {
             }
             this.pendingAttack = true;
         } else if (this.isMovementPacket(packetEvent) && this.pendingAttack) {
-            TickProcessor tickProcessor = PluginServices.INSTANCE.getTickProcessor();
-            int totalTicks = tickProcessor.getTotalTicks();
+            int tickProcessor = MeshServices.ticks();
+            int totalTicks = tickProcessor;
             int index = MathUtils.pingCompensationTicks(this.playerData);
             CollisionState collisionState = this.playerData.getCollisionState();
             double x = collisionState.getX();
@@ -76,16 +76,16 @@ public class ReachA extends AbstractCheck {
                 if ((MeshSettings.settingsIgnoreGeyserPrefixes) && (playerData.getPlayerName().startsWith(MeshSettings.settingsIgnoreGeyserPrefix))) {
                     return;
                 }
-                if ((MeshSettings.settingsIgnoreFloodgate && false) && (org.geysermc.floodgate.api.FloodgateApi.getInstance().isFloodgatePlayer(playerData.getPlayer().getUniqueId()))) {
+                if ((MeshSettings.settingsIgnoreFloodgate && false) && (org.geysermc.floodgate.api.FloodgateApi.getInstance().isFloodgatePlayer(playerData.getPlayer().getUUID()))) {
                     return;
                 }
                 if (MeshSettings.settingsIgnoreFloodgate && false) {
                     FloodgateApi instance = FloodgateApi.getInstance();
-                    if (instance.isFloodgatePlayer(playerData.getPlayer().getUniqueId())) {
+                    if (instance.isFloodgatePlayer(playerData.getPlayer().getUUID())) {
                         return;
                     }
                 }
-                condition = ((this.playerData.getPlayer() != null) && (this.dev.meshac.util.EnchantUtil.level(playerData.getPlayer().getMainHandItem(), net.minecraft.world.item.enchantment.Enchantments.KNOCKBACK) > 0));
+                condition = ((this.playerData.getPlayer() != null) && (dev.meshac.util.EnchantUtil.level(playerData.getPlayer().getMainHandItem(), net.minecraft.world.item.enchantment.Enchantments.KNOCKBACK) > 0));
                 boolean condition2 = condition;
                 boolean exempt = this.isExempt(new ExemptType[] { ExemptType.CREATIVE, ExemptType.VEHICLE, ExemptType.BOAT });
                 PlayerToggles playerToggles = playerData.getPlayerToggles();
@@ -116,12 +116,12 @@ public class ReachA extends AbstractCheck {
     public void update() {
     }
 
-    private static double calculateTargetDistance(Vector vector, Pair pair) {
-        Vector vector2 = ((Location) pair.getFirst()).toVector().setY(0);
+    private static double calculateTargetDistance(Vector vector, dev.meshac.tracker.RelativeMoveTracker.TargetPos pair) {
+        Vector vector2 = new Vector(pair.x(), pair.y(), pair.z()).setY(0);
         return vector.distance(vector2) - 0.52;
     }
 
-    private static boolean isRecentTargetPosition(int index, int index2, Pair pair) {
-        return Math.abs(index - (Integer) pair.getSecond() - index2) < 3;
+    private static boolean isRecentTargetPosition(int index, int index2, dev.meshac.tracker.RelativeMoveTracker.TargetPos pair) {
+        return Math.abs(index - pair.tick() - index2) < 3;
     }
 }

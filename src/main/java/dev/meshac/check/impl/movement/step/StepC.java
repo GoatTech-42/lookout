@@ -1,8 +1,8 @@
 package dev.meshac.check.impl.movement.step;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.player.CollisionState;
 import dev.meshac.player.MotionState;
@@ -41,7 +41,7 @@ public class StepC extends AbstractCheck {
             if (this.playerData.getPlayer() == null) {
                 amount = 0.0F;
             } else {
-                amount = this.playerData.getPlayer().getFallDistance();
+                amount = (float) this.playerData.getPlayer().fallDistance;
             }
             float distance;
             distance = amount;

@@ -44,7 +44,7 @@ public class RelativeMoveTracker {
 		if (level == null) return;
 		Entity target = level.getEntity(entityId);
 		if (target instanceof ItemFrame) {
-			this.lastItemFrameInteractTick = MeshServices.ticks().getTotalTicks();
+			this.lastItemFrameInteractTick = MeshServices.ticks();
 		}
 		if (attack) {
 			this.lastAttackedEntity = target;
@@ -68,9 +68,9 @@ public class RelativeMoveTracker {
 	/** Clientbound entity relative move for the tracked target: record where it was. */
 	public void handleTargetMove(int entityId, double deltaX, double deltaY, double deltaZ) {
 		if (this.player == null || this.player.getId() != entityId) return;
-		PlayerData targetData = MeshServices.players().getPlayerData(this.player);
+		PlayerData targetData = MeshServices.players().get(this.player.getUUID());
 		if (targetData == null || targetData.getPlayer() == null) return;
-		int currentTick = MeshServices.ticks().getTotalTicks();
+		int currentTick = MeshServices.ticks();
 		dev.meshac.player.CollisionState collision = targetData.getCollisionState();
 		this.targetPositions.add(new TargetPos(collision.getX() - deltaX, collision.getY() - deltaY, collision.getZ() - deltaZ, currentTick));
 	}
@@ -80,25 +80,25 @@ public class RelativeMoveTracker {
 	}
 
 	public void recordAttackGiven() {
-		this.lastAttackGivenTick = MeshServices.ticks().getTotalTicks();
+		this.lastAttackGivenTick = MeshServices.ticks();
 	}
 
 	public void recordAttackTaken() {
-		this.lastAttackTakenTick = MeshServices.ticks().getTotalTicks();
+		this.lastAttackTakenTick = MeshServices.ticks();
 	}
 
 	public int getTicksSinceAttackGiven() {
-		return MeshServices.ticks().getTotalTicks() - this.lastAttackGivenTick;
+		return MeshServices.ticks() - this.lastAttackGivenTick;
 	}
 
 	public int getTicksSinceAttackTaken() {
-		return MeshServices.ticks().getTotalTicks() - this.lastAttackTakenTick;
+		return MeshServices.ticks() - this.lastAttackTakenTick;
 	}
 
 	public void processMovement() {
 		++this.ticksSinceAttack;
 		if (!this.targetPositions.isEmpty() && this.player != null) {
-			int currentTick = MeshServices.ticks().getTotalTicks();
+			int currentTick = MeshServices.ticks();
 			int latencyTicks = MathUtils.pingCompensationTicks(this.playerData);
 			double x = this.playerData.getCollisionState().getX();
 			double z = this.playerData.getCollisionState().getZ();

@@ -2,8 +2,8 @@ package dev.meshac.check.impl.player.ghosthand;
 
 import java.util.ArrayList;
 import java.util.List;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.config.MeshSettings;
 import dev.meshac.data.PlayerData;
 import dev.meshac.world.BlockUtils;
@@ -24,11 +24,11 @@ public class GhostHandA extends AbstractCheck {
     public void update() {
     }
 
-    public void handleEvent(Event event) {
+    public void handleEvent(MeshEvent event) {
         if (!(event instanceof MeshBlockBreakEvent)) {
             return;
         }
-        Block broken = ((MeshBlockBreakEvent) event).getBlock();
+        MeshBlock broken = ((MeshBlockBreakEvent) event).getBlock();
         String brokenType = broken.getType().toString();
         if (!brokenType.contains("BED") || brokenType.equalsIgnoreCase("BEDROCK")) {
             return;
@@ -43,7 +43,7 @@ public class GhostHandA extends AbstractCheck {
         checkSurroundings((MeshBlockBreakEvent) event, facing);
     }
 
-    private static Direction getBedFacing(Block broken) {
+    private static Direction getBedFacing(MeshBlock broken) {
         Direction facing = null;
         if (broken.getLocation().add(0.0, 0.0, 1.0).getBlock().getType().toString().contains("BED")) {
             facing = Direction.SOUTH;

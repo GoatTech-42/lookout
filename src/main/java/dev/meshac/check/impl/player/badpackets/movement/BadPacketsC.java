@@ -1,8 +1,8 @@
 package dev.meshac.check.impl.player.badpackets.movement;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.data.PlayerData;
 import dev.meshac.tracker.RotationTracker;
 

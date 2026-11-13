@@ -2,14 +2,15 @@ package dev.meshac.check.impl.combat.killaura;
 
 import dev.meshac.packet.MeshPacketEvent;
 import dev.meshac.config.MeshVersion;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.CheckUtils;
 import dev.meshac.check.ExemptType;
 import dev.meshac.player.ClickTimingData;
 import dev.meshac.player.CollisionState;
 import dev.meshac.player.MotionState;
 import dev.meshac.data.PlayerData;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 
 @CheckInfo(name = "Kill Aura", type = 'B', complexType = "Acceleration", experimental = false, description = "Invalid acceleration.")
@@ -42,7 +43,7 @@ public class KillAuraB extends AbstractCheck {
             sprinting = motionState.isSprinting();
             condition = ((this.playerData.getRelativeMoveTracker()).getLastAttackedEntity() != null) && ((this.playerData.getRelativeMoveTracker()).getLastAttackedEntity() instanceof Player);
             boolean condition2 = condition;
-            boolean olderThan = this.playerData.getUser().getClientVersion().isOlderThan(MeshVersion.V_1_9);
+            boolean olderThan = this.playerData.getClientVersion().isOlderThan(MeshVersion.V_1_9);
             boolean exempt = this.isExempt(new ExemptType[] { ExemptType.SOUL_SAND });
             boolean condition3 = deltaXZChange < 0.0025 && sprinting && deltaXZ > maxSpeed && clickInterval < 500L && condition2 && olderThan;
             if (condition3 && !exempt) {

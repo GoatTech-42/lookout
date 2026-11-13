@@ -6,8 +6,8 @@ import dev.meshac.packet.EntityAction;
 import dev.meshac.packet.EntityAction.Action;
 import java.util.HashMap;
 import java.util.Map;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.CheckUtils;
 import dev.meshac.check.ExemptType;
 import dev.meshac.check.ExemptionManager;
@@ -35,14 +35,14 @@ public class ScaffoldK extends AbstractCheck {
 
     public void handlePacket(MeshPacketEvent packetEvent) {
         if (this.isEntityActionPacket(packetEvent)) {
-            EntityAction wrapperPlayClientEntityAction = new EntityAction((PacketReceiveEvent) packetEvent);
+            EntityAction wrapperPlayClientEntityAction = this.playerData.getLastEntityActionPacket();
             if (wrapperPlayClientEntityAction.getAction() == Action.START_SNEAKING || wrapperPlayClientEntityAction.getAction() == Action.STOP_SNEAKING) {
                 this.lastSneakTick = this.getCurrentTick();
             }
         }
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshBlockPlaceEvent blockPlaceEvent) {
             if (blockPlaceEvent.isCancelled() || BlockUtils.isSlab(blockPlaceEvent.getBlock().getType())) {
                 return;

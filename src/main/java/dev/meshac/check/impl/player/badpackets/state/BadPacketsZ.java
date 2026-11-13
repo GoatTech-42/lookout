@@ -1,8 +1,8 @@
 package dev.meshac.check.impl.player.badpackets.state;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.data.PlayerData;
 import net.minecraft.world.level.GameType;
@@ -23,7 +23,7 @@ public class BadPacketsZ extends AbstractCheck {
             if (this.playerData.getPlayer() == null) {
                 return;
             }
-            condition = ((this.playerData.getPlayer().getGameMode() != GameType.SPECTATOR) && (this.playerData.getMotionState().getGameMode() != GameType.SPECTATOR));
+            condition = ((this.playerData.getPlayer().gameMode.getGameModeForPlayer() != GameType.SPECTATOR) && (this.playerData.getMotionState().getGameMode() != GameType.SPECTATOR));
             boolean condition2 = condition;
             if (condition2) {
                 this.fail();

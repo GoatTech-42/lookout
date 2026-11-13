@@ -4,7 +4,7 @@ import dev.meshac.check.CheckUtils;
 import dev.meshac.event.MeshBlock;
 import dev.meshac.mcutil.MaterialSets;
 import dev.meshac.util.EnchantUtil;
-import net.minecraft.core.registry.Registries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;

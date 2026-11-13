@@ -211,16 +211,16 @@ public class MotionState {
 	}
 
 	public void recordEntityDamage(net.minecraft.world.entity.EntityType<?> entityType) {
-		if (entityType == net.minecraft.world.entity.EntityType.ENDER_DRAGON) {
+		if (entityType == net.minecraft.world.entity.EntityTypes.ENDER_DRAGON) {
 			this.ticksSinceDragonDamage = 0;
-		} else if (entityType == net.minecraft.world.entity.EntityType.FIREBALL
-				|| entityType == net.minecraft.world.entity.EntityType.SMALL_FIREBALL
-				|| entityType == net.minecraft.world.entity.EntityType.DRAGON_FIREBALL) {
+		} else if (entityType == net.minecraft.world.entity.EntityTypes.FIREBALL
+				|| entityType == net.minecraft.world.entity.EntityTypes.SMALL_FIREBALL
+				|| entityType == net.minecraft.world.entity.EntityTypes.DRAGON_FIREBALL) {
 			this.ticksSinceFireball = 0;
-		} else if (entityType == net.minecraft.world.entity.EntityType.END_CRYSTAL) {
+		} else if (entityType == net.minecraft.world.entity.EntityTypes.END_CRYSTAL) {
 			this.ticksSinceCrystalDamage = 0;
 		}
-		if (ExemptionManager.isAtLeast1_14() && entityType == net.minecraft.world.entity.EntityType.RAVAGER) {
+		if (ExemptionManager.isAtLeast1_14() && entityType == net.minecraft.world.entity.EntityTypes.RAVAGER) {
 			this.ticksSinceRavagerDamage = 0;
 		}
 	}
@@ -598,14 +598,14 @@ public class MotionState {
 	}
 
 	private void removePotionEffect(net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect) {
-		if (effect == MobEffects.MOVEMENT_SPEED) {
+		if (effect == MobEffects.SPEED) {
 			speedAmplifier = 0;
 			speedEffect = false;
 			playerData.getCollisionState().setTicksSinceSpeedEffect(0);
-		} else if (effect == MobEffects.MOVEMENT_SLOWDOWN) {
+		} else if (effect == MobEffects.SLOWNESS) {
 			slownessEffect = false;
 			slownessAmplifier = 0;
-		} else if (effect == MobEffects.JUMP) {
+		} else if (effect == MobEffects.JUMP_BOOST) {
 			jumpBoostAmplifier = 0;
 			packetJumpBoostEffect = false;
 		} else if (effect == MobEffects.LEVITATION) {
@@ -618,14 +618,14 @@ public class MotionState {
 
 	private void applyPotionEffect(net.minecraft.core.Holder<net.minecraft.world.effect.MobEffect> effect, int amplifier) {
 		amplifier = amplifier + 1;
-		if (effect == MobEffects.MOVEMENT_SPEED) {
+		if (effect == MobEffects.SPEED) {
 			speedEffect = true;
 			speedAmplifier = amplifier;
 			lastSpeedAmplifier = amplifier;
-		} else if (effect == MobEffects.MOVEMENT_SLOWDOWN) {
+		} else if (effect == MobEffects.SLOWNESS) {
 			slownessEffect = true;
 			slownessAmplifier = amplifier;
-		} else if (effect == MobEffects.JUMP) {
+		} else if (effect == MobEffects.JUMP_BOOST) {
 			packetJumpBoostEffect = true;
 			jumpBoostAmplifier = amplifier;
 		} else if (effect == MobEffects.LEVITATION) {

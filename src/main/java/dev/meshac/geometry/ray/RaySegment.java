@@ -61,7 +61,7 @@ public final class RaySegment {
 	public List<MeshBlock> solidBlocksAlongRay(ServerLevel world, double end, double step) {
 		List<MeshBlock> blocks = new ArrayList<>();
 		for (Vector point : samplePoints(end, step)) {
-			MeshBlock block = new MeshBlock(world, point.toLocation(world).getBlock());
+			MeshBlock block = point.toLocation(world).getBlock();
 			if (block.getType().isSolid())
 				blocks.add(block);
 		}

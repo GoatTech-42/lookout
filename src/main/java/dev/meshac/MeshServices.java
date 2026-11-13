@@ -74,6 +74,8 @@ public final class MeshServices {
 	private static final Map<Integer, Integer> HOOKED_BOAT_TICKS = new ConcurrentHashMap<>();
 
 	public static MinecraftServer server() { return server; }
+	private static final long STARTED_AT_MILLIS = System.currentTimeMillis();
+	public static long getStartedAtMillis() { return STARTED_AT_MILLIS; }
 	public static int ticks() { return totalTicks; }
 	public static Map<UUID, PlayerData> players() { return PLAYERS; }
 	public static AlertManager alerts() { return ALERTS; }
@@ -83,7 +85,7 @@ public final class MeshServices {
 
 	public static double tps() {
 		if (server == null) return 20.0;
-		float mspt = server.getAverageTickTime();
+		float mspt = server.getCurrentSmoothedTickTime();
 		return mspt <= 0 ? 20.0 : Math.min(20.0, 1000.0 / mspt);
 	}
 

@@ -1,13 +1,14 @@
 package dev.meshac.check.impl.combat.killaura;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.player.CollisionState;
 import dev.meshac.data.PlayerData;
 import dev.meshac.tracker.RelativeMoveTracker;
 import dev.meshac.tracker.RotationTracker;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 
 @CheckInfo(name = "Kill Aura", type = 'C', complexType = "Head Snap", experimental = false, description = "Invalid acceleration.")

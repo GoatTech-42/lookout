@@ -40,7 +40,10 @@ public final class MeshBlock {
 
 	public Direction getFace(MeshBlock other) {
 		BlockPos d = pos.subtract(other.pos);
-		return Direction.fromDelta(d.getX(), d.getY(), d.getZ());
+		for (Direction face : Direction.values()) {
+			if (d.getX() == face.getStepX() && d.getY() == face.getStepY() && d.getZ() == face.getStepZ()) return face;
+		}
+		return null;
 	}
 
 	@Override

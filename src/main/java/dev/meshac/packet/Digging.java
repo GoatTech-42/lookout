@@ -7,7 +7,7 @@ import net.minecraft.core.Direction;
 public record Digging(Action action, BlockPos blockPosition, Direction blockFace, int sequence) {
 
 	public enum Action {
-		START_DIGGING, CANCELLED_DIGGING, FINISHED_DIGGING, RELEASE_USE_ITEM, DROP_ITEM_STACK, DROP_ITEM, SWAP_ITEM_WITH_OFFHAND
+		CHANGE_DESTROY_DIRECTION, STAB, START_DIGGING, CANCELLED_DIGGING, FINISHED_DIGGING, RELEASE_USE_ITEM, DROP_ITEM_STACK, DROP_ITEM, SWAP_ITEM_WITH_OFFHAND
 	}
 
 	public Action getAction() { return action; }

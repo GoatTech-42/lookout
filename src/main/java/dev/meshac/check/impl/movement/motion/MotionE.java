@@ -1,8 +1,8 @@
 package dev.meshac.check.impl.movement.motion;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.player.CollisionState;
 import dev.meshac.player.MotionState;
@@ -24,7 +24,7 @@ public class MotionE extends AbstractCheck {
             if (motionState.isSlownessEffect()) {
                 return;
             }
-            if (this.playerData.getPlayer().getWalkSpeed() > 0.25) {
+            if (this.playerData.getCollisionState().getWalkSpeed() > 0.25) {
                 return;
             }
             MotionState motionState2 = this.playerData.getMotionState();

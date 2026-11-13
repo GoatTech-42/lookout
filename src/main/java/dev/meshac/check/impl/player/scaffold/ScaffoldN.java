@@ -2,8 +2,8 @@ package dev.meshac.check.impl.player.scaffold;
 
 import java.util.ArrayList;
 import java.util.List;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.geometry.ray.RaySegment;
@@ -33,7 +33,7 @@ public class ScaffoldN extends AbstractCheck {
     public void update() {
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshBlockPlaceEvent blockPlaceEvent) {
             if (blockPlaceEvent.isCancelled()) {
                 return;
@@ -44,7 +44,7 @@ public class ScaffoldN extends AbstractCheck {
             if (BlockUtils.isStairs(blockPlaceEvent.getBlock().getType())) {
                 return;
             }
-            Block block = blockPlaceEvent.getBlock();
+            dev.meshac.event.MeshBlock block = blockPlaceEvent.getBlock();
             if (this.recentPlacements.contains(blockPlaceEvent.getBlockAgainst())) {
                 double y = blockPlaceEvent.getBlockPlaced().getY();
                 CollisionState collisionState = this.playerData.getCollisionState();
@@ -59,7 +59,7 @@ public class ScaffoldN extends AbstractCheck {
                 if (material == null || blockFace == null) {
                     return;
                 }
-                if (blockFace == Direction.DOWN || blockFace == Direction.UP || blockFace == Direction.SELF) {
+                if (blockFace == Direction.DOWN || blockFace == Direction.UP) {
                     return;
                 }
                 CollisionState collisionState2 = this.playerData.getCollisionState();
@@ -80,12 +80,12 @@ public class ScaffoldN extends AbstractCheck {
                     if (this.playerData.getPlayer() == null) {
                         return;
                     }
-                    Vector vector = this.playerData.getPlayer().getLocation().toVector();
+                    Vector vector = new dev.meshac.util.Location(this.playerData.getPlayer().level(), this.playerData.getPlayer().getX(), this.playerData.getPlayer().getY(), this.playerData.getPlayer().getZ()).toVector();
                     RotationTracker rotationTracker = this.playerData.getRotationTracker();
                     float yaw = rotationTracker.getYaw();
                     RotationTracker rotationTracker2 = this.playerData.getRotationTracker();
                     RaySegment raySegment = new RaySegment(vector, this.getPosition(yaw, rotationTracker2.getPitch()));
-                    World world = this.playerData.getPlayer().getWorld();
+                    net.minecraft.server.level.ServerLevel world = this.playerData.getPlayer().level();
                     List list = raySegment.solidBlocksAlongRay(world, 3.0, 1.0);
                     if (!list.isEmpty()) {
                         if (this.increaseBuffer() > this.maximumBuffer) {
@@ -122,7 +122,7 @@ public class ScaffoldN extends AbstractCheck {
         if (225.0F <= amount && amount < 315.0F) {
             return Direction.SOUTH;
         }
-        return 315.0F <= amount && amount < 360.0 ? Direction.WEST : Direction.SELF;
+        return 315.0F <= amount && amount < 360.0 ? Direction.WEST : null;
     }
 
     public Vector getPosition(float amount, float amount2) {

@@ -1,9 +1,16 @@
 package dev.meshac.player;
 
+import dev.meshac.config.MeshVersion;
+import dev.meshac.alert.AlertManager;
+import dev.meshac.tracker.RotationTracker;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragonPart;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import dev.meshac.MeshServices;
 import dev.meshac.check.CheckUtils;
 import dev.meshac.check.ConditionUtils;
 import dev.meshac.check.ExemptionManager;
+import dev.meshac.check.ExemptType;
 import dev.meshac.config.MeshSettings;
 import dev.meshac.data.PlayerData;
 import dev.meshac.data.RotationSample;
@@ -24,6 +31,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -288,6 +296,8 @@ public class CollisionState {
     public List<BlockState> deepFloorMaterials;
 
     public BlockState groundMaterial;
+    public BlockState subGroundBlockState;
+    public BlockState deepGroundBlockState;
 
     public BlockState subGroundMaterial;
 
@@ -954,7 +964,7 @@ public class CollisionState {
                     if (entity2 instanceof FireworkRocketEntity) {
                         this.ticksSinceFirework = 0;
                     }
-                    if (entity2 instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon || entity2 instanceof net.minecraft.world.entity.boss.EnderDragonPart) {
+                    if (entity2 instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragon || entity2 instanceof net.minecraft.world.entity.boss.enderdragon.EnderDragonPart) {
                         MotionState motionState = this.playerData.getMotionState();
                         motionState.setTicksSinceDragonDamage(0);
                     }
@@ -962,15 +972,15 @@ public class CollisionState {
             } else {
                 for (TrackedEntity trackedEntity : this.closeEntities) {
                     boolean boat3 = this.boat;
-                    this.boat = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.BOAT;
+                    this.boat = boat3 | net.minecraft.world.entity.EntityType.getKey(trackedEntity.getEntityType()).getPath().endsWith("_boat");
                     boat3 = this.shulker;
-                    this.shulker = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.SHULKER;
+                    this.shulker = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.SHULKER;
                     boat3 = this.happyGhast;
-                    this.happyGhast = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.HAPPY_GHAST;
-                    if (trackedEntity.getEntityType() == net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.PLAYER || trackedEntity.getEntityType().canSerialize() /* VERIFY: living-entity predicate */) {
+                    this.happyGhast = boat3 | trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
+                    if (trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.PLAYER || trackedEntity.getEntityType().canSerialize() /* VERIFY: living-entity predicate */) {
                         this.touchedEntity = true;
                     }
-                    if (trackedEntity.getEntityType() == net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.ENDER_DRAGON) {
+                    if (trackedEntity.getEntityType() == net.minecraft.world.entity.EntityTypes.ENDER_DRAGON) {
                         MotionState motionState2 = this.playerData.getMotionState();
                         motionState2.setTicksSinceDragonDamage(0);
                     }
@@ -1224,7 +1234,7 @@ public class CollisionState {
         }
     }
 
-    public void handleVehicleMove(WrapperPlayClientVehicleMove wrapperPlayClientVehicleMove) {
+    public void handleVehicleMove(net.minecraft.network.protocol.game.ServerboundMoveVehiclePacket wrapperPlayClientVehicleMove) {
         ++this.ticksInVehicle;
         this.previousVehicle = this.vehicle;
         if (this.playerData.getPlayer() != null) {
@@ -1233,9 +1243,9 @@ public class CollisionState {
         if (this.previousVehicle != this.vehicle) {
             this.ticksInVehicle = 0;
         }
-        this.vehicleX = wrapperPlayClientVehicleMove.getPosition().getX();
-        this.vehicleY = wrapperPlayClientVehicleMove.getPosition().getY();
-        this.vehicleZ = wrapperPlayClientVehicleMove.getPosition().getZ();
+        this.vehicleX = wrapperPlayClientVehicleMove.movingTo().position().x;
+        this.vehicleY = wrapperPlayClientVehicleMove.movingTo().position().y;
+        this.vehicleZ = wrapperPlayClientVehicleMove.movingTo().position().z;
         Double vehicleX2 = null;
         Double vehicleY2 = null;
         Double vehicleZ2 = this.vehicleZ;
@@ -1308,7 +1318,7 @@ public class CollisionState {
                         continue;
                 }
                 if (this.vehicle != null) {
-                    if (this.vehicle.getEntityId() == ((Entity) value11).getEntityId())
+                    if (this.vehicle.getId() == ((Entity) value11).getId())
                         continue;
                 }
                 if (value11 instanceof LivingEntity) {
@@ -1319,21 +1329,7 @@ public class CollisionState {
                 this.nearHappyGhast = true;
             }
         }
-        if ((false) && (this.closeEntities != null)) {
-            for (TrackedEntity value12 : this.closeEntities) {
-                if (net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.isTypeInstanceOf((value12).getEntityType(), net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.BOAT)) {
-                    ++this.nearbyBoatCount;
-                }
-                if ((value12).getEntityId() == this.playerData.getVehicleTracker().getVehicleEntityId())
-                    continue;
-                if ((value12).getEntityType().isInstanceOf(net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.LIVINGENTITY)) {
-                    this.nearLivingEntity = true;
-                }
-                if ((value12).getEntityType() != net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.HAPPY_GHAST)
-                    continue;
-                this.nearHappyGhast = true;
-            }
-        }
+        // deobf dead block removed: referenced non-existent EntityType helpers (compile-breaking artifact)
         this.ticksSinceSurroundingIce = this.surroundingIce ? 0 : ++this.ticksSinceSurroundingIce;
         this.ticksSinceSurroundingPiston = this.surroundingPiston ? 0 : ++this.ticksSinceSurroundingPiston;
         this.ticksSinceSurroundingBed = this.surroundingBed ? 0 : ++this.ticksSinceSurroundingBed;
@@ -1360,7 +1356,7 @@ public class CollisionState {
                         continue;
                 }
                 if (this.vehicle != null) {
-                    if (this.vehicle.getEntityId() == entity.getEntityId())
+                    if (this.vehicle.getId() == entity.getId())
                         continue;
                 }
                 if (entity instanceof LivingEntity) {
@@ -1446,7 +1442,7 @@ public class CollisionState {
             PlayerData playerData2 = this.playerData;
             if (playerData2.getPlayer() != null) {
                 playerData2 = this.playerData;
-                if (playerData2.getPlayer().getGameMode() == GameMode.SPECTATOR) {
+                if (playerData2.getPlayer().gameMode.getGameModeForPlayer() == net.minecraft.world.level.GameType.SPECTATOR) {
                 }
             }
         }
@@ -1589,7 +1585,7 @@ public class CollisionState {
         PlayerData playerData4 = this.playerData;
         if (playerData4.getPlayer() != null) {
             playerData4 = this.playerData;
-            if (!playerData4.getPlayer().isInsideVehicle()) {
+            if (!playerData4.getPlayer().isPassenger()) {
                 playerData4 = this.playerData;
                 if (playerData4.getPlayer().getVehicle() == null) {
                     this.ticksSinceVehicle++;
@@ -1604,7 +1600,7 @@ public class CollisionState {
         playerData4 = this.playerData;
         if (playerData4.getPlayer() != null) {
             playerData4 = this.playerData;
-            if (!playerData4.getPlayer().getAllowFlight() && !this.flightAllowed) {
+            if (!playerData4.getPlayer().getAbilities().mayfly && !this.flightAllowed) {
                 this.ticksSinceFlightAllowed++;
             } else {
                 this.ticksSinceFlightAllowed = 0;
@@ -1644,7 +1640,7 @@ public class CollisionState {
                 if (motionState3.getBoots() != null) {
                     playerData4 = this.playerData;
                     MotionState motionState4 = playerData4.getMotionState();
-                    if (motionState4.getBoots().getEnchantmentLevel(Enchantment.SOUL_SPEED) > 0) {
+                    if (dev.meshac.util.EnchantUtil.level(motionState4.getBoots(), net.minecraft.world.item.enchantment.Enchantments.SOUL_SPEED) > 0) {
                         this.ticksSinceSoulSpeed = 0;
                     } else {
                         this.ticksSinceSoulSpeed++;
@@ -1702,14 +1698,14 @@ public class CollisionState {
         }
     }
 
-    public void setTicksSinceRiptide(WrapperPlayClientPlayerDigging wrapperPlayClientPlayerDigging) {
+    public void setTicksSinceRiptide(net.minecraft.network.protocol.game.ServerboundPlayerActionPacket wrapperPlayClientPlayerDigging) {
         PlayerData playerData2 = this.playerData;
-        if ((playerData2.getPlayer() != null) && (ExemptionManager.isAtLeast1_9() && wrapperPlayClientPlayerDigging.getAction() == DiggingAction.RELEASE_USE_ITEM)) {
+        if ((playerData2.getPlayer() != null) && (ExemptionManager.isAtLeast1_9() && wrapperPlayClientPlayerDigging.getAction() == net.minecraft.network.protocol.game.ServerboundPlayerActionPacket.Action.RELEASE_USE_ITEM)) {
             boolean condition = this.ticksSinceLiquid < 30 || this.ticksSinceWaterlogged < 30;
             playerData2 = this.playerData;
-            boolean condition2 = playerData2.getPlayer().getPlayerWeather() == WeatherType.DOWNFALL;
+            boolean condition2 = playerData2.getPlayer().level().isRaining();
             playerData2 = this.playerData;
-            boolean hasStorm2 = playerData2.getPlayer().getWorld().hasStorm();
+            boolean hasStorm2 = playerData2.getPlayer().level().isRaining();
             playerData2 = this.playerData;
             boolean recentBucketEmpty = playerData2.getMotionState().getTicksSinceBucketEmpty() < 20;
             if (!condition && !hasStorm2 && !condition2 && !recentBucketEmpty) {
@@ -1785,9 +1781,9 @@ public class CollisionState {
         PlayerData playerData2 = this.playerData;
         if ((playerData2.getPlayer() != null) && (MeshSettings.ghostBlocksFixEnabled) && (!(ExemptionManager.getTps() < MeshSettings.ghostBlocksFixMinimumTps))) {
             playerData2 = this.playerData;
-            playerData2.getPlayer().hasPermission("vulcan.bypass.ghostblock");
+            // Upstream discarded this permission result; retain no-op behavior.
             playerData2 = this.playerData;
-            if (playerData2.getUser().getClientVersion().isOlderThan(ClientVersion.V_1_17)) {
+            if (playerData2.getClientVersion().isOlderThan(MeshVersion.V_1_17)) {
                 if (ExemptionManager.isAtLeast1_17() && MeshSettings.ghostBlocksFixIgnoreLegacyVia) {
                     if (this.getY() < 5.0) {
                         return;
@@ -1826,11 +1822,7 @@ public class CollisionState {
             boolean condition3 = this.ghostActivityTicks > MeshSettings.ghostBlocksFixTicks && this.groundTicks >= 1 && this.groundAlignedTicks >= 1;
             if (condition3 && !anyExempt && !condition2) {
                 if (++this.ghostFixBuffer > MeshSettings.ghostBlocksFixBufferMax) {
-                    if (MeshSettings.settingsEnableApi) {
-                        if (vulcanGhostBlockEvent.isCancelled()) {
-                            return;
-                        }
-                    }
+                    // Bukkit API callback unsupported on Fabric; recorded in PARITY.md.
                     if (MeshSettings.ghostBlocksFixSetback) {
                         playerData2 = this.playerData;
                         CollisionState collisionState = playerData2.getCollisionState();
@@ -1863,24 +1855,24 @@ public class CollisionState {
                         playerData2 = this.playerData;
                         Player player2 = playerData2.getPlayer();
                         String ghostBlocksFixMessage2 = MeshSettings.ghostBlocksFixMessage;
-                        player2.sendMessage(TextUtil.parse(ghostBlocksFixMessage2));
+                        player2.sendSystemMessage(TextUtil.parse(ghostBlocksFixMessage2));
                     }
                     if (MeshSettings.ghostBlocksFixStaffMessageEnabled) {
                         AlertManager alertManager = MeshServices.alerts();
                         String text = MeshSettings.ghostBlocksFixStaffMessage.replaceAll("%x%", Integer.toString(this.blockX)).replaceAll("%y%", Integer.toString(this.blockY)).replaceAll("%z%", Integer.toString(this.blockZ)).replaceAll("%ticks%", Integer.toString(this.ghostActivityTicks));
                         PlayerData playerData3 = this.playerData;
-                        text = text.replaceAll("%world%", (ServerLevel) playerData3.getPlayer().level().getName());
+                        text = text.replaceAll("%world%", playerData3.getPlayer().level().dimension().identifier().toString());
                         playerData3 = this.playerData;
                         alertManager.broadcastAlert(text.replaceAll("%player%", playerData3.getPlayerName()));
                     }
                     if (MeshSettings.ghostBlocksFixPrintToConsole) {
                         java.util.logging.Logger logger = java.util.logging.Logger.getLogger("meshac");
-                        Level info = Level.INFO;
+                        java.util.logging.Level info = java.util.logging.Level.INFO;
                         String text2 = MeshSettings.ghostBlocksFixConsoleMessage.replaceAll("%ticks%", Integer.toString(this.ghostActivityTicks));
                         PlayerData playerData4 = this.playerData;
                         text2 = text2.replaceAll("%player%", playerData4.getPlayerName());
                         playerData4 = this.playerData;
-                        logger.log(info, TextUtil.parse(text2.replaceAll("%world%", playerData4.getPlayer().getWorld().getName()).replaceAll("%z%", Integer.toString(this.blockZ)).replaceAll("%y%", Integer.toString(this.blockY)).replaceAll("%x%", Integer.toString(this.blockX))));
+                        logger.log(info, (text2.replaceAll("%world%", playerData4.getPlayer().level().dimension().identifier().toString()).replaceAll("%z%", Integer.toString(this.blockZ)).replaceAll("%y%", Integer.toString(this.blockY)).replaceAll("%x%", Integer.toString(this.blockX))));
                     }
                     this.ghostActivityTicks = 0;
                     this.ghostFixBuffer = 0.0;
@@ -1969,18 +1961,13 @@ public class CollisionState {
                         RotationTracker rotationTracker2 = playerData2.getRotationTracker();
                         float pitch = rotationTracker2.getPitch();
                         Location location = new Location(this.world, this.setbackX, this.setbackY, this.setbackZ, yaw, pitch);
-                        if (false) {
-                            WrapperPlayServerPlayerPositionAndLook wrapperPlayServerPlayerPositionAndLook = new WrapperPlayServerPlayerPositionAndLook(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch(), (byte) 0, 69, false);
-                            playerData2 = this.playerData;
-                            playerData2.getUser().sendPacket(wrapperPlayServerPlayerPositionAndLook);
-                        } else {
-                            MeshServices.mainThread(() -> this.teleportToLoadedChunk(location));
-                        }
+                        // The legacy packet-send branch was unreachable; retain the active native path.
+                        MeshServices.mainThread(() -> this.teleportToLoadedChunk(location));
                         if (!MeshSettings.unloadedChunksMessage.isEmpty()) {
                             AlertManager alertManager = MeshServices.alerts();
                             String text = MeshSettings.unloadedChunksMessage.replaceAll("%x%", Integer.toString(this.blockX)).replaceAll("%y%", Integer.toString(this.blockY)).replaceAll("%z%", Integer.toString(this.blockZ)).replaceAll("%ticks%", Integer.toString(this.ghostActivityTicks));
                             PlayerData playerData3 = this.playerData;
-                            text = text.replaceAll("%world%", (ServerLevel) playerData3.getPlayer().level().getName());
+                            text = text.replaceAll("%world%", playerData3.getPlayer().level().dimension().identifier().toString());
                             playerData3 = this.playerData;
                             alertManager.broadcastAlert(text.replaceAll("%player%", playerData3.getPlayerName()));
                         }
@@ -2876,7 +2863,7 @@ public class CollisionState {
     }
 
     private void teleportToLoadedChunk(Location location) {
-        this.playerData.getPlayer().connection.teleport(location.getX(), location.getY(), location.getZ(), this.playerData.getRotationTracker().getYaw(), this.playerData.getRotationTracker().getPitch(), java.util.Set.of(), false);
+        this.playerData.getPlayer().connection.teleport(location.getX(), location.getY(), location.getZ(), this.playerData.getRotationTracker().getYaw(), this.playerData.getRotationTracker().getPitch());
     }
 
     private void applyPlayerAbilities(ServerAbilities wrapperPlayServerPlayerAbilities2) {
@@ -2892,7 +2879,7 @@ public class CollisionState {
     }
 
     private static boolean isHappyGhast(TrackedEntity trackedEntity) {
-        EntityType happyGhast2 = net.minecraft.world.entity.net.minecraft.world.entity.EntityType<?>.HAPPY_GHAST;
+        net.minecraft.world.entity.EntityType<?> happyGhast2 = net.minecraft.world.entity.EntityTypes.HAPPY_GHAST;
         return happyGhast2.equals(trackedEntity.getEntityType());
     }
 

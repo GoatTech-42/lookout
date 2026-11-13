@@ -1,7 +1,7 @@
 package dev.meshac.check.impl.player.scaffold;
 
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.player.CollisionState;
 import dev.meshac.data.PlayerData;
 import dev.meshac.tracker.RotationTracker;
@@ -22,7 +22,7 @@ public class ScaffoldM extends AbstractCheck {
     public void update() {
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshBlockPlaceEvent blockPlaceEvent) {
             if (blockPlaceEvent.isCancelled()) {
                 return;
@@ -74,6 +74,6 @@ public class ScaffoldM extends AbstractCheck {
         if (225.0F <= amount && amount < 315.0F) {
             return Direction.SOUTH;
         }
-        return 315.0F <= amount && amount < 360.0 ? Direction.WEST : Direction.SELF;
+        return 315.0F <= amount && amount < 360.0 ? Direction.WEST : null;
     }
 }

@@ -1,18 +1,20 @@
 package dev.meshac.check.impl.combat.hitbox;
 
+import dev.meshac.packet.InteractEntity;
 import dev.meshac.packet.MeshPacketEvent;
-import dev.meshac.packet.InteractEntity.Action;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.ExemptType;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.config.MeshSettings;
 import dev.meshac.MeshServices;
 import dev.meshac.data.PlayerData;
+import dev.meshac.data.PlayerDataManager;
 import dev.meshac.tracker.RotationTracker;
 import dev.meshac.collection.tuple.Pair;
 import dev.meshac.util.MathUtils;
 import dev.meshac.util.Location;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import dev.meshac.util.Vector;
 
@@ -87,15 +89,15 @@ public class HitboxA extends AbstractCheck {
         return direction;
     }
 
-    private double calculateAimDistance(Vector origin, Pair entry) {
-        Vector offset = ((Location) entry.getFirst()).toVector().setY(0.0);
+    private double calculateAimDistance(Vector origin, dev.meshac.tracker.RelativeMoveTracker.TargetPos entry) {
+        Vector offset = new Vector(entry.x(), entry.y(), entry.z()).setY(0.0);
         Vector toTarget = offset.clone().subtract(origin);
         RotationTracker rotation = this.playerData.getRotationTracker();
         Vector look = this.getPosition(rotation.getYaw(), rotation.getPitch()).setY(0.0);
         return toTarget.angle(look);
     }
 
-    private static boolean isRecentTargetPosition(int currentTick, int latencyTicks, Pair entry) {
-        return Math.abs(currentTick - (Integer) entry.getSecond() - latencyTicks) < 3;
+    private static boolean isRecentTargetPosition(int currentTick, int latencyTicks, dev.meshac.tracker.RelativeMoveTracker.TargetPos entry) {
+        return Math.abs(currentTick - entry.tick() - latencyTicks) < 3;
     }
 }

@@ -13,6 +13,30 @@ import java.util.stream.Collectors;
  */
 public final class MeshSettings {
 
+    public static final Map<String, dev.meshac.check.CheckData> checkDataByName = new HashMap<>();
+    public static final Map<String, Boolean> checkEnabled = new HashMap<>();
+    public static final Map<String, Integer> maximumViolations = new HashMap<>();
+    public static final Map<String, Integer> alertIntervals = new HashMap<>();
+    public static final Map<String, Integer> minimumAlertViolations = new HashMap<>();
+    public static final Map<String, java.util.List<String>> punishmentCommands = new HashMap<>();
+    public static final Map<String, Boolean> checkPunishable = new HashMap<>();
+    public static final Map<String, Boolean> broadcastPunishments = new HashMap<>();
+    public static final Map<String, Boolean> setbackEnabled = new HashMap<>();
+    public static final Map<String, Integer> maximumBuffers = new HashMap<>();
+    public static final Map<String, Double> bufferDecays = new HashMap<>();
+    public static final Map<String, Double> bufferMultipliers = new HashMap<>();
+    public static final Map<String, Boolean> hotbarShuffleEnabled = new HashMap<>();
+    public static final Map<String, Integer> minimumShuffleViolations = new HashMap<>();
+    public static final Map<String, Integer> shuffleIntervals = new HashMap<>();
+    public static final Map<String, Boolean> randomRotationEnabled = new HashMap<>();
+    public static final Map<String, Integer> minimumRotationViolations = new HashMap<>();
+    public static final Map<String, Integer> rotationIntervals = new HashMap<>();
+    public static final Map<String, Integer> discordAlertIntervals = new HashMap<>();
+    public static final Map<String, Integer> minimumSetbackViolations = new HashMap<>();
+    public static final Map<String, Integer> maximumPing = new HashMap<>();
+    public static final Map<String, Double> minimumTps = new HashMap<>();
+
+
     public static String prefix;
 
     public static String messagesNoPermission;

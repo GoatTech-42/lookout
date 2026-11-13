@@ -9,6 +9,6 @@ public final class Perms {
 	}
 
 	public static boolean has(ServerPlayer player, String node) {
-		return player != null && player.hasPermissions(2);
+		return player != null && player.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER);
 	}
 }

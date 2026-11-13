@@ -1,8 +1,8 @@
 package dev.meshac.check.impl.movement.entityspeed;
 
 import dev.meshac.packet.MeshPacketEvent;
-import me.frep.vulcan.spigot.check.AbstractCheck;
-import me.frep.vulcan.spigot.check.api.CheckInfo;
+import dev.meshac.check.AbstractCheck;
+import dev.meshac.check.api.CheckInfo;
 import dev.meshac.check.CheckUtils;
 import dev.meshac.check.ExemptionManager;
 import dev.meshac.config.MeshSettings;
@@ -12,18 +12,18 @@ import dev.meshac.player.CollisionState;
 import dev.meshac.player.MotionState;
 import dev.meshac.data.PlayerData;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import net.minecraft.world.entity.animal.camel.Camel;
-import net.minecraft.world.entity.animal.horse.Donkey;
-import net.minecraft.world.entity.animal.horse.Horse;
+import net.minecraft.world.entity.animal.equine.Donkey;
+import net.minecraft.world.entity.animal.equine.Horse;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.animal.horse.Llama;
-import net.minecraft.world.entity.animal.horse.Mule;
-import net.minecraft.world.entity.animal.Pig;
-import net.minecraft.world.entity.animal.horse.SkeletonHorse;
+import net.minecraft.world.entity.animal.equine.Llama;
+import net.minecraft.world.entity.animal.equine.Mule;
+import net.minecraft.world.entity.animal.pig.Pig;
+import net.minecraft.world.entity.animal.equine.SkeletonHorse;
 import net.minecraft.world.entity.monster.Strider;
-import net.minecraft.world.entity.animal.horse.TraderLlama;
-import net.minecraft.world.entity.animal.horse.ZombieHorse;
+import net.minecraft.world.entity.animal.equine.TraderLlama;
+import net.minecraft.world.entity.animal.equine.ZombieHorse;
 import dev.meshac.event.MeshEvent;
 import dev.meshac.event.MeshMoveEvent;
 import net.minecraft.world.effect.MobEffects;
@@ -69,10 +69,10 @@ public class EntitySpeedA extends AbstractCheck {
             }
             if ((this.playerData.getPlayer().getVehicle() != null) && (this.playerData.getPlayer().getVehicle() instanceof Horse)) {
                 Horse vehicle2 = (Horse) this.playerData.getPlayer().getVehicle();
-                if (vehicle2 == null || vehicle2.hasMetadata("PROCOSMETICS_ENTITY") || vehicle2.isLeashed()) {
+                if (vehicle2 == null || vehicle2.isLeashed()) {
                     return;
                 }
-                double maximumSpeed = vehicle2.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed = vehicle2.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle2.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle2) * 0.5;
                 }
@@ -111,7 +111,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle3 == null || vehicle3.isLeashed()) {
                     return;
                 }
-                double maximumSpeed2 = vehicle3.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed2 = vehicle3.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle3.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed2 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle3) * 0.5;
                 }
@@ -150,7 +150,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle4 == null || vehicle4.isLeashed()) {
                     return;
                 }
-                double maximumSpeed3 = vehicle4.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed3 = vehicle4.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle4.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed3 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle4) * 0.5;
                 }
@@ -189,7 +189,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle5 == null || vehicle5.isLeashed()) {
                     return;
                 }
-                double maximumSpeed4 = vehicle5.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed4 = vehicle5.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle5.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed4 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle5) * 0.5;
                 }
@@ -228,7 +228,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle6 == null || vehicle6.isLeashed()) {
                     return;
                 }
-                double maximumSpeed5 = vehicle6.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed5 = vehicle6.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle6.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed5 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle6) * 0.15;
                 }
@@ -291,7 +291,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle7 == null || vehicle7.isLeashed()) {
                     return;
                 }
-                double maximumSpeed6 = vehicle7.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed6 = vehicle7.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle7.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed6 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle7) * 0.5;
                 }
@@ -322,7 +322,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle8 == null || vehicle8.isLeashed()) {
                     return;
                 }
-                double maximumSpeed7 = vehicle8.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed7 = vehicle8.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle8.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed7 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle8) * 0.15;
                 }
@@ -361,7 +361,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle9 == null || vehicle9.isLeashed()) {
                     return;
                 }
-                double maximumSpeed8 = vehicle9.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed8 = vehicle9.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle9.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed8 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle9) * 0.45;
                 }
@@ -400,7 +400,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle10 == null || vehicle10.isLeashed()) {
                     return;
                 }
-                double maximumSpeed9 = vehicle10.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed9 = vehicle10.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle10.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed9 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle10) * 0.15;
                 }
@@ -436,7 +436,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle11 == null || vehicle11.isLeashed()) {
                     return;
                 }
-                double maximumSpeed10 = vehicle11.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.45;
+                double maximumSpeed10 = vehicle11.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.45;
                 if (vehicle11.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed10 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle11) * 0.45;
                 }
@@ -471,7 +471,7 @@ public class EntitySpeedA extends AbstractCheck {
         }
     }
 
-    public void handleEvent(Event event2) {
+    public void handleEvent(MeshEvent event2) {
         if (event2 instanceof MeshMoveEvent) {
             if (ExemptionManager.isBefore1_9()) {
                 return;
@@ -502,10 +502,10 @@ public class EntitySpeedA extends AbstractCheck {
             }
             if ((this.playerData.getPlayer().getVehicle() != null) && (this.playerData.getPlayer().getVehicle() instanceof Horse)) {
                 Horse vehicle2 = (Horse) this.playerData.getPlayer().getVehicle();
-                if (vehicle2 == null || vehicle2.hasMetadata("PROCOSMETICS_ENTITY") || vehicle2.isLeashed()) {
+                if (vehicle2 == null || vehicle2.isLeashed()) {
                     return;
                 }
-                double maximumSpeed = vehicle2.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed = vehicle2.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle2.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle2) * 0.5;
                 }
@@ -544,7 +544,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle3 == null || vehicle3.isLeashed()) {
                     return;
                 }
-                double maximumSpeed2 = vehicle3.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed2 = vehicle3.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle3.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed2 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle3) * 0.5;
                 }
@@ -583,7 +583,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle4 == null || vehicle4.isLeashed()) {
                     return;
                 }
-                double maximumSpeed3 = vehicle4.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed3 = vehicle4.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle4.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed3 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle4) * 0.5;
                 }
@@ -622,7 +622,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle5 == null || vehicle5.isLeashed()) {
                     return;
                 }
-                double maximumSpeed4 = vehicle5.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed4 = vehicle5.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle5.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed4 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle5) * 0.5;
                 }
@@ -661,7 +661,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle6 == null || vehicle6.isLeashed()) {
                     return;
                 }
-                double maximumSpeed5 = vehicle6.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed5 = vehicle6.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle6.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed5 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle6) * 0.15;
                 }
@@ -724,7 +724,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle7 == null || vehicle7.isLeashed()) {
                     return;
                 }
-                double maximumSpeed6 = vehicle7.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed6 = vehicle7.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle7.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed6 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle7) * 0.5;
                 }
@@ -755,7 +755,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle8 == null || vehicle8.isLeashed()) {
                     return;
                 }
-                double maximumSpeed7 = vehicle8.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed7 = vehicle8.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle8.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed7 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle8) * 0.15;
                 }
@@ -794,7 +794,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle9 == null || vehicle9.isLeashed()) {
                     return;
                 }
-                double maximumSpeed8 = vehicle9.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed8 = vehicle9.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle9.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed8 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle9) * 0.45;
                 }
@@ -833,7 +833,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle10 == null || vehicle10.isLeashed()) {
                     return;
                 }
-                double maximumSpeed9 = vehicle10.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
+                double maximumSpeed9 = vehicle10.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.1;
                 if (vehicle10.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed9 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle10) * 0.15;
                 }
@@ -869,7 +869,7 @@ public class EntitySpeedA extends AbstractCheck {
                 if (vehicle11 == null || vehicle11.isLeashed()) {
                     return;
                 }
-                double maximumSpeed10 = vehicle11.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.45;
+                double maximumSpeed10 = vehicle11.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue() * 2.25 + 0.45;
                 if (vehicle11.hasEffect(MobEffects.SPEED)) {
                     maximumSpeed10 += CheckUtils.getSpeedPotionLevel((LivingEntity) vehicle11) * 0.45;
                 }
@@ -905,6 +905,6 @@ public class EntitySpeedA extends AbstractCheck {
     }
 
     private void ejectPlayer() {
-        this.playerData.getPlayer().leaveVehicle();
+        this.playerData.getPlayer().stopRiding();
     }
 }

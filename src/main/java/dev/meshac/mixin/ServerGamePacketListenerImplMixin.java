@@ -9,7 +9,7 @@ import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
-import net.minecraft.network.protocol.game.ServerboundSwingPacket;
+import net.minecraft.network.protocol.game.ServerboundPunchPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,6 +47,11 @@ public abstract class ServerGamePacketListenerImplMixin {
 		PacketDispatcher.onInteractEntity(player, p);
 	}
 
+	@Inject(method = "handleAttack", at = @At("HEAD"))
+	private void meshac$attack(net.minecraft.network.protocol.game.ServerboundAttackPacket p, CallbackInfo ci) {
+		PacketDispatcher.onAttackEntity(player, p);
+	}
+
 	@Inject(method = "handlePlayerCommand", at = @At("HEAD"))
 	private void meshac$command(ServerboundPlayerCommandPacket p, CallbackInfo ci) {
 		PacketDispatcher.onEntityAction(player, p);
@@ -68,7 +73,7 @@ public abstract class ServerGamePacketListenerImplMixin {
 	}
 
 	@Inject(method = "handleAnimate", at = @At("HEAD"))
-	private void meshac$animate(ServerboundSwingPacket p, CallbackInfo ci) {
+	private void meshac$animate(ServerboundPunchPacket p, CallbackInfo ci) {
 		PacketDispatcher.onSwing(player, p);
 	}
 
