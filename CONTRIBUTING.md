@@ -26,13 +26,15 @@ use jdk 25 to run gradle:
 ./gradlew build
 ```
 
-this builds the default target. to attempt the version configurations in `versions/`:
+this builds 26.3. the verified alternative build routes are:
 
 ```sh
-./build-all.sh
+./gradlew build -Pminecraft_version=26.2 -Pfabric_api_version=0.159.0+26.2 -Pmc_range=26.2 -Pjava_min=25
+./gradlew build -Pminecraft_version=26.1.2 -Pfabric_api_version=0.155.3+26.1.2 -Pmc_range=26.1.x -Pjava_min=25
+./gradlew build -Premap=1 -Pminecraft_version=1.21.11 -Pfabric_api_version=0.141.6+1.21.11 -Pmc_range=1.21.11 -Pjava_min=21
 ```
 
-version properties live in `versions/`. `build-all.sh` passes `remap=1` for 1.21.11, which makes `settings.gradle` select `build-remap.gradle` and compile for java 21. the 26.x builds use `build.gradle` and compile for java 25. a successful compile is not a server boot or a gameplay test.
+`remap=1` makes settings.gradle select build-remap.gradle for 1.21.11 and Java 21 bytecode. 26.x uses build.gradle and Java 25 bytecode. a successful compile is not mixin application, server startup or gameplay proof. the 1.21.11 remap warning remains recorded, not dismissed.
 
 ## test the change
 
@@ -48,4 +50,4 @@ record the false flag, cause and fix in the pull request, with private details r
 
 ## license
 
-changes to this project stay under the `AGPL-3.0-only` license. keep the existing copyright and third-party notices.
+this rebuild is private internal work. keep the legacy LICENSE and third-party credits, but do not treat that license file as permission to redistribute imported Vulcan code. public distribution and release remain blocked pending rights and readiness review.
