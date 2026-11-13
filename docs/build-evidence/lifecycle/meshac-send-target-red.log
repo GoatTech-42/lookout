@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/sandbox/meshac-repo/sim/lifecycle/check_send_target.py", line 13, in <module>
+    assert 'descriptor: (Lnet/minecraft/network/protocol/Packet;)V' in out,(v,owner,'send(Packet) not declared by mixin target')
+AssertionError: ('1.21.11', 'ServerGamePacketListenerImpl', 'send(Packet) not declared by mixin target')

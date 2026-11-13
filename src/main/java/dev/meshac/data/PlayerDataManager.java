@@ -12,6 +12,8 @@ public final class PlayerDataManager {
 
 	public static void onJoin(ServerPlayer player) {
 		PlayerData data = new PlayerData(player);
+		// Fabric JOIN occurs after the login packet, before later entity-scoped updates.
+		data.setEntityId(player.getId());
 		data.setClientVersion(ClientVersionResolver.resolve(player.connection == null ? null : ((dev.meshac.mixin.ServerCommonPacketListenerImplAccessor) player.connection).meshac$getConnection()));
 		data.setChecks(CheckManager.createChecks(data));
 		MeshServices.players().put(player.getUUID(), data);
