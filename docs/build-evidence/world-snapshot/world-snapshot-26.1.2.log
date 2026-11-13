@@ -1,0 +1,42 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :
+Fabric Loom: 1.18.4
+
+> Task :compileJava
+/home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/RelativeMoveTracker.java:43: error: cannot access EntityFluidExtension
+		ServerLevel level = self.level() instanceof ServerLevel l ? l : null;
+		                        ^
+  class file for net.fabricmc.fabric.api.registry.fluid.EntityFluidExtension not found
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+1 error
+
+> Task :compileJava FAILED
+
+[Incubating] Problems report is available at: file:///home/sandbox/meshac-repo/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
+> Compilation failed; see the compiler output below.
+  Note: Recompile with -Xlint:deprecation for details.
+  /home/sandbox/meshac-repo/src/main/java/dev/meshac/tracker/RelativeMoveTracker.java:43: error: cannot access EntityFluidExtension
+  		ServerLevel level = self.level() instanceof ServerLevel l ? l : null;
+  		                        ^
+    class file for net.fabricmc.fabric.api.registry.fluid.EntityFluidExtension not found
+  Note: Recompile with -Xlint:unchecked for details.
+  Note: Some input files use or override a deprecated API.
+  Note: Some input files use unchecked or unsafe operations.
+  1 error
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 17s
+1 actionable task: 1 executed

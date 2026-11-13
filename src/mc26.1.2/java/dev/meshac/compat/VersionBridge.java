@@ -23,6 +23,10 @@ public final class VersionBridge {
  public static boolean wetSulfur(BlockState state) {
   return false; // This server version has no potent sulfur block (verified target jar).
  }
+ public static ClientboundLevelChunkPacketData chunkData(ClientboundLevelChunkWithLightPacket packet) { return packet.getChunkData(); }
+ public static void blockEntityPositions(ClientboundLevelChunkPacketData payload, int chunkX, int chunkZ, java.util.function.Consumer<net.minecraft.core.BlockPos> out) {
+  payload.getBlockEntitiesTagsConsumer(chunkX, chunkZ).accept((pos, type, tag) -> out.accept(pos.immutable()));
+ }
  public static long chunkKey(net.minecraft.world.level.ChunkPos pos) { return pos.pack(); }
  public static int motionEntity(ClientboundSetEntityMotionPacket p) { return p.id(); }
  public static Vec3 motion(ClientboundSetEntityMotionPacket p) { return p.movement(); }

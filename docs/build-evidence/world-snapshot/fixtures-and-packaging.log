@@ -1,0 +1,62 @@
+RUN sim/world/run_world_snapshot.py
+WorldSnapshotTest PASS (payload freeze, negative coordinates, updates, reset generation)
+RUN sim/world/test_mutations.py
+REJECTED: late-payload-read
+REJECTED: reset-generation
+REJECTED: mutable-update-pos
+REJECTED: unmodifiable-live-cache
+REJECTED: unsigned-negative-z
+REJECTED: unsigned-negative-y
+World snapshot mutation checks PASS
+RUN sim/safety/run_product_safety.py
+SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=kick fixture
+[meshac] contained effect (log-only): disconnect target=fixture detail=simulated staff ban: test
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=pardon
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=unban
+[meshac] contained effect (log-only): disconnect target=fixture detail=Unusual fly (fly forced isolated REMOVE)
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+ProductSafetyTest PASS (registered kick/ban/pardon/unban; persistence, escalation, disconnect, egress, inherited veil)
+RUN sim/safety/test_mutations.py
+REJECTED: kick-command-guard
+REJECTED: case-add-guard
+REJECTED: case-pardon-guard
+REJECTED: discord-egress-guard
+REJECTED: veil-qualification-hold
+Product mutation checks PASS (temporary copies only)
+RUN sim/dispatch/run_dispatch_safety.py
+PASS: inbound-packet world/unknown suppressed, eligible control executed
+PASS: event-dispatch world/unknown suppressed, eligible control executed
+PASS: placement-packet world/unknown suppressed, eligible control executed
+PASS: digging-and-event world/unknown suppressed, eligible control executed
+PASS: outbound-position world/unknown suppressed, eligible control executed
+PASS: movement-event world/unknown suppressed, eligible control executed
+RUN sim/dispatch/test_mutations.py
+REJECTED missing production guard: inbound
+REJECTED missing production guard: event
+REJECTED missing production guard: outbound
+REJECTED missing production guard: move
+Dispatcher mutation checks PASS
+RUN scripts/test_analyzer_cli.py
+checks: 1 needsVersion: 0 needsWorld: 0
+test_analyzer_cli: PASS (stale/missing fail, check does not write, no Git required)
+RUN scripts/test_analyze_deps.py
+checks: 3 needsVersion: 1 needsWorld: 1
+ok: call site getClientVersion seeds version need
+ok: world-only check does not gain version need
+ok: declaration file does not seed
+ok: call site getWorldBlockTracker seeds world need
+ok: comment mention does not seed world need
+ok: plain check is known
+ok: plain check has no propagated needs through declaration-only PlayerData
+ok: metadata is current (read-only comparison): checks: 180 needsVersion: 179 needsWorld: 179
+test_analyze_deps: PASS
+Packaged target metadata/class/mixin presence PASS: 26.1.2 meshac-26.1.2-2.9.7.28-meshac-0.1.0.jar
+Packaged target metadata/class/mixin presence PASS: 26.2 meshac-26.2-2.9.7.28-meshac-0.1.0.jar
+Packaged target metadata/class/mixin presence PASS: 26.3 meshac-26.3-2.9.7.28-meshac-0.1.0.jar
+Packaged target metadata/class/mixin presence PASS: 1.21.11 meshac-1.21.11-2.9.7.28-meshac-0.1.0.jar

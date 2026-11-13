@@ -48,9 +48,7 @@ public final class OutboundDispatcher {
 			return;
 		}
 		if (packet instanceof net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket chunk) {
-			// Faithful mirror point: the chunk the client is being sent, veil-adjusted inside the tracker.
-			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(dev.meshac.compat.VersionBridge.chunkX(chunk), dev.meshac.compat.VersionBridge.chunkZ(chunk));
-			data.getWorldBlockTracker().handleChunkColumn(player.level().dimension(), levelChunk);
+			data.getWorldBlockTracker().handleChunkPacket(player.level(), chunk);
 			return;
 		}
 		if (packet instanceof net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket forget) {

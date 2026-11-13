@@ -25,3 +25,9 @@ python3 sim/dispatch/test_mutations.py
 The fixtures do not run the Fabric JOIN callback or actual vanilla packet lifecycle. The JOIN source fix still needs integration qualification. They do not prove every effect call site is contained, all callbacks are ordered, or that a suppressed check detects anything. The product fixture uses real Verdict logic but does not connect Vulcan's punishment system to it. That integration remains separate and must preserve upstream decisions.
 
 Recorded evidence is in `docs/build-evidence/2026-11-13-safety-fixtures.log`. The product RED run reproduced staff-kick persistence, pardon/unban mutation, configured-webhook escape and inherited-config veil activation before the fixes. The analyzer RED run reproduced stale `--check` falsely returning success.
+
+
+## Packet snapshot fixture (not runtime clearance)
+
+Run `python3 sim/world/run_world_snapshot.py` and `python3 sim/world/test_mutations.py`.
+They compile the actual production WorldBlockTracker against explicit native/confirmation boundary doubles. They test packet capture timing, recipient independence, signed positions, mutable update copying, reset generations, tile-entity filtering, subsequent updates and radius boundaries. Six realistic source mutations must fail. They do not exercise Minecraft section codecs, shipping adapters/mixins, network acknowledgement ordering, actual check VL/alerts, thread ownership or game sessions. World eligibility stays closed and Veil off. See PARITY.md's packet-owned snapshot entry for limits and the corrected packet serialization timing.

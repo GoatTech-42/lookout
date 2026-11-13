@@ -3,23 +3,20 @@ package dev.meshac.tracker;
 import dev.meshac.data.PlayerData;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 
 /**
- * Client-acknowledged world view, faithful to Vulcan's WorldBlockTracker semantics:
+ * Partial outbound sulfur-proximity view based on Vulcan's WorldBlockTracker:
  * fed by outbound chunk columns, section multi-block updates, single block updates,
- * chunk forgets and respawn/login resets, all applied after client confirmation
- * (upstream defers every apply through the confirmation tracker).
+ * chunk forgets and respawn/login resets. Updates use the confirmation tracker;
+ * acknowledgement ordering and JOIN anchoring remain unqualified.
  * hasTrackedBlockNearby is the upstream wet-potent-sulfur proximity query, NOT
  * generic chunk presence. Full block-state mirroring is not implemented:
  * getBlockState keeps the empty-cache air fallback and any future consumer must
@@ -39,69 +36,71 @@ public class WorldBlockTracker {
 	}
 
 	public void reset() {
+		generation++;
 		trackedSulfur.clear();
 	}
 
-	public void handleChunkColumn(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension, LevelChunk chunk) {
-		if (chunk == null) return;
-		long packedPos = dev.meshac.compat.VersionBridge.chunkKey(chunk.getPos());
-		final int chunkX = ChunkPos.getX(packedPos), chunkZ = ChunkPos.getZ(packedPos);
-		// Freeze at send time: scan the sections and consume the emitted-mods record NOW, so the
-		// confirmation-deferred apply cannot observe a later world state or a later encode's swaps.
-		// Remaining delta vs exact per-packet payload: this still scans the live LevelChunk at send
-		// time rather than the packet-decoded bytes (PARITY.md); world gate stays CLOSED regardless.
-		Map<Integer, Set<Long>> frozen = new HashMap<>();
-		LevelChunkSection[] sections = chunk.getSections();
-		for (int i = 0; i < sections.length; i++) {
-			LevelChunkSection section = sections[i];
-			if (section == null || section.hasOnlyAir()) continue;
-			Set<Integer> hidden = new HashSet<>(dev.meshac.veil.Veil.takeEmittedMods(dimension, chunk.getPos(), i));
-			int sectionMinY = chunk.getSectionYFromSectionIndex(i) << 4;
-			Set<Long> wet = new HashSet<>();
-			for (int ly = 0; ly < 16; ly++) {
-				for (int lz = 0; lz < 16; lz++) {
-					for (int lx = 0; lx < 16; lx++) {
-						int idx = lx | (ly << 4) | (lz << 8);
-						if (hidden.contains(idx)) continue;
-						if (isWetPotentSulfur(section.getBlockState(lx, ly, lz)))
-							wet.add(positionKey((chunkX << 4) + lx, sectionMinY + ly, (chunkZ << 4) + lz));
-					}
-				}
+	/** Read the packet-owned encoded bytes now; defer only applying immutable results. */
+	public void handleChunkPacket(net.minecraft.server.level.ServerLevel level,
+			net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket packet) {
+		int chunkX = dev.meshac.compat.VersionBridge.chunkX(packet);
+		int chunkZ = dev.meshac.compat.VersionBridge.chunkZ(packet);
+		var payload = dev.meshac.compat.VersionBridge.chunkData(packet);
+		Map<Integer, Set<Long>> snapshot = new HashMap<>();
+		var buffer = payload.getReadBuffer();
+		try {
+			LevelChunkSection[] sections = new LevelChunkSection[level.getSectionsCount()];
+			for (int i = 0; i < sections.length; i++) {
+				sections[i] = new LevelChunkSection(level.palettedContainerFactory());
+				sections[i].read(buffer);
 			}
-			if (!wet.isEmpty()) frozen.put(i, wet);
+			if (buffer.isReadable()) throw new IllegalStateException("Trailing chunk section bytes: " + buffer.readableBytes());
+			int firstSectionY = level.getMinSectionY();
+			// Upstream indexes emitted tile entities, then checks the corresponding emitted section state.
+			dev.meshac.compat.VersionBridge.blockEntityPositions(payload, chunkX, chunkZ, pos -> {
+				int section = (pos.getY() >> 4) - firstSectionY;
+				if (section < 0 || section >= sections.length || pos.getY() < MIN_Y || pos.getY() > MAX_Y) return;
+				if (isWetPotentSulfur(sections[section].getBlockState(pos.getX() & 15, pos.getY() & 15, pos.getZ() & 15))) {
+					int index = (pos.getY() - MIN_Y) >> 4;
+					snapshot.computeIfAbsent(index, key -> new HashSet<>()).add(positionKey(pos.getX(), pos.getY(), pos.getZ()));
+				}
+			});
+		} catch (RuntimeException failure) {
+			reset();
+			dev.meshac.MeshServices.log("[parity] chunk payload decode failed; world tracking reset and eligibility remains closed: " + failure);
+			return;
+		} finally {
+			buffer.release();
 		}
-		playerData.getConfirmationTracker().runAfterConfirmation(() -> {
+		Map<Integer, Set<Long>> frozen = new HashMap<>();
+		snapshot.forEach((section, positions) -> frozen.put(section, Set.copyOf(positions)));
+		afterConfirmation(() -> {
 			clearChunk(chunkX, chunkZ);
 			if (!frozen.isEmpty()) {
-				Map<Integer, Set<Long>> dst = new HashMap<>();
-				frozen.forEach((sec, keys) -> dst.put(sec, Set.copyOf(keys)));
-				trackedSulfur.put(chunkKey(chunkX, chunkZ), dst);
+				Map<Integer, Set<Long>> mutable = new HashMap<>();
+				frozen.forEach((section, positions) -> mutable.put(section, new HashSet<>(positions)));
+				trackedSulfur.put(chunkKey(chunkX, chunkZ), mutable);
 			}
 		});
 	}
 
-	private void scanSection(int chunkX, int chunkZ, int sectionIndex, int sectionMinY, LevelChunkSection section, Set<Integer> hidden) {
-		for (int ly = 0; ly < 16; ly++) {
-			for (int lz = 0; lz < 16; lz++) {
-				for (int lx = 0; lx < 16; lx++) {
-					int idx = lx | (ly << 4) | (lz << 8); // must match Veil.Mod.idx layout (x | y<<4 | z<<8)
-					if (hidden.contains(idx)) continue;
-					BlockState state = section.getBlockState(lx, ly, lz);
-					if (isWetPotentSulfur(state)) {
-						track(chunkX, chunkZ, sectionIndex, (chunkX << 4) + lx, sectionMinY + ly, (chunkZ << 4) + lz);
-					}
-				}
-			}
-		}
+	private long generation;
+	private void afterConfirmation(Runnable action) {
+		long capturedGeneration = generation;
+		playerData.getConfirmationTracker().runAfterConfirmation(() -> {
+			if (generation == capturedGeneration) action.run();
+		});
 	}
 
 	public void handleBlockUpdate(BlockPos pos, BlockState state) {
-		playerData.getConfirmationTracker().runAfterConfirmation(() -> applyBlockChange(pos, state));
+		BlockPos frozenPosition = pos.immutable();
+		afterConfirmation(() -> applyBlockChange(frozenPosition, state));
 	}
 
 	public void handleSectionUpdates(ClientboundSectionUpdatesConsumer consumer) {
-		playerData.getConfirmationTracker().runAfterConfirmation(() ->
-				consumer.consume(this::applyBlockChange));
+		java.util.List<java.util.Map.Entry<BlockPos, BlockState>> frozen = new java.util.ArrayList<>();
+		consumer.consume((pos, state) -> frozen.add(java.util.Map.entry(pos.immutable(), state)));
+		afterConfirmation(() -> frozen.forEach(entry -> applyBlockChange(entry.getKey(), entry.getValue())));
 	}
 
 	/** Functional bridge so this class need not import the packet type in tests. */
@@ -110,7 +109,7 @@ public class WorldBlockTracker {
 	}
 
 	public void handleChunkForget(ChunkPos pos) {
-		playerData.getConfirmationTracker().runAfterConfirmation(() -> clearChunk(ChunkPos.getX(dev.meshac.compat.VersionBridge.chunkKey(pos)), ChunkPos.getZ(dev.meshac.compat.VersionBridge.chunkKey(pos))));
+		afterConfirmation(() -> clearChunk(ChunkPos.getX(dev.meshac.compat.VersionBridge.chunkKey(pos)), ChunkPos.getZ(dev.meshac.compat.VersionBridge.chunkKey(pos))));
 	}
 
 	private void applyBlockChange(BlockPos pos, BlockState state) {

@@ -1,0 +1,303 @@
+Compiled from "ClientboundLevelChunkPacketData.java"
+public class net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData {
+  private static final net.minecraft.network.codec.StreamCodec<io.netty.buffer.ByteBuf, java.util.Map<net.minecraft.world.level.levelgen.Heightmap$Types, long[]>> HEIGHTMAPS_STREAM_CODEC;
+
+  private static final int TWO_MEGABYTES;
+
+  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.RegistryFriendlyByteBuf, net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData> STREAM_CODEC;
+
+  private final java.util.Map<net.minecraft.world.level.levelgen.Heightmap$Types, long[]> heightmaps;
+
+  private final byte[] buffer;
+
+  private final java.util.List<net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData$BlockEntityInfo> blockEntitiesData;
+
+  public net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData(net.minecraft.world.level.chunk.LevelChunk);
+    Code:
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: aload_0
+         5: aload_1
+         6: invokevirtual #7                  // Method net/minecraft/world/level/chunk/LevelChunk.getHeightmaps:()Ljava/util/Collection;
+         9: invokeinterface #13,  1           // InterfaceMethod java/util/Collection.stream:()Ljava/util/stream/Stream;
+        14: invokedynamic #19,  0             // InvokeDynamic #0:test:()Ljava/util/function/Predicate;
+        19: invokeinterface #23,  2           // InterfaceMethod java/util/stream/Stream.filter:(Ljava/util/function/Predicate;)Ljava/util/stream/Stream;
+        24: invokedynamic #29,  0             // InvokeDynamic #1:apply:()Ljava/util/function/Function;
+        29: invokedynamic #33,  0             // InvokeDynamic #2:apply:()Ljava/util/function/Function;
+        34: invokestatic  #34                 // Method java/util/stream/Collectors.toMap:(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/util/stream/Collector;
+        37: invokeinterface #40,  2           // InterfaceMethod java/util/stream/Stream.collect:(Ljava/util/stream/Collector;)Ljava/lang/Object;
+        42: checkcast     #44                 // class java/util/Map
+        45: putfield      #46                 // Field heightmaps:Ljava/util/Map;
+        48: aload_0
+        49: aload_1
+        50: invokestatic  #52                 // Method calculateChunkSize:(Lnet/minecraft/world/level/chunk/LevelChunk;)I
+        53: newarray       byte
+        55: putfield      #56                 // Field buffer:[B
+        58: new           #60                 // class net/minecraft/network/FriendlyByteBuf
+        61: dup
+        62: aload_0
+        63: invokevirtual #62                 // Method getWriteBuffer:()Lio/netty/buffer/ByteBuf;
+        66: invokespecial #66                 // Method net/minecraft/network/FriendlyByteBuf."<init>":(Lio/netty/buffer/ByteBuf;)V
+        69: aload_1
+        70: invokestatic  #69                 // Method extractChunkData:(Lnet/minecraft/network/FriendlyByteBuf;Lnet/minecraft/world/level/chunk/LevelChunk;)V
+        73: aload_0
+        74: invokestatic  #73                 // Method com/google/common/collect/Lists.newArrayList:()Ljava/util/ArrayList;
+        77: putfield      #79                 // Field blockEntitiesData:Ljava/util/List;
+        80: aload_1
+        81: invokevirtual #83                 // Method net/minecraft/world/level/chunk/LevelChunk.getBlockEntities:()Ljava/util/Map;
+        84: invokeinterface #87,  1           // InterfaceMethod java/util/Map.entrySet:()Ljava/util/Set;
+        89: invokeinterface #91,  1           // InterfaceMethod java/util/Set.iterator:()Ljava/util/Iterator;
+        94: astore_2
+        95: aload_2
+        96: invokeinterface #97,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+       101: ifeq          139
+       104: aload_2
+       105: invokeinterface #103,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+       110: checkcast     #107                // class java/util/Map$Entry
+       113: astore_3
+       114: aload_0
+       115: getfield      #79                 // Field blockEntitiesData:Ljava/util/List;
+       118: aload_3
+       119: invokeinterface #109,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+       124: checkcast     #112                // class net/minecraft/world/level/block/entity/BlockEntity
+       127: invokestatic  #114                // Method net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo.create:(Lnet/minecraft/world/level/block/entity/BlockEntity;)Lnet/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo;
+       130: invokeinterface #120,  2          // InterfaceMethod java/util/List.add:(Ljava/lang/Object;)Z
+       135: pop
+       136: goto          95
+       139: return
+
+  private net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData(java.util.Map<net.minecraft.world.level.levelgen.Heightmap$Types, long[]>, byte[], java.util.List<net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData$BlockEntityInfo>);
+    Code:
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: aload_0
+         5: aload_1
+         6: putfield      #46                 // Field heightmaps:Ljava/util/Map;
+         9: aload_0
+        10: aload_2
+        11: putfield      #56                 // Field buffer:[B
+        14: aload_0
+        15: aload_3
+        16: putfield      #79                 // Field blockEntitiesData:Ljava/util/List;
+        19: return
+
+  private static int calculateChunkSize(net.minecraft.world.level.chunk.LevelChunk);
+    Code:
+         0: iconst_0
+         1: istore_1
+         2: aload_0
+         3: invokevirtual #126                // Method net/minecraft/world/level/chunk/LevelChunk.getSections:()[Lnet/minecraft/world/level/chunk/LevelChunkSection;
+         6: astore_2
+         7: aload_2
+         8: arraylength
+         9: istore_3
+        10: iconst_0
+        11: istore        4
+        13: iload         4
+        15: iload_3
+        16: if_icmpge     39
+        19: aload_2
+        20: iload         4
+        22: aaload
+        23: astore        5
+        25: iload_1
+        26: aload         5
+        28: invokevirtual #130                // Method net/minecraft/world/level/chunk/LevelChunkSection.getSerializedSize:()I
+        31: iadd
+        32: istore_1
+        33: iinc          4, 1
+        36: goto          13
+        39: iload_1
+        40: ireturn
+
+  private io.netty.buffer.ByteBuf getWriteBuffer();
+    Code:
+         0: aload_0
+         1: getfield      #56                 // Field buffer:[B
+         4: invokestatic  #136                // Method io/netty/buffer/Unpooled.wrappedBuffer:([B)Lio/netty/buffer/ByteBuf;
+         7: astore_1
+         8: aload_1
+         9: iconst_0
+        10: invokevirtual #142                // Method io/netty/buffer/ByteBuf.writerIndex:(I)Lio/netty/buffer/ByteBuf;
+        13: pop
+        14: aload_1
+        15: areturn
+
+  public static void extractChunkData(net.minecraft.network.FriendlyByteBuf, net.minecraft.world.level.chunk.LevelChunk);
+    Code:
+         0: aload_1
+         1: invokevirtual #126                // Method net/minecraft/world/level/chunk/LevelChunk.getSections:()[Lnet/minecraft/world/level/chunk/LevelChunkSection;
+         4: astore_2
+         5: aload_2
+         6: arraylength
+         7: istore_3
+         8: iconst_0
+         9: istore        4
+        11: iload         4
+        13: iload_3
+        14: if_icmpge     35
+        17: aload_2
+        18: iload         4
+        20: aaload
+        21: astore        5
+        23: aload         5
+        25: aload_0
+        26: invokevirtual #148                // Method net/minecraft/world/level/chunk/LevelChunkSection.write:(Lnet/minecraft/network/FriendlyByteBuf;)V
+        29: iinc          4, 1
+        32: goto          11
+        35: aload_0
+        36: invokevirtual #152                // Method net/minecraft/network/FriendlyByteBuf.writerIndex:()I
+        39: aload_0
+        40: invokevirtual #154                // Method net/minecraft/network/FriendlyByteBuf.capacity:()I
+        43: if_icmpeq     67
+        46: new           #157                // class java/lang/IllegalStateException
+        49: dup
+        50: aload_0
+        51: invokevirtual #154                // Method net/minecraft/network/FriendlyByteBuf.capacity:()I
+        54: aload_0
+        55: invokevirtual #152                // Method net/minecraft/network/FriendlyByteBuf.writerIndex:()I
+        58: invokedynamic #159,  0            // InvokeDynamic #3:makeConcatWithConstants:(II)Ljava/lang/String;
+        63: invokespecial #163                // Method java/lang/IllegalStateException."<init>":(Ljava/lang/String;)V
+        66: athrow
+        67: return
+
+  public void forEachBlockEntityTag(int, int, net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData$BlockEntityTagOutput);
+    Code:
+         0: bipush        16
+         2: iload_1
+         3: imul
+         4: istore        4
+         6: bipush        16
+         8: iload_2
+         9: imul
+        10: istore        5
+        12: new           #168                // class net/minecraft/core/BlockPos$MutableBlockPos
+        15: dup
+        16: invokespecial #170                // Method net/minecraft/core/BlockPos$MutableBlockPos."<init>":()V
+        19: astore        6
+        21: aload_0
+        22: getfield      #79                 // Field blockEntitiesData:Ljava/util/List;
+        25: invokeinterface #171,  1          // InterfaceMethod java/util/List.iterator:()Ljava/util/Iterator;
+        30: astore        7
+        32: aload         7
+        34: invokeinterface #97,  1           // InterfaceMethod java/util/Iterator.hasNext:()Z
+        39: ifeq          125
+        42: aload         7
+        44: invokeinterface #103,  1          // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+        49: checkcast     #115                // class net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo
+        52: astore        8
+        54: iload         4
+        56: aload         8
+        58: getfield      #172                // Field net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo.packedXZ:B
+        61: iconst_4
+        62: ishr
+        63: invokestatic  #176                // Method net/minecraft/core/SectionPos.sectionRelative:(I)I
+        66: iadd
+        67: istore        9
+        69: iload         5
+        71: aload         8
+        73: getfield      #172                // Field net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo.packedXZ:B
+        76: invokestatic  #176                // Method net/minecraft/core/SectionPos.sectionRelative:(I)I
+        79: iadd
+        80: istore        10
+        82: aload         6
+        84: iload         9
+        86: aload         8
+        88: getfield      #180                // Field net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo.y:S
+        91: iload         10
+        93: invokevirtual #184                // Method net/minecraft/core/BlockPos$MutableBlockPos.set:(III)Lnet/minecraft/core/BlockPos$MutableBlockPos;
+        96: pop
+        97: aload_3
+        98: aload         6
+       100: aload         8
+       102: getfield      #188                // Field net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo.type:Lnet/minecraft/world/level/block/entity/BlockEntityType;
+       105: aload         8
+       107: getfield      #192                // Field net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo.tag:Ljava/util/Optional;
+       110: aconst_null
+       111: invokevirtual #196                // Method java/util/Optional.orElse:(Ljava/lang/Object;)Ljava/lang/Object;
+       114: checkcast     #202                // class net/minecraft/nbt/CompoundTag
+       117: invokeinterface #204,  4          // InterfaceMethod net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityTagOutput.accept:(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/entity/BlockEntityType;Lnet/minecraft/nbt/CompoundTag;)V
+       122: goto          32
+       125: return
+
+  public net.minecraft.network.FriendlyByteBuf getReadBuffer();
+    Code:
+         0: new           #60                 // class net/minecraft/network/FriendlyByteBuf
+         3: dup
+         4: aload_0
+         5: getfield      #56                 // Field buffer:[B
+         8: invokestatic  #136                // Method io/netty/buffer/Unpooled.wrappedBuffer:([B)Lio/netty/buffer/ByteBuf;
+        11: invokespecial #66                 // Method net/minecraft/network/FriendlyByteBuf."<init>":(Lio/netty/buffer/ByteBuf;)V
+        14: areturn
+
+  public java.util.Map<net.minecraft.world.level.levelgen.Heightmap$Types, long[]> getHeightmaps();
+    Code:
+         0: aload_0
+         1: getfield      #46                 // Field heightmaps:Ljava/util/Map;
+         4: areturn
+
+  private static long[] lambda$new$1(java.util.Map$Entry);
+    Code:
+         0: aload_0
+         1: invokeinterface #109,  1          // InterfaceMethod java/util/Map$Entry.getValue:()Ljava/lang/Object;
+         6: checkcast     #210                // class net/minecraft/world/level/levelgen/Heightmap
+         9: invokevirtual #212                // Method net/minecraft/world/level/levelgen/Heightmap.getRawData:()[J
+        12: invokevirtual #216                // Method "[J".clone:()Ljava/lang/Object;
+        15: checkcast     #217                // class "[J"
+        18: areturn
+
+  private static boolean lambda$new$0(java.util.Map$Entry);
+    Code:
+         0: aload_0
+         1: invokeinterface #221,  1          // InterfaceMethod java/util/Map$Entry.getKey:()Ljava/lang/Object;
+         6: checkcast     #224                // class net/minecraft/world/level/levelgen/Heightmap$Types
+         9: invokevirtual #226                // Method net/minecraft/world/level/levelgen/Heightmap$Types.sendToClient:()Z
+        12: ireturn
+
+  private static java.util.List lambda$static$3(net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData);
+    Code:
+         0: aload_0
+         1: getfield      #79                 // Field blockEntitiesData:Ljava/util/List;
+         4: areturn
+
+  private static byte[] lambda$static$2(net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData);
+    Code:
+         0: aload_0
+         1: getfield      #56                 // Field buffer:[B
+         4: areturn
+
+  private static java.util.Map lambda$static$1(net.minecraft.network.protocol.game.ClientboundLevelChunkPacketData);
+    Code:
+         0: aload_0
+         1: getfield      #46                 // Field heightmaps:Ljava/util/Map;
+         4: areturn
+
+  private static java.util.Map lambda$static$0(int);
+    Code:
+         0: new           #229                // class java/util/EnumMap
+         3: dup
+         4: ldc           #224                // class net/minecraft/world/level/levelgen/Heightmap$Types
+         6: invokespecial #231                // Method java/util/EnumMap."<init>":(Ljava/lang/Class;)V
+         9: areturn
+
+  static {};
+    Code:
+         0: invokedynamic #234,  0            // InvokeDynamic #4:apply:()Ljava/util/function/IntFunction;
+         5: getstatic     #237                // Field net/minecraft/world/level/levelgen/Heightmap$Types.STREAM_CODEC:Lnet/minecraft/network/codec/StreamCodec;
+         8: getstatic     #241                // Field net/minecraft/network/codec/ByteBufCodecs.LONG_ARRAY:Lnet/minecraft/network/codec/StreamCodec;
+        11: invokestatic  #246                // InterfaceMethod net/minecraft/network/codec/ByteBufCodecs.map:(Ljava/util/function/IntFunction;Lnet/minecraft/network/codec/StreamCodec;Lnet/minecraft/network/codec/StreamCodec;)Lnet/minecraft/network/codec/StreamCodec;
+        14: putstatic     #250                // Field HEIGHTMAPS_STREAM_CODEC:Lnet/minecraft/network/codec/StreamCodec;
+        17: getstatic     #250                // Field HEIGHTMAPS_STREAM_CODEC:Lnet/minecraft/network/codec/StreamCodec;
+        20: invokedynamic #253,  0            // InvokeDynamic #5:apply:()Ljava/util/function/Function;
+        25: ldc           #254                // int 2097152
+        27: invokestatic  #255                // InterfaceMethod net/minecraft/network/codec/ByteBufCodecs.byteArray:(I)Lnet/minecraft/network/codec/StreamCodec;
+        30: invokedynamic #259,  0            // InvokeDynamic #6:apply:()Ljava/util/function/Function;
+        35: getstatic     #260                // Field net/minecraft/network/protocol/game/ClientboundLevelChunkPacketData$BlockEntityInfo.STREAM_CODEC:Lnet/minecraft/network/codec/StreamCodec;
+        38: invokestatic  #261                // InterfaceMethod net/minecraft/network/codec/ByteBufCodecs.list:()Lnet/minecraft/network/codec/StreamCodec$CodecOperation;
+        41: invokeinterface #265,  2          // InterfaceMethod net/minecraft/network/codec/StreamCodec.apply:(Lnet/minecraft/network/codec/StreamCodec$CodecOperation;)Lnet/minecraft/network/codec/StreamCodec;
+        46: invokedynamic #270,  0            // InvokeDynamic #7:apply:()Ljava/util/function/Function;
+        51: invokedynamic #271,  0            // InvokeDynamic #8:apply:()Lcom/mojang/datafixers/util/Function3;
+        56: invokestatic  #274                // InterfaceMethod net/minecraft/network/codec/StreamCodec.composite:(Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Lcom/mojang/datafixers/util/Function3;)Lnet/minecraft/network/codec/StreamCodec;
+        59: putstatic     #278                // Field STREAM_CODEC:Lnet/minecraft/network/codec/StreamCodec;
+        62: return
+}
