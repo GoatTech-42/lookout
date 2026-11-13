@@ -1,0 +1,141 @@
+Compiled from "Input.java"
+public final class net.minecraft.world.entity.player.Input extends java.lang.Record {
+  private final boolean forward;
+
+  private final boolean backward;
+
+  private final boolean left;
+
+  private final boolean right;
+
+  private final boolean jump;
+
+  private final boolean shift;
+
+  private final boolean sprint;
+
+  private static final byte FLAG_FORWARD;
+
+  private static final byte FLAG_BACKWARD;
+
+  private static final byte FLAG_LEFT;
+
+  private static final byte FLAG_RIGHT;
+
+  private static final byte FLAG_JUMP;
+
+  private static final byte FLAG_SHIFT;
+
+  private static final byte FLAG_SPRINT;
+
+  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.FriendlyByteBuf, net.minecraft.world.entity.player.Input> STREAM_CODEC;
+
+  public static final net.minecraft.world.entity.player.Input EMPTY;
+
+  public net.minecraft.world.entity.player.Input(boolean, boolean, boolean, boolean, boolean, boolean, boolean);
+    Code:
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Record."<init>":()V
+         4: aload_0
+         5: iload_1
+         6: putfield      #7                  // Field forward:Z
+         9: aload_0
+        10: iload_2
+        11: putfield      #13                 // Field backward:Z
+        14: aload_0
+        15: iload_3
+        16: putfield      #16                 // Field left:Z
+        19: aload_0
+        20: iload         4
+        22: putfield      #19                 // Field right:Z
+        25: aload_0
+        26: iload         5
+        28: putfield      #22                 // Field jump:Z
+        31: aload_0
+        32: iload         6
+        34: putfield      #25                 // Field shift:Z
+        37: aload_0
+        38: iload         7
+        40: putfield      #28                 // Field sprint:Z
+        43: return
+
+  public final java.lang.String toString();
+    Code:
+         0: aload_0
+         1: invokedynamic #31,  0             // InvokeDynamic #0:toString:(Lnet/minecraft/world/entity/player/Input;)Ljava/lang/String;
+         6: areturn
+
+  public final int hashCode();
+    Code:
+         0: aload_0
+         1: invokedynamic #35,  0             // InvokeDynamic #0:hashCode:(Lnet/minecraft/world/entity/player/Input;)I
+         6: ireturn
+
+  public final boolean equals(java.lang.Object);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: invokedynamic #39,  0             // InvokeDynamic #0:equals:(Lnet/minecraft/world/entity/player/Input;Ljava/lang/Object;)Z
+         7: ireturn
+
+  public boolean forward();
+    Code:
+         0: aload_0
+         1: getfield      #7                  // Field forward:Z
+         4: ireturn
+
+  public boolean backward();
+    Code:
+         0: aload_0
+         1: getfield      #13                 // Field backward:Z
+         4: ireturn
+
+  public boolean left();
+    Code:
+         0: aload_0
+         1: getfield      #16                 // Field left:Z
+         4: ireturn
+
+  public boolean right();
+    Code:
+         0: aload_0
+         1: getfield      #19                 // Field right:Z
+         4: ireturn
+
+  public boolean jump();
+    Code:
+         0: aload_0
+         1: getfield      #22                 // Field jump:Z
+         4: ireturn
+
+  public boolean shift();
+    Code:
+         0: aload_0
+         1: getfield      #25                 // Field shift:Z
+         4: ireturn
+
+  public boolean sprint();
+    Code:
+         0: aload_0
+         1: getfield      #28                 // Field sprint:Z
+         4: ireturn
+
+  static {};
+    Code:
+         0: new           #43                 // class net/minecraft/world/entity/player/Input$1
+         3: dup
+         4: invokespecial #45                 // Method net/minecraft/world/entity/player/Input$1."<init>":()V
+         7: putstatic     #46                 // Field STREAM_CODEC:Lnet/minecraft/network/codec/StreamCodec;
+        10: new           #8                  // class net/minecraft/world/entity/player/Input
+        13: dup
+        14: iconst_0
+        15: iconst_0
+        16: iconst_0
+        17: iconst_0
+        18: iconst_0
+        19: iconst_0
+        20: iconst_0
+        21: invokespecial #50                 // Method "<init>":(ZZZZZZZ)V
+        24: putstatic     #53                 // Field EMPTY:Lnet/minecraft/world/entity/player/Input;
+        27: return
+}

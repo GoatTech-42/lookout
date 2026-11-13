@@ -11,8 +11,10 @@ public final class PlayerDataManager {
 	}
 
 	public static void onJoin(ServerPlayer player) {
+		PlayerData current = get(player);
+		if (current != null && current.getPlayer() == player) return;
 		PlayerData data = new PlayerData(player);
-		// Fabric JOIN occurs after the login packet, before later entity-scoped updates.
+		// Login-send HEAD initializes once; the later Fabric JOIN reuses this session.
 		data.setEntityId(player.getId());
 		data.setUniqueId(player.getUUID());
 		data.setPlayerName(player.getName().getString());

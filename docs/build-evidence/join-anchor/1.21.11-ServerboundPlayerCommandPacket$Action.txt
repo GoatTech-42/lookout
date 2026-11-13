@@ -1,0 +1,123 @@
+Compiled from "ServerboundPlayerCommandPacket.java"
+public final class net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action extends java.lang.Enum<net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action> {
+  public static final net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action STOP_SLEEPING;
+
+  public static final net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action START_SPRINTING;
+
+  public static final net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action STOP_SPRINTING;
+
+  public static final net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action START_RIDING_JUMP;
+
+  public static final net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action STOP_RIDING_JUMP;
+
+  public static final net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action OPEN_INVENTORY;
+
+  public static final net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action START_FALL_FLYING;
+
+  private static final net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action[] $VALUES;
+
+  public static net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action[] values();
+    Code:
+         0: getstatic     #23                 // Field $VALUES:[Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+         3: invokevirtual #28                 // Method "[Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;".clone:()Ljava/lang/Object;
+         6: checkcast     #24                 // class "[Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;"
+         9: areturn
+
+  public static net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action valueOf(java.lang.String);
+    Code:
+         0: ldc           #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+         2: aload_0
+         3: invokestatic  #34                 // Method java/lang/Enum.valueOf:(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Enum;
+         6: checkcast     #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+         9: areturn
+
+  private net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action();
+    Code:
+         0: aload_0
+         1: aload_1
+         2: iload_2
+         3: invokespecial #41                 // Method java/lang/Enum."<init>":(Ljava/lang/String;I)V
+         6: return
+
+  private static net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket$Action[] $values();
+    Code:
+         0: bipush        7
+         2: anewarray     #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+         5: dup
+         6: iconst_0
+         7: getstatic     #46                 // Field STOP_SLEEPING:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        10: aastore
+        11: dup
+        12: iconst_1
+        13: getstatic     #48                 // Field START_SPRINTING:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        16: aastore
+        17: dup
+        18: iconst_2
+        19: getstatic     #50                 // Field STOP_SPRINTING:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        22: aastore
+        23: dup
+        24: iconst_3
+        25: getstatic     #52                 // Field START_RIDING_JUMP:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        28: aastore
+        29: dup
+        30: iconst_4
+        31: getstatic     #54                 // Field STOP_RIDING_JUMP:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        34: aastore
+        35: dup
+        36: iconst_5
+        37: getstatic     #56                 // Field OPEN_INVENTORY:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        40: aastore
+        41: dup
+        42: bipush        6
+        44: getstatic     #58                 // Field START_FALL_FLYING:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        47: aastore
+        48: areturn
+
+  static {};
+    Code:
+         0: new           #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+         3: dup
+         4: ldc           #60                 // String STOP_SLEEPING
+         6: iconst_0
+         7: invokespecial #61                 // Method "<init>":(Ljava/lang/String;I)V
+        10: putstatic     #46                 // Field STOP_SLEEPING:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        13: new           #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+        16: dup
+        17: ldc           #62                 // String START_SPRINTING
+        19: iconst_1
+        20: invokespecial #61                 // Method "<init>":(Ljava/lang/String;I)V
+        23: putstatic     #48                 // Field START_SPRINTING:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        26: new           #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+        29: dup
+        30: ldc           #63                 // String STOP_SPRINTING
+        32: iconst_2
+        33: invokespecial #61                 // Method "<init>":(Ljava/lang/String;I)V
+        36: putstatic     #50                 // Field STOP_SPRINTING:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        39: new           #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+        42: dup
+        43: ldc           #64                 // String START_RIDING_JUMP
+        45: iconst_3
+        46: invokespecial #61                 // Method "<init>":(Ljava/lang/String;I)V
+        49: putstatic     #52                 // Field START_RIDING_JUMP:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        52: new           #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+        55: dup
+        56: ldc           #65                 // String STOP_RIDING_JUMP
+        58: iconst_4
+        59: invokespecial #61                 // Method "<init>":(Ljava/lang/String;I)V
+        62: putstatic     #54                 // Field STOP_RIDING_JUMP:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        65: new           #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+        68: dup
+        69: ldc           #66                 // String OPEN_INVENTORY
+        71: iconst_5
+        72: invokespecial #61                 // Method "<init>":(Ljava/lang/String;I)V
+        75: putstatic     #56                 // Field OPEN_INVENTORY:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        78: new           #2                  // class net/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action
+        81: dup
+        82: ldc           #67                 // String START_FALL_FLYING
+        84: bipush        6
+        86: invokespecial #61                 // Method "<init>":(Ljava/lang/String;I)V
+        89: putstatic     #58                 // Field START_FALL_FLYING:Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        92: invokestatic  #69                 // Method $values:()[Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        95: putstatic     #23                 // Field $VALUES:[Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket$Action;
+        98: return
+}

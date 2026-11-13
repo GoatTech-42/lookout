@@ -26,6 +26,7 @@ public class ConfirmationTracker {
 	private short nextConfirmationId = -32348;
 	private short lastSentConfirmationId = -69;
 	private short joinConfirmationId = -69;
+	private boolean joinConfirmationSent;
 	private long transactionPingMillis = 0L;
 	private long lastMovementAtMillis = -1L;
 	private long movementDelayMillis = -1L;
@@ -137,9 +138,23 @@ public class ConfirmationTracker {
 		ExemptionManager.logColored("Last Raw IDs: " + playerData.getRawConfirmationIds());
 	}
 
+	public void sendJoinConfirmation() {
+		ConfirmationTransport.inEventLoop(playerData, () -> {
+			if (joinConfirmationSent) return;
+			joinConfirmationSent = true;
+			joinConfirmationId = (short) java.util.concurrent.ThreadLocalRandom.current().nextInt(-11500, -11000);
+			if (MeshSettings.connectionDebugMessages)
+				ExemptionManager.logColored("Join game PING sent with ID=" + joinConfirmationId + " for " + playerData.getPlayerName());
+			sendPacket(joinConfirmationId);
+		});
+	}
+
 	public void sendConfirmation(boolean inEventLoop) {
-		if (!playerData.isHandshakeComplete()) return;
-		sendConfirmationPacket();
+		if (!playerData.isHandshakeComplete() || !ConfirmationTransport.isPlay(playerData, ConfirmationTransport.connection(playerData))) return;
+		if (inEventLoop) ConfirmationTransport.inEventLoop(playerData, () -> {
+			if (playerData.isHandshakeComplete()) sendConfirmationPacket();
+		});
+		else sendConfirmationPacket();
 	}
 
 	public void sendPacket(int id) {

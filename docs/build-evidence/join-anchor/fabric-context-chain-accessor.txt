@@ -1,0 +1,48 @@
+Classfile jar:file:///home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/net.fabricmc.fabric-api/fabric-entity-events-v1/3.1.1+1d0ab4303e/d51f803955a715b18aacac0349a73aa3e7031a8a/fabric-entity-events-v1-3.1.1+1d0ab4303e.jar!/net/fabricmc/fabric/mixin/entity/event/effect/ContextChainAccessor.class
+  Last modified Dec 31, 1979; size 599 bytes
+  SHA-256 checksum 880d96d0117a5fab504d8f2e576336b37b243d6293252e0784c3a05fcdaa5a07
+  Compiled from "ContextChainAccessor.java"
+public interface net.fabricmc.fabric.mixin.entity.event.effect.ContextChainAccessor<S extends java.lang.Object>
+  minor version: 0
+  major version: 65
+  flags: (0x0601) ACC_PUBLIC, ACC_INTERFACE, ACC_ABSTRACT
+  this_class: #2                          // net/fabricmc/fabric/mixin/entity/event/effect/ContextChainAccessor
+  super_class: #5                         // java/lang/Object
+  interfaces: 0, fields: 0, methods: 1, attributes: 3
+Constant pool:
+   #1 = Utf8               net/fabricmc/fabric/mixin/entity/event/effect/ContextChainAccessor
+   #2 = Class              #1             // net/fabricmc/fabric/mixin/entity/event/effect/ContextChainAccessor
+   #3 = Utf8               <S:Ljava/lang/Object;>Ljava/lang/Object;
+   #4 = Utf8               java/lang/Object
+   #5 = Class              #4             // java/lang/Object
+   #6 = Utf8               ContextChainAccessor.java
+   #7 = Utf8               Lorg/spongepowered/asm/mixin/Mixin;
+   #8 = Utf8               value
+   #9 = Utf8               Lcom/mojang/brigadier/context/ContextChain;
+  #10 = Utf8               getModifiers
+  #11 = Utf8               ()Ljava/util/List;
+  #12 = Utf8               ()Ljava/util/List<Lcom/mojang/brigadier/context/CommandContext<TS;>;>;
+  #13 = Utf8               Lorg/spongepowered/asm/mixin/gen/Accessor;
+  #14 = Utf8               modifiers
+  #15 = Utf8               Signature
+  #16 = Utf8               RuntimeVisibleAnnotations
+  #17 = Utf8               SourceFile
+  #18 = Utf8               RuntimeInvisibleAnnotations
+{
+  public abstract java.util.List<com.mojang.brigadier.context.CommandContext<S>> getModifiers();
+    descriptor: ()Ljava/util/List;
+    flags: (0x0401) ACC_PUBLIC, ACC_ABSTRACT
+    Signature: #12                          // ()Ljava/util/List<Lcom/mojang/brigadier/context/CommandContext<TS;>;>;
+    RuntimeVisibleAnnotations:
+      0: #13(#8=s#14)
+        org.spongepowered.asm.mixin.gen.Accessor(
+          value="modifiers"
+        )
+}
+Signature: #3                           // <S:Ljava/lang/Object;>Ljava/lang/Object;
+SourceFile: "ContextChainAccessor.java"
+RuntimeInvisibleAnnotations:
+  0: #7(#8=[c#9])
+    org.spongepowered.asm.mixin.Mixin(
+      value=[class Lcom/mojang/brigadier/context/ContextChain;]
+    )

@@ -1,0 +1,9 @@
+Exception in thread "main" java.lang.AssertionError: new session skipped JOIN confirmation
+	at JoinAnchorTest.check(JoinAnchorTest.java:17)
+	at JoinAnchorTest.main(JoinAnchorTest.java:21)
+Traceback (most recent call last):
+  File "/home/sandbox/meshac-repo/sim/lifecycle/run_join_anchor.py", line 70, in <module>
+    subprocess.run([str(JDK/'java'),'-cp',str(t/'classes'),'JoinAnchorTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-anchor-lp8kwhkl/classes', 'JoinAnchorTest']' returned non-zero exit status 1.

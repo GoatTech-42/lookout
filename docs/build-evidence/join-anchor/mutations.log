@@ -1,0 +1,12 @@
+REJECTED: handshake-default
+REJECTED: missing-early-publication
+REJECTED: replace-fabric-session
+REJECTED: anchor-before-login-write
+REJECTED: no-anchor
+REJECTED: duplicate-anchor
+REJECTED: anchor-ID-after-send
+REJECTED: ignored-event-loop
+REJECTED: no-play-guard
+REJECTED: no-close-recheck
+REJECTED: skip-ban-on-reuse
+Join anchor mutations PASS

@@ -1,0 +1,9 @@
+Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS: 1.21.11
+Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS: 26.1.2
+Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS: 26.2
+Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS: 26.3
+Packaged required anchor mixins/classes PASS: 1.21.11
+Packaged required anchor mixins/classes PASS: 26.1.2
+Packaged required anchor mixins/classes PASS: 26.2
+Packaged required anchor mixins/classes PASS: 26.3
+These native boundary and packaged registration checks do not prove Mixin weaving or runtime packet delivery.

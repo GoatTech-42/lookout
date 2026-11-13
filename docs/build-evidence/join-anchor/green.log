@@ -1,0 +1,1 @@
+JoinAnchorTest PASS (real session/tracker/dispatch/hooks; deterministic channel boundaries, not weave/runtime)

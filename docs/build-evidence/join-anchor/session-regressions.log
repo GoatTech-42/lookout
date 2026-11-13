@@ -1,0 +1,6 @@
+JoinIdentityTest PASS (missed-login, UUID/name, copy/stale-copy, two sessions, quit/rejoin)
+REJECTED: uuid
+REJECTED: name
+REJECTED: copy
+REJECTED: stale-copy
+Session identity mutation checks PASS

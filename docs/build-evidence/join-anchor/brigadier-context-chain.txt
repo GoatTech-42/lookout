@@ -1,0 +1,14 @@
+Compiled from "ContextChain.java"
+public class com.mojang.brigadier.context.ContextChain<S> {
+  private final java.util.List<com.mojang.brigadier.context.CommandContext<S>> modifiers;
+  private final com.mojang.brigadier.context.CommandContext<S> executable;
+  private com.mojang.brigadier.context.ContextChain<S> nextStageCache;
+  public com.mojang.brigadier.context.ContextChain(java.util.List<com.mojang.brigadier.context.CommandContext<S>>, com.mojang.brigadier.context.CommandContext<S>);
+  public static <S> java.util.Optional<com.mojang.brigadier.context.ContextChain<S>> tryFlatten(com.mojang.brigadier.context.CommandContext<S>);
+  public static <S> java.util.Collection<S> runModifier(com.mojang.brigadier.context.CommandContext<S>, S, com.mojang.brigadier.ResultConsumer<S>, boolean) throws com.mojang.brigadier.exceptions.CommandSyntaxException;
+  public static <S> int runExecutable(com.mojang.brigadier.context.CommandContext<S>, S, com.mojang.brigadier.ResultConsumer<S>, boolean) throws com.mojang.brigadier.exceptions.CommandSyntaxException;
+  public int executeAll(S, com.mojang.brigadier.ResultConsumer<S>) throws com.mojang.brigadier.exceptions.CommandSyntaxException;
+  public com.mojang.brigadier.context.ContextChain$Stage getStage();
+  public com.mojang.brigadier.context.CommandContext<S> getTopContext();
+  public com.mojang.brigadier.context.ContextChain<S> nextStage();
+}

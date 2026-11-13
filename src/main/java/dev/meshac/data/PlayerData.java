@@ -46,7 +46,7 @@ public class PlayerData {
 	private String playerName = "Unresolved";
 	private boolean clientBrandResolved = false;
 	private boolean mitigationPending = false;
-	private boolean handshakeComplete = true;
+	private boolean handshakeComplete = false;
 	private boolean connectionKickQueued = false;
 	private int totalViolations;
 	private int combatViolations;

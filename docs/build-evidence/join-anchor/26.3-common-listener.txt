@@ -1,0 +1,451 @@
+Compiled from "ServerCommonPacketListenerImpl.java"
+public abstract class net.minecraft.server.network.ServerCommonPacketListenerImpl implements net.minecraft.network.protocol.common.ServerCommonPacketListener {
+  private static final org.slf4j.Logger LOGGER;
+
+  public static final int LATENCY_CHECK_INTERVAL;
+
+  private static final int CLOSED_LISTENER_TIMEOUT;
+
+  private static final net.minecraft.network.chat.Component TIMEOUT_DISCONNECTION_MESSAGE;
+
+  static final net.minecraft.network.chat.Component DISCONNECT_UNEXPECTED_QUERY;
+
+  protected final net.minecraft.server.MinecraftServer server;
+
+  protected final net.minecraft.network.Connection connection;
+
+  private final boolean transferred;
+
+  private long keepAliveTime;
+
+  private boolean keepAlivePending;
+
+  private long keepAliveChallenge;
+
+  private long closedListenerTime;
+
+  private boolean closed;
+
+  private int latency;
+
+  private volatile boolean suspendFlushingOnServerThread;
+
+  public net.minecraft.server.network.ServerCommonPacketListenerImpl(net.minecraft.server.MinecraftServer, net.minecraft.network.Connection, net.minecraft.server.network.CommonListenerCookie);
+    Code:
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: aload_0
+         5: iconst_0
+         6: putfield      #7                  // Field closed:Z
+         9: aload_0
+        10: iconst_0
+        11: putfield      #13                 // Field suspendFlushingOnServerThread:Z
+        14: aload_0
+        15: aload_1
+        16: putfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+        19: aload_0
+        20: aload_2
+        21: putfield      #20                 // Field connection:Lnet/minecraft/network/Connection;
+        24: aload_0
+        25: invokestatic  #24                 // Method net/minecraft/util/Util.getMillis:()J
+        28: putfield      #30                 // Field keepAliveTime:J
+        31: aload_0
+        32: aload_3
+        33: invokevirtual #34                 // Method net/minecraft/server/network/CommonListenerCookie.latency:()I
+        36: putfield      #40                 // Field latency:I
+        39: aload_0
+        40: aload_3
+        41: invokevirtual #43                 // Method net/minecraft/server/network/CommonListenerCookie.transferred:()Z
+        44: putfield      #47                 // Field transferred:Z
+        47: return
+
+  private void close();
+    Code:
+         0: aload_0
+         1: getfield      #7                  // Field closed:Z
+         4: ifne          19
+         7: aload_0
+         8: invokestatic  #24                 // Method net/minecraft/util/Util.getMillis:()J
+        11: putfield      #49                 // Field closedListenerTime:J
+        14: aload_0
+        15: iconst_1
+        16: putfield      #7                  // Field closed:Z
+        19: return
+
+  public void onDisconnect(net.minecraft.network.DisconnectionDetails);
+    Code:
+         0: aload_0
+         1: invokevirtual #52                 // Method isSingleplayerOwner:()Z
+         4: ifeq          25
+         7: getstatic     #55                 // Field LOGGER:Lorg/slf4j/Logger;
+        10: ldc           #59                 // String Stopping singleplayer server as player logged out
+        12: invokeinterface #61,  2           // InterfaceMethod org/slf4j/Logger.info:(Ljava/lang/String;)V
+        17: aload_0
+        18: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+        21: iconst_0
+        22: invokevirtual #67                 // Method net/minecraft/server/MinecraftServer.halt:(Z)V
+        25: return
+
+  public void onPacketError(net.minecraft.network.protocol.Packet, java.lang.Exception) throws net.minecraft.ReportedException;
+    Code:
+         0: aload_0
+         1: aload_1
+         2: aload_2
+         3: invokespecial #73                 // InterfaceMethod net/minecraft/network/protocol/common/ServerCommonPacketListener.onPacketError:(Lnet/minecraft/network/protocol/Packet;Ljava/lang/Exception;)V
+         6: aload_0
+         7: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+        10: aload_2
+        11: aload_1
+        12: invokeinterface #79,  1           // InterfaceMethod net/minecraft/network/protocol/Packet.type:()Lnet/minecraft/network/protocol/PacketType;
+        17: invokevirtual #85                 // Method net/minecraft/server/MinecraftServer.reportPacketHandlingException:(Ljava/lang/Throwable;Lnet/minecraft/network/protocol/PacketType;)V
+        20: return
+
+  public void handleKeepAlive(net.minecraft.network.protocol.common.ServerboundKeepAlivePacket);
+    Code:
+         0: aload_0
+         1: getfield      #89                 // Field keepAlivePending:Z
+         4: ifeq          51
+         7: aload_1
+         8: invokevirtual #92                 // Method net/minecraft/network/protocol/common/ServerboundKeepAlivePacket.getId:()J
+        11: aload_0
+        12: getfield      #97                 // Field keepAliveChallenge:J
+        15: lcmp
+        16: ifne          51
+        19: invokestatic  #24                 // Method net/minecraft/util/Util.getMillis:()J
+        22: aload_0
+        23: getfield      #30                 // Field keepAliveTime:J
+        26: lsub
+        27: l2i
+        28: istore_2
+        29: aload_0
+        30: aload_0
+        31: getfield      #40                 // Field latency:I
+        34: iconst_3
+        35: imul
+        36: iload_2
+        37: iadd
+        38: iconst_4
+        39: idiv
+        40: putfield      #40                 // Field latency:I
+        43: aload_0
+        44: iconst_0
+        45: putfield      #89                 // Field keepAlivePending:Z
+        48: goto          65
+        51: aload_0
+        52: invokevirtual #52                 // Method isSingleplayerOwner:()Z
+        55: ifne          65
+        58: aload_0
+        59: getstatic     #100                // Field TIMEOUT_DISCONNECTION_MESSAGE:Lnet/minecraft/network/chat/Component;
+        62: invokevirtual #104                // Method disconnect:(Lnet/minecraft/network/chat/Component;)V
+        65: return
+
+  public void handlePong(net.minecraft.network.protocol.common.ServerboundPongPacket);
+    Code:
+         0: return
+
+  public void handleCustomPayload(net.minecraft.network.protocol.common.ServerboundCustomPayloadPacket);
+    Code:
+         0: return
+
+  public void handleCustomClickAction(net.minecraft.network.protocol.common.ServerboundCustomClickActionPacket);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: aload_0
+         3: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+         6: invokevirtual #108                // Method net/minecraft/server/MinecraftServer.packetProcessor:()Lnet/minecraft/network/PacketProcessor;
+         9: invokestatic  #112                // Method net/minecraft/network/protocol/PacketUtils.ensureRunningOnSameThread:(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V
+        12: aload_0
+        13: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+        16: aload_1
+        17: invokevirtual #118                // Method net/minecraft/network/protocol/common/ServerboundCustomClickActionPacket.id:()Lnet/minecraft/resources/Identifier;
+        20: aload_1
+        21: invokevirtual #124                // Method net/minecraft/network/protocol/common/ServerboundCustomClickActionPacket.payload:()Ljava/util/Optional;
+        24: invokevirtual #128                // Method net/minecraft/server/MinecraftServer.handleCustomClickAction:(Lnet/minecraft/resources/Identifier;Ljava/util/Optional;)V
+        27: return
+
+  public void handleResourcePackResponse(net.minecraft.network.protocol.common.ServerboundResourcePackPacket);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: aload_0
+         3: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+         6: invokevirtual #108                // Method net/minecraft/server/MinecraftServer.packetProcessor:()Lnet/minecraft/network/PacketProcessor;
+         9: invokestatic  #112                // Method net/minecraft/network/protocol/PacketUtils.ensureRunningOnSameThread:(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/network/PacketProcessor;)V
+        12: aload_1
+        13: invokevirtual #132                // Method net/minecraft/network/protocol/common/ServerboundResourcePackPacket.action:()Lnet/minecraft/network/protocol/common/ServerboundResourcePackPacket$Action;
+        16: getstatic     #138                // Field net/minecraft/network/protocol/common/ServerboundResourcePackPacket$Action.DECLINED:Lnet/minecraft/network/protocol/common/ServerboundResourcePackPacket$Action;
+        19: if_acmpne     62
+        22: aload_0
+        23: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+        26: invokevirtual #144                // Method net/minecraft/server/MinecraftServer.isResourcePackRequired:()Z
+        29: ifeq          62
+        32: getstatic     #55                 // Field LOGGER:Lorg/slf4j/Logger;
+        35: ldc           #147                // String Disconnecting {} due to resource pack {} rejection
+        37: aload_0
+        38: invokevirtual #149                // Method playerProfile:()Lcom/mojang/authlib/GameProfile;
+        41: invokevirtual #153                // Method com/mojang/authlib/GameProfile.name:()Ljava/lang/String;
+        44: aload_1
+        45: invokevirtual #159                // Method net/minecraft/network/protocol/common/ServerboundResourcePackPacket.id:()Ljava/util/UUID;
+        48: invokeinterface #162,  4          // InterfaceMethod org/slf4j/Logger.info:(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V
+        53: aload_0
+        54: ldc           #165                // String multiplayer.requiredTexturePrompt.disconnect
+        56: invokestatic  #167                // InterfaceMethod net/minecraft/network/chat/Component.translatable:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+        59: invokevirtual #104                // Method disconnect:(Lnet/minecraft/network/chat/Component;)V
+        62: return
+
+  public void handleCookieResponse(net.minecraft.network.protocol.cookie.ServerboundCookieResponsePacket);
+    Code:
+         0: aload_0
+         1: getstatic     #173                // Field DISCONNECT_UNEXPECTED_QUERY:Lnet/minecraft/network/chat/Component;
+         4: invokevirtual #104                // Method disconnect:(Lnet/minecraft/network/chat/Component;)V
+         7: return
+
+  protected void keepConnectionAlive();
+    Code:
+         0: invokestatic  #176                // Method net/minecraft/util/profiling/Profiler.get:()Lnet/minecraft/util/profiling/ProfilerFiller;
+         3: ldc           #182                // String keepAlive
+         5: invokeinterface #184,  2          // InterfaceMethod net/minecraft/util/profiling/ProfilerFiller.push:(Ljava/lang/String;)V
+        10: invokestatic  #24                 // Method net/minecraft/util/Util.getMillis:()J
+        13: lstore_1
+        14: aload_0
+        15: invokevirtual #52                 // Method isSingleplayerOwner:()Z
+        18: ifne          89
+        21: lload_1
+        22: aload_0
+        23: getfield      #30                 // Field keepAliveTime:J
+        26: lsub
+        27: ldc2_w        #189                // long 15000l
+        30: lcmp
+        31: iflt          89
+        34: aload_0
+        35: getfield      #89                 // Field keepAlivePending:Z
+        38: ifeq          51
+        41: aload_0
+        42: getstatic     #100                // Field TIMEOUT_DISCONNECTION_MESSAGE:Lnet/minecraft/network/chat/Component;
+        45: invokevirtual #104                // Method disconnect:(Lnet/minecraft/network/chat/Component;)V
+        48: goto          89
+        51: aload_0
+        52: lload_1
+        53: invokevirtual #191                // Method checkIfClosed:(J)Z
+        56: ifeq          89
+        59: aload_0
+        60: iconst_1
+        61: putfield      #89                 // Field keepAlivePending:Z
+        64: aload_0
+        65: lload_1
+        66: putfield      #30                 // Field keepAliveTime:J
+        69: aload_0
+        70: lload_1
+        71: putfield      #97                 // Field keepAliveChallenge:J
+        74: aload_0
+        75: new           #195                // class net/minecraft/network/protocol/common/ClientboundKeepAlivePacket
+        78: dup
+        79: aload_0
+        80: getfield      #97                 // Field keepAliveChallenge:J
+        83: invokespecial #197                // Method net/minecraft/network/protocol/common/ClientboundKeepAlivePacket."<init>":(J)V
+        86: invokevirtual #200                // Method send:(Lnet/minecraft/network/protocol/Packet;)V
+        89: invokestatic  #176                // Method net/minecraft/util/profiling/Profiler.get:()Lnet/minecraft/util/profiling/ProfilerFiller;
+        92: invokeinterface #204,  1          // InterfaceMethod net/minecraft/util/profiling/ProfilerFiller.pop:()V
+        97: return
+
+  private boolean checkIfClosed(long);
+    Code:
+         0: aload_0
+         1: getfield      #7                  // Field closed:Z
+         4: ifeq          29
+         7: lload_1
+         8: aload_0
+         9: getfield      #49                 // Field closedListenerTime:J
+        12: lsub
+        13: ldc2_w        #189                // long 15000l
+        16: lcmp
+        17: iflt          27
+        20: aload_0
+        21: getstatic     #100                // Field TIMEOUT_DISCONNECTION_MESSAGE:Lnet/minecraft/network/chat/Component;
+        24: invokevirtual #104                // Method disconnect:(Lnet/minecraft/network/chat/Component;)V
+        27: iconst_0
+        28: ireturn
+        29: iconst_1
+        30: ireturn
+
+  public void suspendFlushing();
+    Code:
+         0: aload_0
+         1: iconst_1
+         2: putfield      #13                 // Field suspendFlushingOnServerThread:Z
+         5: return
+
+  public void resumeFlushing();
+    Code:
+         0: aload_0
+         1: iconst_0
+         2: putfield      #13                 // Field suspendFlushingOnServerThread:Z
+         5: aload_0
+         6: getfield      #20                 // Field connection:Lnet/minecraft/network/Connection;
+         9: invokevirtual #207                // Method net/minecraft/network/Connection.flushChannel:()V
+        12: return
+
+  public void send(net.minecraft.network.protocol.Packet<?>);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: aconst_null
+         3: invokevirtual #212                // Method send:(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V
+         6: return
+
+  public void send(net.minecraft.network.protocol.Packet<?>, io.netty.channel.ChannelFutureListener);
+    Code:
+         0: aload_1
+         1: invokeinterface #215,  1          // InterfaceMethod net/minecraft/network/protocol/Packet.isTerminal:()Z
+         6: ifeq          13
+         9: aload_0
+        10: invokevirtual #218                // Method close:()V
+        13: aload_0
+        14: getfield      #13                 // Field suspendFlushingOnServerThread:Z
+        17: ifeq          30
+        20: aload_0
+        21: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+        24: invokevirtual #221                // Method net/minecraft/server/MinecraftServer.isSameThread:()Z
+        27: ifne          34
+        30: iconst_1
+        31: goto          35
+        34: iconst_0
+        35: istore_3
+        36: aload_0
+        37: getfield      #20                 // Field connection:Lnet/minecraft/network/Connection;
+        40: aload_1
+        41: aload_2
+        42: iload_3
+        43: invokevirtual #224                // Method net/minecraft/network/Connection.send:(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;Z)V
+        46: goto          93
+        49: astore        4
+        51: aload         4
+        53: ldc           #229                // String Sending packet
+        55: invokestatic  #231                // Method net/minecraft/CrashReport.forThrowable:(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/CrashReport;
+        58: astore        5
+        60: aload         5
+        62: ldc           #237                // String Packet being sent
+        64: invokevirtual #239                // Method net/minecraft/CrashReport.addCategory:(Ljava/lang/String;)Lnet/minecraft/CrashReportCategory;
+        67: astore        6
+        69: aload         6
+        71: ldc           #243                // String Packet class
+        73: aload_1
+        74: invokedynamic #245,  0            // InvokeDynamic #0:call:(Lnet/minecraft/network/protocol/Packet;)Lnet/minecraft/CrashReportDetail;
+        79: invokevirtual #249                // Method net/minecraft/CrashReportCategory.setDetail:(Ljava/lang/String;Lnet/minecraft/CrashReportDetail;)Lnet/minecraft/CrashReportCategory;
+        82: pop
+        83: new           #255                // class net/minecraft/ReportedException
+        86: dup
+        87: aload         5
+        89: invokespecial #257                // Method net/minecraft/ReportedException."<init>":(Lnet/minecraft/CrashReport;)V
+        92: athrow
+        93: return
+      Exception table:
+         from    to  target type
+            36    46    49   Class java/lang/Throwable
+
+  public void disconnect(net.minecraft.network.chat.Component);
+    Code:
+         0: aload_0
+         1: new           #260                // class net/minecraft/network/DisconnectionDetails
+         4: dup
+         5: aload_1
+         6: invokespecial #262                // Method net/minecraft/network/DisconnectionDetails."<init>":(Lnet/minecraft/network/chat/Component;)V
+         9: invokevirtual #264                // Method disconnect:(Lnet/minecraft/network/DisconnectionDetails;)V
+        12: return
+
+  public void disconnect(net.minecraft.network.DisconnectionDetails);
+    Code:
+         0: aload_0
+         1: getfield      #20                 // Field connection:Lnet/minecraft/network/Connection;
+         4: new           #267                // class net/minecraft/network/protocol/common/ClientboundDisconnectPacket
+         7: dup
+         8: aload_1
+         9: invokevirtual #269                // Method net/minecraft/network/DisconnectionDetails.reason:()Lnet/minecraft/network/chat/Component;
+        12: invokespecial #273                // Method net/minecraft/network/protocol/common/ClientboundDisconnectPacket."<init>":(Lnet/minecraft/network/chat/Component;)V
+        15: aload_0
+        16: aload_1
+        17: invokedynamic #274,  0            // InvokeDynamic #1:run:(Lnet/minecraft/server/network/ServerCommonPacketListenerImpl;Lnet/minecraft/network/DisconnectionDetails;)Ljava/lang/Runnable;
+        22: invokestatic  #278                // Method net/minecraft/network/PacketSendListener.thenRun:(Ljava/lang/Runnable;)Lio/netty/channel/ChannelFutureListener;
+        25: invokevirtual #284                // Method net/minecraft/network/Connection.send:(Lnet/minecraft/network/protocol/Packet;Lio/netty/channel/ChannelFutureListener;)V
+        28: aload_0
+        29: getfield      #20                 // Field connection:Lnet/minecraft/network/Connection;
+        32: invokevirtual #285                // Method net/minecraft/network/Connection.setReadOnly:()V
+        35: aload_0
+        36: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+        39: aload_0
+        40: getfield      #20                 // Field connection:Lnet/minecraft/network/Connection;
+        43: dup
+        44: invokestatic  #288                // Method java/util/Objects.requireNonNull:(Ljava/lang/Object;)Ljava/lang/Object;
+        47: pop
+        48: invokedynamic #294,  0            // InvokeDynamic #2:run:(Lnet/minecraft/network/Connection;)Ljava/lang/Runnable;
+        53: invokevirtual #297                // Method net/minecraft/server/MinecraftServer.executeBlocking:(Ljava/lang/Runnable;)V
+        56: return
+
+  protected boolean isSingleplayerOwner();
+    Code:
+         0: aload_0
+         1: getfield      #16                 // Field server:Lnet/minecraft/server/MinecraftServer;
+         4: new           #301                // class net/minecraft/server/players/NameAndId
+         7: dup
+         8: aload_0
+         9: invokevirtual #149                // Method playerProfile:()Lcom/mojang/authlib/GameProfile;
+        12: invokespecial #303                // Method net/minecraft/server/players/NameAndId."<init>":(Lcom/mojang/authlib/GameProfile;)V
+        15: invokevirtual #306                // Method net/minecraft/server/MinecraftServer.isSingleplayerOwner:(Lnet/minecraft/server/players/NameAndId;)Z
+        18: ireturn
+
+  protected abstract com.mojang.authlib.GameProfile playerProfile();
+
+  public com.mojang.authlib.GameProfile getOwner();
+    Code:
+         0: aload_0
+         1: invokevirtual #149                // Method playerProfile:()Lcom/mojang/authlib/GameProfile;
+         4: areturn
+
+  public int latency();
+    Code:
+         0: aload_0
+         1: getfield      #40                 // Field latency:I
+         4: ireturn
+
+  protected net.minecraft.server.network.CommonListenerCookie createCookie(net.minecraft.server.level.ClientInformation);
+    Code:
+         0: new           #35                 // class net/minecraft/server/network/CommonListenerCookie
+         3: dup
+         4: aload_0
+         5: invokevirtual #149                // Method playerProfile:()Lcom/mojang/authlib/GameProfile;
+         8: aload_0
+         9: getfield      #40                 // Field latency:I
+        12: aload_1
+        13: aload_0
+        14: getfield      #47                 // Field transferred:Z
+        17: invokespecial #309                // Method net/minecraft/server/network/CommonListenerCookie."<init>":(Lcom/mojang/authlib/GameProfile;ILnet/minecraft/server/level/ClientInformation;Z)V
+        20: areturn
+
+  private void lambda$disconnect$0(net.minecraft.network.DisconnectionDetails);
+    Code:
+         0: aload_0
+         1: getfield      #20                 // Field connection:Lnet/minecraft/network/Connection;
+         4: aload_1
+         5: invokevirtual #312                // Method net/minecraft/network/Connection.disconnect:(Lnet/minecraft/network/DisconnectionDetails;)V
+         8: return
+
+  private static java.lang.String lambda$send$0(net.minecraft.network.protocol.Packet) throws java.lang.Exception;
+    Code:
+         0: aload_0
+         1: invokeinterface #313,  1          // InterfaceMethod net/minecraft/network/protocol/Packet.getClass:()Ljava/lang/Class;
+         6: invokevirtual #317                // Method java/lang/Class.getCanonicalName:()Ljava/lang/String;
+         9: areturn
+
+  static {};
+    Code:
+         0: invokestatic  #322                // Method com/mojang/logging/LogUtils.getLogger:()Lorg/slf4j/Logger;
+         3: putstatic     #55                 // Field LOGGER:Lorg/slf4j/Logger;
+         6: ldc_w         #328                // String disconnect.timeout
+         9: invokestatic  #167                // InterfaceMethod net/minecraft/network/chat/Component.translatable:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+        12: putstatic     #100                // Field TIMEOUT_DISCONNECTION_MESSAGE:Lnet/minecraft/network/chat/Component;
+        15: ldc_w         #330                // String multiplayer.disconnect.unexpected_query_response
+        18: invokestatic  #167                // InterfaceMethod net/minecraft/network/chat/Component.translatable:(Ljava/lang/String;)Lnet/minecraft/network/chat/MutableComponent;
+        21: putstatic     #173                // Field DISCONNECT_UNEXPECTED_QUERY:Lnet/minecraft/network/chat/Component;
+        24: return
+}

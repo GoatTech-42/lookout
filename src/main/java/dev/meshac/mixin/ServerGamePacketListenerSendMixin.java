@@ -17,7 +17,10 @@ public abstract class ServerGamePacketListenerSendMixin {
 	@Inject(method = "send(Lnet/minecraft/network/protocol/Packet;)V", at = @At("HEAD"))
 	private void meshac$send(Packet<?> packet, CallbackInfo ci) {
 		// send is declared on the common listener, but tracked state only exists in PLAY.
-		if ((Object) this instanceof ServerGamePacketListenerImpl game)
+		if ((Object) this instanceof ServerGamePacketListenerImpl game) {
+			if (packet instanceof net.minecraft.network.protocol.game.ClientboundLoginPacket)
+				dev.meshac.data.PlayerDataManager.onJoin(game.player);
 			OutboundDispatcher.onSend(game.player, packet);
+		}
 	}
 }

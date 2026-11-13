@@ -1,0 +1,69 @@
+Compiled from "ServerboundPlayerInputPacket.java"
+public final class net.minecraft.network.protocol.game.ServerboundPlayerInputPacket extends java.lang.Record implements net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ServerGamePacketListener> {
+  private final net.minecraft.world.entity.player.Input input;
+
+  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.FriendlyByteBuf, net.minecraft.network.protocol.game.ServerboundPlayerInputPacket> STREAM_CODEC;
+
+  public net.minecraft.network.protocol.game.ServerboundPlayerInputPacket(net.minecraft.world.entity.player.Input);
+    Code:
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Record."<init>":()V
+         4: aload_0
+         5: aload_1
+         6: putfield      #7                  // Field input:Lnet/minecraft/world/entity/player/Input;
+         9: return
+
+  public net.minecraft.network.protocol.PacketType<net.minecraft.network.protocol.game.ServerboundPlayerInputPacket> type();
+    Code:
+         0: getstatic     #13                 // Field net/minecraft/network/protocol/game/GamePacketTypes.SERVERBOUND_PLAYER_INPUT:Lnet/minecraft/network/protocol/PacketType;
+         3: areturn
+
+  public void handle(net.minecraft.network.protocol.game.ServerGamePacketListener);
+    Code:
+         0: aload_1
+         1: aload_0
+         2: invokeinterface #19,  2           // InterfaceMethod net/minecraft/network/protocol/game/ServerGamePacketListener.handlePlayerInput:(Lnet/minecraft/network/protocol/game/ServerboundPlayerInputPacket;)V
+         7: return
+
+  public final java.lang.String toString();
+    Code:
+         0: aload_0
+         1: invokedynamic #29,  0             // InvokeDynamic #0:toString:(Lnet/minecraft/network/protocol/game/ServerboundPlayerInputPacket;)Ljava/lang/String;
+         6: areturn
+
+  public final int hashCode();
+    Code:
+         0: aload_0
+         1: invokedynamic #33,  0             // InvokeDynamic #0:hashCode:(Lnet/minecraft/network/protocol/game/ServerboundPlayerInputPacket;)I
+         6: ireturn
+
+  public final boolean equals(java.lang.Object);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: invokedynamic #37,  0             // InvokeDynamic #0:equals:(Lnet/minecraft/network/protocol/game/ServerboundPlayerInputPacket;Ljava/lang/Object;)Z
+         7: ireturn
+
+  public net.minecraft.world.entity.player.Input input();
+    Code:
+         0: aload_0
+         1: getfield      #7                  // Field input:Lnet/minecraft/world/entity/player/Input;
+         4: areturn
+
+  public void handle(net.minecraft.network.PacketListener);
+    Code:
+         0: aload_0
+         1: aload_1
+         2: checkcast     #20                 // class net/minecraft/network/protocol/game/ServerGamePacketListener
+         5: invokevirtual #25                 // Method handle:(Lnet/minecraft/network/protocol/game/ServerGamePacketListener;)V
+         8: return
+
+  static {};
+    Code:
+         0: getstatic     #41                 // Field net/minecraft/world/entity/player/Input.STREAM_CODEC:Lnet/minecraft/network/codec/StreamCodec;
+         3: invokedynamic #47,  0             // InvokeDynamic #1:apply:()Ljava/util/function/Function;
+         8: invokedynamic #51,  0             // InvokeDynamic #2:apply:()Ljava/util/function/Function;
+        13: invokestatic  #52                 // InterfaceMethod net/minecraft/network/codec/StreamCodec.composite:(Lnet/minecraft/network/codec/StreamCodec;Ljava/util/function/Function;Ljava/util/function/Function;)Lnet/minecraft/network/codec/StreamCodec;
+        16: putstatic     #58                 // Field STREAM_CODEC:Lnet/minecraft/network/codec/StreamCodec;
+        19: return
+}
