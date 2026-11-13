@@ -1,0 +1,4 @@
+1.21.11 io.netty:netty-codec-base:4.2.7.Final native superclass/three ctx.write sites after encode and packaged registration PASS
+26.1.2 io.netty:netty-codec-base:4.2.7.Final native superclass/three ctx.write sites after encode and packaged registration PASS
+26.2 io.netty:netty-codec-base:4.2.15.Final native superclass/three ctx.write sites after encode and packaged registration PASS
+26.3 io.netty:netty-codec-base:4.2.16.Final native superclass/three ctx.write sites after encode and packaged registration PASS

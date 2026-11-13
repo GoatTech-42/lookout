@@ -1,0 +1,7 @@
+Native outbound finite trace PASS: three native motions including bundled child; one explosion; completion callbacks and caller success; containment/shutdown retained
+REJECTED no-weave native superclass weave missing
+REJECTED lost-completion explosion completion missing
+REJECTED no-bundle-child native unbundler child trace missing
+REJECTED truncated-runner runner shutdown/completion missing
+REJECTED early-disconnect early client disconnect
+Outbound native validator mutation checks PASS
