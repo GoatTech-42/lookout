@@ -27,12 +27,13 @@ public abstract class ServerGamePacketListenerImplMixin {
 	private double meshac$fromY;
 	private double meshac$fromZ;
 
-	@Inject(method = "handleMovePlayer", at = @At("HEAD"))
+	@Inject(method = "handleMovePlayer", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/network/protocol/PacketUtils;ensureRunningOnSameThread(Lnet/minecraft/network/protocol/Packet;Lnet/minecraft/network/PacketListener;Lnet/minecraft/server/level/ServerLevel;)V",
+            shift = At.Shift.AFTER))
 	private void meshac$move(ServerboundMovePlayerPacket p, CallbackInfo ci) {
 		meshac$fromX = player.getX();
 		meshac$fromY = player.getY();
 		meshac$fromZ = player.getZ();
-		PacketDispatcher.onMove(player, p);
 	}
 
 	@Inject(method = "handleMovePlayer", at = @At("TAIL"))

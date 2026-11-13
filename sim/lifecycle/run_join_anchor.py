@@ -37,6 +37,7 @@ put('dev/meshac/safety/Effects','public class Effects {public static boolean dis
 put('io/netty/channel/EventLoop','public class EventLoop {public boolean in;public java.util.ArrayDeque<Runnable> tasks=new java.util.ArrayDeque<>();public boolean inEventLoop(){return in;}public void execute(Runnable r){tasks.add(r);}public void drain(){in=true;try{while(!tasks.isEmpty())tasks.remove().run();}finally{in=false;}}}')
 put('io/netty/channel/Channel','public class Channel {public final EventLoop loop=new EventLoop();public final net.minecraft.network.PacketEncoder<?> encoder=new net.minecraft.network.PacketEncoder<>();public EventLoop eventLoop(){return loop;}public Channel pipeline(){return this;}public <T> T get(Class<T> c){return c.cast(encoder);}}')
 put('io/netty/channel/ChannelFutureListener','public interface ChannelFutureListener {}')
+put('io/netty/channel/ChannelHandlerContext','public class ChannelHandlerContext {}')
 put('net/minecraft/network/ConnectionProtocol','public enum ConnectionProtocol {PLAY,CONFIGURATION}')
 put('net/minecraft/network/ProtocolInfo','public class ProtocolInfo<T> {public ConnectionProtocol id(){return ConnectionProtocol.PLAY;}}')
 put('net/minecraft/network/PacketEncoder','public class PacketEncoder<T> implements dev.meshac.mixin.PacketEncoderAccessor {public boolean play=true;public ProtocolInfo<?> meshac$getProtocolInfo(){return new ProtocolInfo<>(){public ConnectionProtocol id(){return play?ConnectionProtocol.PLAY:ConnectionProtocol.CONFIGURATION;}};}}')
@@ -48,7 +49,7 @@ put('net/minecraft/server/network/ServerCommonPacketListenerImpl','''public clas
 put('net/minecraft/server/network/ServerGamePacketListenerImpl','public class ServerGamePacketListenerImpl extends ServerCommonPacketListenerImpl implements net.minecraft.network.PacketListener {public net.minecraft.server.level.ServerPlayer player;}')
 for n,b in {'Mixin':'Class<?>[] value();','Shadow':'','Final':'','Unique':''}.items():put('org/spongepowered/asm/mixin/'+n,'public @interface '+n+' {'+b+'}')
 put('org/spongepowered/asm/mixin/gen/Accessor','public @interface Accessor {String value();}')
-put('org/spongepowered/asm/mixin/injection/At','public @interface At {String value();}')
+put('org/spongepowered/asm/mixin/injection/At','public @interface At {String value();String target() default "";Shift shift() default Shift.NONE;enum Shift{NONE,BEFORE,AFTER}}')
 put('org/spongepowered/asm/mixin/injection/Inject','public @interface Inject {String method();At at();}')
 put('org/spongepowered/asm/mixin/injection/callback/CallbackInfo','public class CallbackInfo {}')
 # Compile the real initializer to invoke its registered Fabric JOIN callback after early publication.

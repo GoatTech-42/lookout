@@ -1,0 +1,22 @@
+{
+  "1.21.11": {
+    "jar": "/home/sandbox/.gradle-meshac/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged/1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2/minecraft-merged-1.21.11-loom.mappings.1_21_11.layered+hash.2198-v2.jar",
+    "jarSHA256": "2899e5906e93b21929bab7dc844d742fa7606f2007e8b48290eb7b8b4b454288",
+    "receiptSHA256": "f3c7837204f2ac66b0b45b98fa51b98d7a18b3d338d0c903287fc14b00ffda66"
+  },
+  "26.1.2": {
+    "jar": "/home/sandbox/.gradle-meshac/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-deobf/26.1.2/minecraft-merged-deobf-26.1.2.jar",
+    "jarSHA256": "37e34f5c0c1331a8ef3efd1c61dbe5c2e774f5400a192e7b4b934ace39876c9d",
+    "receiptSHA256": "6b3ab8156bee8f50f8eba05b748ee5cb40c704bd80815ac9d1187c12accd5399"
+  },
+  "26.2": {
+    "jar": "/home/sandbox/.gradle-meshac/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-deobf/26.2/minecraft-merged-deobf-26.2.jar",
+    "jarSHA256": "06ac7c4a86c0b89eb340f8ce7363579db11b10a1a26b392782ce214d70d5cb1f",
+    "receiptSHA256": "04d2a28ec7ae7db8cfdbaca9d2e5b5994a6b7d7c10fb10d3c8f4d17921058a4b"
+  },
+  "26.3": {
+    "jar": "/home/sandbox/.gradle-meshac/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-deobf/26.3/minecraft-merged-deobf-26.3.jar",
+    "jarSHA256": "10c148d35a8bf137f9303364a2412857addff03793a8ddffa62c1a347facac92",
+    "receiptSHA256": "a93c46bddbdd1349e51fb799680d83d538b9bbc1f98bdcc6a03bd62eb31fd17c"
+  }
+}

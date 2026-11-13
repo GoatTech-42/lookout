@@ -1,0 +1,10 @@
+Exception in thread "main" java.lang.AssertionError: movement must dispatch at admitted channel boundary before any native handler/replay
+	at MoveIngressTest.check(MoveIngressTest.java:2)
+	at MoveIngressTest.read(MoveIngressTest.java:12)
+	at MoveIngressTest.main(MoveIngressTest.java:28)
+Traceback (most recent call last):
+  File "/tmp/meshac-move-baseline-45h31mde/sim/ownership/run_move_ingress.py", line 66, in <module>
+    subprocess.run([str(jdk/'java'),'-cp',str(t/'classes'),'MoveIngressTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-move-ingress-aq3hwrzy/classes', 'MoveIngressTest']' returned non-zero exit status 1.

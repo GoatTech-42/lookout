@@ -1,0 +1,1 @@
+MoveIngressTest PASS: real dispatcher once per admitted channel read, zero on native rejection/close/stale/phase; server replay capture separate (modeled boundary, not weave)

@@ -366,3 +366,12 @@ All four actual PlayerList initial-login paths invoke the one-argument game-list
 ## 2026-11-13 12:49 - defensive current-listener PONG admission, runtime pending
 
 Separate candidate: common PONG hook verifies its own live native Connection against current PlayerData/player/listener/PLAY state before dispatch. This closes a source-reproduced stale-listener same-UUID/colliding-ID boundary; it is defensive session isolation, not a claim of exact upstream rejection policy. Actual-class RED/GREEN/mutation cover stale/replacement/same-player connections, phase/close, valid copied-player and ordinary replies. All four current builds execute compileJava; headless regressions pass. No changed-artifact runtime yet; bf069754 native anchor evidence does not migrate. Duplicate anchor tolerance, ownership/after-send and stale-quit behavior remain unchanged and open. Gates stay closed.
+
+
+### Explicit listener admission and isolated normal join
+
+The reviewed PONG follow-up now compares THIS listener to both Connection.getPacketListener and player.connection, retaining the transport/session/PLAY checks. Same-player/same-Connection replacement is fixture/mutation evidence only, with native stale-callback reachability unproven. Source d7ffae8 has normal26.3 changed-artifact join evidence pinned to jar2f7b63892b17c87b5de0111c32e0263b145df6cc95d5f8878ab8f2e9888f0ec8, under docs/build-evidence/session-pong26.3. That positive run does not prove native stale-callback exclusion.
+
+### Finite movement ingress candidate
+
+Only ServerboundMovePlayerPacket tracking now uses the admitted Connection.channelRead0 genericsFtw boundary, before native handler thread handoff, instead of game-handler HEAD replay. Authoritative pre-move capture stays server-side after successful ensureRunningOnSameThread; the existing TAIL event stays separate. Actual hooks/dispatcher/session transport pass RED-to-GREEN and six mutation rejections with modeled native boundaries. Four native descriptors/branch order are retained; four compileJava/build/package routes pass. See docs/build-evidence/move-ingress. No changed-artifact native run yet. Other inbound HEAD hooks, global concurrent ownership, authoritative event/read qualification, velocity/explosion after-write and callback lifetime remain open. Gates closed, Veil off, LOG_ONLY.

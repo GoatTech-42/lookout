@@ -1,0 +1,9 @@
+Exception in thread "main" java.lang.AssertionError: one admitted network move reached real PacketDispatcher 3 times
+	at MoveIngressTest.check(MoveIngressTest.java:2)
+	at MoveIngressTest.main(MoveIngressTest.java:27)
+Traceback (most recent call last):
+  File "/tmp/meshac-move-baseline-sxu6qbo1/sim/ownership/run_move_ingress.py", line 64, in <module>
+    subprocess.run([str(jdk/'java'),'-cp',str(t/'classes'),'MoveIngressTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-move-ingress-8zcwvvz6/classes', 'MoveIngressTest']' returned non-zero exit status 1.
