@@ -296,8 +296,6 @@ public class CollisionState {
     public List<BlockState> deepFloorMaterials;
 
     public BlockState groundMaterial;
-    public BlockState subGroundBlockState;
-    public BlockState deepGroundBlockState;
 
     public BlockState subGroundMaterial;
 
@@ -731,7 +729,7 @@ public class CollisionState {
     }
 
     private void scanNearbyBlocks() {
-        if (this.surroundingMaterials != null && this.groundMaterial != null && this.subGroundBlockState != null && this.deepGroundBlockState != null) {
+        if (this.surroundingMaterials != null && this.groundMaterial != null && this.subGroundMaterial != null && this.deepGroundMaterial != null) {
             boolean inOpenAir2;
             this.blockX = (int) Math.floor(this.x);
             this.blockY = (int) Math.floor(this.y);
@@ -1411,7 +1409,7 @@ public class CollisionState {
         } else {
             this.ticksSinceHighFlySpeed++;
         }
-        if (!this.slime && (this.groundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.groundMaterialLegacy)) && (this.subGroundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.subGroundMaterialLegacy)) && (this.deepGroundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.deepGroundMaterialLegacy)) && (this.groundMaterial == null || !BlockUtils.isSlimeBlock(this.groundMaterial)) && (this.subGroundBlockState == null || !BlockUtils.isSlimeBlock(this.subGroundMaterial)) && (this.deepGroundBlockState == null || !BlockUtils.isSlimeBlock(this.deepGroundMaterial))) {
+        if (!this.slime && (this.groundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.groundMaterialLegacy)) && (this.subGroundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.subGroundMaterialLegacy)) && (this.deepGroundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.deepGroundMaterialLegacy)) && (this.groundMaterial == null || !BlockUtils.isSlimeBlock(this.groundMaterial)) && (this.subGroundMaterial == null || !BlockUtils.isSlimeBlock(this.subGroundMaterial)) && (this.deepGroundMaterial == null || !BlockUtils.isSlimeBlock(this.deepGroundMaterial))) {
             this.ticksSinceSlime++;
         } else {
             this.ticksSinceSlime = 0;
@@ -1722,7 +1720,7 @@ public class CollisionState {
 
     public boolean isNearGround() {
         if (ExemptionManager.isNewerThan1_13()) {
-            if (this.groundMaterial != null && this.subGroundBlockState != null) {
+            if (this.groundMaterial != null && this.subGroundMaterial != null) {
                 return !BlockUtils.isAir(this.groundMaterial) || !BlockUtils.isAir(this.subGroundMaterial);
             }
         } else if (this.groundMaterialLegacy != null && this.subGroundMaterialLegacy != null) {
@@ -1732,7 +1730,7 @@ public class CollisionState {
     }
 
     public boolean isNearGroundWide() {
-        return this.groundMaterial != null && this.subGroundBlockState != null && this.deepGroundBlockState != null ? !BlockUtils.isAir(this.groundMaterial) || !BlockUtils.isAir(this.subGroundMaterial) || !BlockUtils.isAir(this.deepGroundMaterial) : false;
+        return this.groundMaterial != null && this.subGroundMaterial != null && this.deepGroundMaterial != null ? !BlockUtils.isAir(this.groundMaterial) || !BlockUtils.isAir(this.subGroundMaterial) || !BlockUtils.isAir(this.deepGroundMaterial) : false;
     }
 
     public boolean hasNoGroundBeneath() {
@@ -2855,11 +2853,11 @@ public class CollisionState {
     }
 
     public void setSubGroundMaterial(BlockState subGroundMaterial2) {
-        this.subGroundBlockState = subGroundMaterial2;
+        this.subGroundMaterial = subGroundMaterial2;
     }
 
     public void setDeepGroundMaterial(BlockState deepGroundMaterial2) {
-        this.deepGroundBlockState = deepGroundMaterial2;
+        this.deepGroundMaterial = deepGroundMaterial2;
     }
 
     private void teleportToLoadedChunk(Location location) {

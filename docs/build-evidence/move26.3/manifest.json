@@ -1,0 +1,26 @@
+{
+  "ingressCodeCommit": "a8ac33787d04868ecbca823057769fa74d3ca289",
+  "collisionStateSourceSHA256": "84773bd10e5e5b5c2d7f78159c043445416a974f52f7cf336249eeb3233c65db",
+  "shippingJarSHA256": "0566dd2f9619d51525056330e24cddae02d16726af39344cb04ccff867aaa330",
+  "installedJarSHA256": "0566dd2f9619d51525056330e24cddae02d16726af39344cb04ccff867aaa330",
+  "observerJarSHA256": "76904cd77f288aeb644719620ec19d2a74a00c9f03cd90ca6c2af56d33d3ce2c",
+  "caseBeforeSHA256": "37c53c19d9eb419e442a41d2c731673ff7765805729002c494d89033c082bc96",
+  "caseAfterSHA256": "37c53c19d9eb419e442a41d2c731673ff7765805729002c494d89033c082bc96",
+  "runtimeSummary": {
+    "packets": 62,
+    "dispatches": 62,
+    "handlerHEAD": 124,
+    "serverCaptureTailEvents": 62,
+    "changedPositions": 47
+  },
+  "scope": "isolated26.3 admitted network movement/order and driven movement only; all gates closed",
+  "notQualified": [
+    "detectors",
+    "concurrent global ownership",
+    "other inbound families",
+    "afterwrite outbound",
+    "other3runtimes",
+    "arbitrary reentrancy/earlyreturns",
+    "distribution"
+  ]
+}

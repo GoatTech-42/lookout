@@ -1,0 +1,55 @@
+===sim/ownership/run_move_ingress.py
+MoveIngressTest PASS: real dispatcher once per admitted channel read, zero on native rejection/close/stale/phase; server replay capture separate (modeled boundary, not weave)
+===sim/ownership/test_move_mutations.py
+REJECTED: no-ingress
+REJECTED: duplicate-handler-dispatch
+REJECTED: network-capture
+REJECTED: no-current-player-listener
+REJECTED: no-transport-admission
+REJECTED: wrong-ingress-target
+Movement ingress mutation checks PASS
+===sim/lifecycle/run_join_anchor.py
+JoinAnchorTest PASS (real session/tracker/dispatch/hooks; deterministic channel boundaries, not weave/runtime)
+===sim/lifecycle/run_join_identity.py
+JoinIdentityTest PASS (missed-login, UUID/name, copy/stale-copy, two sessions, quit/rejoin)
+===sim/ownership/run_session_pong.py
+SessionPongTest PASS (real common hook, session/listener/phase/close boundary, ordinary policy retained)
+===sim/version/run_version_contract.py
+VersionContractTest PASS (native initialization, UNKNOWN -1, known chronology)
+===sim/world/run_world_snapshot.py
+WorldSnapshotTest PASS (payload freeze, negative coordinates, updates, reset generation)
+===sim/safety/run_product_safety.py
+SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=kick fixture
+[meshac] contained effect (log-only): disconnect target=fixture detail=simulated staff ban: test
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=pardon
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=unban
+[meshac] contained effect (log-only): disconnect target=fixture detail=Unusual fly (fly forced isolated REMOVE)
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+ProductSafetyTest PASS (registered kick/ban/pardon/unban; persistence, escalation, disconnect, egress, inherited veil)
+===sim/dispatch/run_dispatch_safety.py
+PASS: inbound-packet world/unknown suppressed, eligible control executed
+PASS: event-dispatch world/unknown suppressed, eligible control executed
+PASS: placement-packet world/unknown suppressed, eligible control executed
+PASS: digging-and-event world/unknown suppressed, eligible control executed
+PASS: outbound-position world/unknown suppressed, eligible control executed
+PASS: movement-event world/unknown suppressed, eligible control executed
+===scripts/test_analyze_deps.py
+checks: 3 needsVersion: 1 needsWorld: 1
+ok: call site getClientVersion seeds version need
+ok: world-only check does not gain version need
+ok: declaration file does not seed
+ok: call site getWorldBlockTracker seeds world need
+ok: comment mention does not seed world need
+ok: plain check is known
+ok: plain check has no propagated needs through declaration-only PlayerData
+ok: metadata is current (read-only comparison): checks: 180 needsVersion: 179 needsWorld: 179
+test_analyze_deps: PASS
+===scripts/test_analyzer_cli.py
+checks: 1 needsVersion: 0 needsWorld: 0
+test_analyzer_cli: PASS (stale/missing fail, check does not write, no Git required)

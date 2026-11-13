@@ -1,0 +1,17 @@
+[
+  {
+    "id": "MA-TEST",
+    "player": "MeshRigA",
+    "uuid": "ba891028-6122-3aa5-ac27-c1fb44aa79f7",
+    "action": "ban",
+    "reason": "isolated inherited ban fixture",
+    "by": "test-only",
+    "at": 1,
+    "until": 0,
+    "pardoned": false,
+    "lifted": false,
+    "evidence": [
+      "disposable lifecycle fixture only"
+    ]
+  }
+]

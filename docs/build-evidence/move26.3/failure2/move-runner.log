@@ -1,0 +1,200 @@
+client_exit None server_exit None
+CASE_BYTES_UNCHANGED True
+SERVER TAIL
+
+[13:28:12] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=5 thread=Netty Epoll IO #1
+[13:28:12] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=5 thread=Server thread
+[13:28:12] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] SERVER_CAPTURE packet=5 thread=Server thread
+[13:28:12] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] CAPTURE_COORD x=-0.5 y=-60.0 z=-6.4019999966323375 thread=Server thread
+[13:28:12] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_TAIL packet=5 thread=Server thread
+[13:28:12] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] EVENT_CALL from=-0.5,-60.0,-6.4019999966323375 to=-0.5,-60.0,-6.4019999966323375 thread=Server thread
+[13:28:13] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] ADMITTED_CHANNEL packet=6 thread=Netty Epoll IO #1
+[13:28:13] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] DISPATCH packet=6 thread=Netty Epoll IO #1
+[13:28:13] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=6 thread=Netty Epoll IO #1
+[13:28:13] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=6 thread=Server thread
+[13:28:13] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] SERVER_CAPTURE packet=6 thread=Server thread
+[13:28:13] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] CAPTURE_COORD x=-0.5 y=-60.0 z=-6.4019999966323375 thread=Server thread
+[13:28:13] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_TAIL packet=6 thread=Server thread
+[13:28:13] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] EVENT_CALL from=-0.5,-60.0,-6.4019999966323375 to=-0.5,-60.0,-6.4019999966323375 thread=Server thread
+[13:28:14] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] ADMITTED_CHANNEL packet=7 thread=Netty Epoll IO #1
+[13:28:14] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] DISPATCH packet=7 thread=Netty Epoll IO #1
+[13:28:14] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=7 thread=Netty Epoll IO #1
+[13:28:14] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=7 thread=Server thread
+[13:28:14] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] SERVER_CAPTURE packet=7 thread=Server thread
+[13:28:14] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] CAPTURE_COORD x=-0.5 y=-60.0 z=-6.4019999966323375 thread=Server thread
+[13:28:14] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_TAIL packet=7 thread=Server thread
+[13:28:14] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] EVENT_CALL from=-0.5,-60.0,-6.4019999966323375 to=-0.5,-60.0,-6.4019999966323375 thread=Server thread
+[13:28:15] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] ADMITTED_CHANNEL packet=8 thread=Netty Epoll IO #1
+[13:28:15] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] DISPATCH packet=8 thread=Netty Epoll IO #1
+[13:28:15] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=8 thread=Netty Epoll IO #1
+[13:28:15] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=8 thread=Server thread
+[13:28:15] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] SERVER_CAPTURE packet=8 thread=Server thread
+[13:28:15] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] CAPTURE_COORD x=-0.5 y=-60.0 z=-6.4019999966323375 thread=Server thread
+[13:28:15] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_TAIL packet=8 thread=Server thread
+[13:28:15] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] EVENT_CALL from=-0.5,-60.0,-6.4019999966323375 to=-0.5,-60.0,-6.4019999966323375 thread=Server thread
+[13:28:16] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] ADMITTED_CHANNEL packet=9 thread=Netty Epoll IO #1
+[13:28:16] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] DISPATCH packet=9 thread=Netty Epoll IO #1
+[13:28:16] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=9 thread=Netty Epoll IO #1
+[13:28:16] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=9 thread=Server thread
+[13:28:16] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] SERVER_CAPTURE packet=9 thread=Server thread
+[13:28:16] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] CAPTURE_COORD x=-0.5 y=-60.0 z=-6.4019999966323375 thread=Server thread
+[13:28:16] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_TAIL packet=9 thread=Server thread
+[13:28:16] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] EVENT_CALL from=-0.5,-60.0,-6.4019999966323375 to=-0.5,-60.0,-6.4019999966323375 thread=Server thread
+[13:28:17] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] ADMITTED_CHANNEL packet=10 thread=Netty Epoll IO #1
+[13:28:17] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] DISPATCH packet=10 thread=Netty Epoll IO #1
+[13:28:17] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=10 thread=Netty Epoll IO #1
+[13:28:17] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=10 thread=Server thread
+[13:28:17] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] SERVER_CAPTURE packet=10 thread=Server thread
+[13:28:17] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] CAPTURE_COORD x=-0.5 y=-60.0 z=-6.4019999966323375 thread=Server thread
+[13:28:17] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_TAIL packet=10 thread=Server thread
+[13:28:17] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] EVENT_CALL from=-0.5,-60.0,-6.4019999966323375 to=-0.5,-60.0,-6.4019999966323375 thread=Server thread
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] ADMITTED_CHANNEL packet=11 thread=Netty Epoll IO #1
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] DISPATCH packet=11 thread=Netty Epoll IO #1
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=11 thread=Netty Epoll IO #1
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=11 thread=Server thread
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] SERVER_CAPTURE packet=11 thread=Server thread
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] CAPTURE_COORD x=-0.5 y=-60.0 z=-6.4019999966323375 thread=Server thread
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_TAIL packet=11 thread=Server thread
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] EVENT_CALL from=-0.5,-60.0,-6.4019999966323375 to=-0.5,-60.0,-6.4019999966323375 thread=Server thread
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] ADMITTED_CHANNEL packet=12 thread=Netty Epoll IO #1
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] DISPATCH packet=12 thread=Netty Epoll IO #1
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=12 thread=Netty Epoll IO #1
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_HEAD packet=12 thread=Server thread
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] SERVER_CAPTURE packet=12 thread=Server thread
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] CAPTURE_COORD x=-0.5 y=-60.0 z=-6.4019999966323375 thread=Server thread
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] HANDLER_TAIL packet=12 thread=Server thread
+[13:28:18] [Server thread/INFO]: [STDOUT]: [MOVE-OBSERVER] EVENT_CALL from=-0.5,-60.0,-6.4019999966323375 to=-0.5,-60.0,-6.303999993264675 thread=Server thread
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] ADMITTED_CHANNEL packet=13 thread=Netty Epoll IO #1
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] DISPATCH packet=13 thread=Netty Epoll IO #1
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [MOVE-OBSERVER] NATIVE_EXCEPTION java.lang.NullPointerException: Cannot invoke "net.minecraft.world.level.block.state.BlockState.getBlock()" because "state" is null
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: java.lang.NullPointerException: Cannot invoke "net.minecraft.world.level.block.state.BlockState.getBlock()" because "state" is null
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//dev.meshac.world.BlockUtils.nameOf(BlockUtils.java:23)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//dev.meshac.world.BlockUtils.isSlimeBlock(BlockUtils.java:128)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//dev.meshac.player.CollisionState.updateTickCounters(CollisionState.java:1414)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//dev.meshac.player.CollisionState.processMovement(CollisionState.java:665)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//dev.meshac.packet.PacketDispatcher.onMove(PacketDispatcher.java:38)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//net.minecraft.network.Connection.handler$znd000$meshac$movementIngress(Connection.java:2733)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//net.minecraft.network.Connection.channelRead0(Connection.java:165)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//net.minecraft.network.Connection.channelRead0(Connection.java:58)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:107)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.flow.FlowControlHandler.dequeue(FlowControlHandler.java:236)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.flow.FlowControlHandler.channelRead(FlowControlHandler.java:195)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:355)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.codec.ByteToMessageDecoder.fireChannelRead(ByteToMessageDecoder.java:361)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.codec.ByteToMessageDecoder.channelRead(ByteToMessageDecoder.java:325)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:357)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.handler.timeout.IdleStateHandler.channelRead(IdleStateHandler.java:288)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:355)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1429)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.epoll.AbstractEpollStreamChannel$EpollStreamUnsafe.epollInReady(AbstractEpollStreamChannel.java:804)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.epoll.AbstractEpollChannel$AbstractEpollUnsafe.handle(AbstractEpollChannel.java:487)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.epoll.EpollIoHandler$DefaultEpollIoRegistration.handle(EpollIoHandler.java:349)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.epoll.EpollIoHandler.processReady(EpollIoHandler.java:548)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.epoll.EpollIoHandler.run(EpollIoHandler.java:491)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.SingleThreadIoEventLoop.runIo(SingleThreadIoEventLoop.java:225)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.channel.SingleThreadIoEventLoop.run(SingleThreadIoEventLoop.java:196)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.util.concurrent.SingleThreadEventExecutor$5.run(SingleThreadEventExecutor.java:1204)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at knot//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: 	at java.base/java.lang.Thread.run(Thread.java:1474)
+[13:28:18] [Netty Epoll IO #1/INFO]: [STDOUT]: [TEST-OBSERVER] DISCONNECT callback uuid=ba891028-6122-3aa5-ac27-c1fb44aa79f7
+[13:28:18] [Server thread/INFO]: MeshRigA lost connection: Internal Exception: java.lang.NullPointerException: Cannot invoke "net.minecraft.world.level.block.state.BlockState.getBlock()" because "state" is null
+[13:28:18] [Server thread/INFO]: System chat: MeshRigA left the game
+[13:28:18] [Server thread/INFO]: [STDOUT]: [TEST-OBSERVER] copyCount=0 sessions=0 nativeOnline=0 mode=LOG_ONLY veil=false,false,false
+[13:28:25] [Server thread/INFO]: Mixing effect.ContextChainAccessor from fabric-entity-events-v1.mixins.json into com.mojang.brigadier.context.ContextChain
+[13:28:25] [Server thread/INFO]: Mixing effect.ContextChainMixin from fabric-entity-events-v1.mixins.json into com.mojang.brigadier.context.ContextChain
+[13:28:25] [Server thread/INFO]: Mixing effect.CommandQueueEntryMixin from fabric-entity-events-v1.mixins.json into net.minecraft.commands.execution.CommandQueueEntry
+[13:28:25] [Server thread/INFO]: Mixing effect.BuildContextsAccessor from fabric-entity-events-v1.mixins.json into net.minecraft.commands.execution.tasks.BuildContexts
+[13:28:25] [Server thread/INFO]: System chat: Stopping the server
+[13:28:25] [Server thread/INFO]: Stopping server
+[13:28:25] [Server thread/INFO]: Saving players
+[13:28:25] [Server thread/INFO]: Saving worlds
+[13:28:25] [Server thread/INFO]: Saving chunks for level 'ServerLevel[disposable-world]'/minecraft:overworld
+[13:28:25] [Server thread/INFO]: Saving chunks for level 'ServerLevel[disposable-world]'/minecraft:the_nether
+[13:28:25] [Server thread/INFO]: Saving chunks for level 'ServerLevel[disposable-world]'/minecraft:the_end
+
+CLIENT TAIL
+eFuture.java:1789)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1090)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:614)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[13:27:54] [Render thread/INFO]: Reloading ResourceManager: vanilla, vanilla
+[13:27:55] [Worker-Main-1/INFO]: Found unifont_all_no_pua-17.0.01.hex, loading
+[13:27:55] [Worker-Main-1/INFO]: Found unifont_jp_patch-17.0.01.hex, loading
+[13:27:55] [Worker-Main-1/INFO]: Found unifont_pua-17.0.01.hex, loading
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1334:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5701:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM default
+ALSA lib confmisc.c:855:(parse_card) cannot find card '0'
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_card_inum returned error: No such file or directory
+ALSA lib confmisc.c:422:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1334:(snd_func_refer) error evaluating name
+ALSA lib conf.c:5178:(_snd_config_evaluate) function snd_func_refer returned error: No such file or directory
+ALSA lib conf.c:5701:(snd_config_expand) Evaluate error: No such file or directory
+ALSA lib pcm.c:2664:(snd_pcm_open_noupdate) Unknown PCM default
+[13:28:00] [Render thread/ERROR]: Error starting SoundSystem. Turning off sounds & music
+java.lang.IllegalStateException: Failed to open OpenAL device
+	at com.mojang.blaze3d.audio.Library.openDeviceOrFallback(Library.java:274)
+	at com.mojang.blaze3d.audio.Library.init(Library.java:149)
+	at net.minecraft.client.sounds.SoundEngine.loadLibrary(SoundEngine.java:121)
+	at net.minecraft.client.sounds.SoundEngine.reload(SoundEngine.java:110)
+	at net.minecraft.client.sounds.SoundManager.apply(SoundManager.java:122)
+	at net.minecraft.client.sounds.SoundManager.apply(SoundManager.java:41)
+	at net.minecraft.server.packs.resources.SimplePreparableReloadListener.lambda$reload$1(SimplePreparableReloadListener.java:15)
+	at java.base/java.util.concurrent.CompletableFuture$UniAccept.tryFire(CompletableFuture.java:739)
+	at java.base/java.util.concurrent.CompletableFuture$Completion.run(CompletableFuture.java:503)
+	at net.minecraft.server.packs.resources.SimpleReloadInstance.lambda$prepareTasks$3(SimpleReloadInstance.java:59)
+	at net.minecraft.util.thread.BlockableEventLoop.doRunTask(BlockableEventLoop.java:173)
+	at net.minecraft.util.thread.ReentrantBlockableEventLoop.doRunTask(ReentrantBlockableEventLoop.java:23)
+	at net.minecraft.util.thread.BlockableEventLoop.pollTask(BlockableEventLoop.java:147)
+	at net.minecraft.util.thread.BlockableEventLoop.runAllTasks(BlockableEventLoop.java:127)
+	at net.minecraft.client.Minecraft.runTick(Minecraft.java:1240)
+	at net.minecraft.client.Minecraft.run(Minecraft.java:967)
+	at net.minecraft.client.main.Main.main(Main.java:292)
+[13:28:00] [Render thread/INFO]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 256x128x0 minecraft:textures/atlas/celestials.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 128x128x0 minecraft:textures/atlas/decorated_pot.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/shield_patterns.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/banner_patterns.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 2048x2048x4 minecraft:textures/atlas/blocks.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 1024x512x0 minecraft:textures/atlas/items.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 1024x1024x0 minecraft:textures/atlas/gui.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 128x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 512x512x0 minecraft:textures/atlas/chest.png-atlas
+[13:28:00] [Render thread/INFO]: Created: 512x512x0 minecraft:textures/atlas/shulker_boxes.png-atlas
+[13:28:01] [Download-1/WARN]: Services are unavailable, unable to fetch uri for PLAYER/getBlocklist
+[13:28:01] [Download-1/WARN]: Services are unavailable, unable to fetch uri for PLAYER/getCertificates
+[13:28:01] [Render thread/INFO]: Connecting to 127.0.0.1, 25587
+[13:28:01] [Server Connector #1/WARN]: Failed to find a usable hardware address from the network interfaces; using random bytes: 65:26:f6:99:f6:b2:5e:10
+[13:28:06] [Render thread/WARN]: Ignoring chat session from MeshRigA due to missing Services public key
+[13:28:06] [Render thread/INFO]: Loaded 2 advancements
+[13:28:06] [Render thread/WARN]: Requested post effect does not exist: minecraft:end_of_frame
+[13:28:07] [Render thread/INFO]: Resizing Dynamic Transforms UBO, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[13:28:08] [Render thread/INFO]: Resizing Dynamic Transforms UBO, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[13:28:09] [Render thread/INFO]: Resizing Chunk Sections Command Buffer, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[13:28:09] [Render thread/INFO]: Resizing Chunk Sections Instanced, capacity limit of 2 reached during a single frame. New capacity will be 4.
+[13:28:09] [Render thread/INFO]: Resizing Chunk Sections Command Buffer, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[13:28:09] [Render thread/INFO]: Resizing Chunk Sections Instanced, capacity limit of 4 reached during a single frame. New capacity will be 8.
+[13:28:10] [Render thread/INFO]: Resizing Chunk Sections Command Buffer, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[13:28:10] [Render thread/INFO]: Resizing Chunk Sections Instanced, capacity limit of 8 reached during a single frame. New capacity will be 16.
+[13:28:10] [Render thread/INFO]: Resizing Chunk Sections Command Buffer, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[13:28:10] [Render thread/INFO]: Resizing Chunk Sections Instanced, capacity limit of 16 reached during a single frame. New capacity will be 32.
+[13:28:18] [Render thread/WARN]: Client disconnected with reason: Internal Exception: java.lang.NullPointerException: Cannot invoke "net.minecraft.world.level.block.state.BlockState.getBlock()" because "state" is null
+
+BOUNDED ANCHOR RUNTIME ASSERTIONS PASS; visual inspection separate

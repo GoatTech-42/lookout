@@ -1,0 +1,23 @@
+Source: local pinned OpenVulcan checkout commit f5640d1fbd19710bd398cb3945dedf605eadc225
+File: src/main/java/me/frep/vulcan/spigot/player/collision/CollisionState.java
+    private Material subGroundMaterialLegacy;
+    private Material deepGroundMaterialLegacy;
+    public Material subGroundMaterial;
+    public Material deepGroundMaterial;
+        if (this.surroundingMaterials != null && this.groundMaterial != null && this.subGroundMaterial != null && this.deepGroundMaterial != null) {
+        this.subGroundMaterialLegacy = BlockUtils.getMaterial(world4, blockX3, blockZ2, blockZ4);
+        this.deepGroundMaterialLegacy = BlockUtils.getMaterial(world5, blockX3, blockZ2, blockZ5);
+        if (!this.slime && (this.groundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.groundMaterialLegacy)) && (this.subGroundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.subGroundMaterialLegacy)) && (this.deepGroundMaterialLegacy == null || !BlockUtils.isSlimeBlock(this.deepGroundMaterialLegacy)) && (this.groundMaterial == null || !BlockUtils.isSlimeBlock(this.groundMaterial)) && (this.subGroundMaterial == null || !BlockUtils.isSlimeBlock(this.subGroundMaterial)) && (this.deepGroundMaterial == null || !BlockUtils.isSlimeBlock(this.deepGroundMaterial))) {
+            if (this.groundMaterial != null && this.subGroundMaterial != null) {
+                return !BlockUtils.isAir(this.groundMaterial) || !BlockUtils.isAir(this.subGroundMaterial);
+        } else if (this.groundMaterialLegacy != null && this.subGroundMaterialLegacy != null) {
+            return !BlockUtils.isAir(this.groundMaterialLegacy) || !BlockUtils.isAir(this.subGroundMaterialLegacy);
+        return this.groundMaterial != null && this.subGroundMaterial != null && this.deepGroundMaterial != null ? !BlockUtils.isAir(this.groundMaterial) || !BlockUtils.isAir(this.subGroundMaterial) || !BlockUtils.isAir(this.deepGroundMaterial) : false;
+        return this.subGroundMaterialLegacy;
+        return this.deepGroundMaterialLegacy;
+        return this.subGroundMaterial;
+        return this.deepGroundMaterial;
+    public void setSubGroundMaterial(Material subGroundMaterial2) {
+        this.subGroundMaterial = subGroundMaterial2;
+    public void setDeepGroundMaterial(Material deepGroundMaterial2) {
+        this.deepGroundMaterial = deepGroundMaterial2;

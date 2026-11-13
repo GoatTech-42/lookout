@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home/sandbox/meshac-repo/sim/ownership/verify_movement_trace.py", line 24, in <module>
+    print(json.dumps(verify(Path(sys.argv[1]).read_text(),Path(sys.argv[2]).read_text()),indent=2))
+  File "/home/sandbox/meshac-repo/sim/ownership/verify_movement_trace.py", line 7, in verify
+    assert 'NATIVE_EXCEPTION' not in text,'native movement exception observed'
+AssertionError: native movement exception observed
