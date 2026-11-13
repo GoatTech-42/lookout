@@ -44,6 +44,8 @@ public class Meshac implements DedicatedServerModInitializer {
 			// LOG_ONLY: contained (simulated) ban disconnect leaves the player connected; they still need anticheat state.
 			dev.meshac.data.PlayerDataManager.onJoin(handler.getPlayer());
 		});
+		net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents.COPY_FROM.register(
+				(previous, replacement, alive) -> dev.meshac.data.PlayerDataManager.onPlayerCopy(previous, replacement));
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
 			dev.meshac.data.PlayerDataManager.onQuit(handler.getPlayer());
 			dev.meshac.product.Verdict.forget(handler.getPlayer().getUUID());

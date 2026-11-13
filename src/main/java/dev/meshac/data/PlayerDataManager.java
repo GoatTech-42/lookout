@@ -14,10 +14,18 @@ public final class PlayerDataManager {
 		PlayerData data = new PlayerData(player);
 		// Fabric JOIN occurs after the login packet, before later entity-scoped updates.
 		data.setEntityId(player.getId());
+		data.setUniqueId(player.getUUID());
+		data.setPlayerName(player.getName().getString());
 		data.setClientVersion(ClientVersionResolver.resolve(player.connection == null ? null : ((dev.meshac.mixin.ServerCommonPacketListenerImplAccessor) player.connection).meshac$getConnection()));
 		data.setChecks(CheckManager.createChecks(data));
 		MeshServices.players().put(player.getUUID(), data);
 		dev.meshac.veil.Veil.grace(player, player.level().getServer().getTickCount());
+	}
+
+	/** Fabric COPY_FROM follows restoreFrom and precedes respawn's outbound state packets. */
+	public static void onPlayerCopy(ServerPlayer previous, ServerPlayer replacement) {
+		PlayerData data = get(previous);
+		if (data != null && data.getPlayer() == previous) data.setPlayer(replacement);
 	}
 
 	public static void onQuit(ServerPlayer player) {

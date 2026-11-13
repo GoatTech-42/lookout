@@ -1,0 +1,11 @@
+Exception in thread "main" java.lang.AssertionError: missing copied-player reference refresh
+	at JoinIdentityTest.main(JoinIdentityTest.java:11)
+Caused by: java.lang.NoSuchMethodException: dev.meshac.data.PlayerDataManager.onPlayerCopy(net.minecraft.server.level.ServerPlayer,net.minecraft.server.level.ServerPlayer)
+	at java.base/java.lang.Class.getMethod(Class.java:2166)
+	at JoinIdentityTest.main(JoinIdentityTest.java:10)
+Traceback (most recent call last):
+  File "/home/sandbox/meshac-repo/sim/lifecycle/run_join_identity.py", line 40, in <module>
+    subprocess.run([str(jdk/'java'),'-cp',str(t/'classes'),'JoinIdentityTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-join-du9rbab4/classes', 'JoinIdentityTest']' returned non-zero exit status 1.
