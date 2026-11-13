@@ -1,0 +1,7 @@
+FINAL GREEN {'packets': 62, 'dispatches': 62, 'handlerHEAD': 124, 'serverCaptureTailEvents': 62, 'changedPositions': 47}
+REJECTED: swap-admission-dispatch ('1', 'native stage order', ['DISPATCH', 'ADMITTED_CHANNEL', 'HANDLER_HEAD:network', 'HANDLER_HEAD:server', 'SERVER_CAPTURE', 'HANDLER_TAIL'])
+REJECTED: truncate-before-stop deliberate server shutdown missing
+REJECTED: missing-client-close client did not observe deliberate server close
+REJECTED: missing-runner-completion runner completion/cleanup markers missing
+REJECTED: failed-native-run native movement exception observed
+Movement validator mutation checks PASS
