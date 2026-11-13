@@ -38,3 +38,9 @@ The confirmed plan makes the OpenVulcan Fabric rebuild the main line, keeps old 
 Old detection branches are not blindly merged into the port. Some are already ancestors; others hold unique patch history. The archive tags preserve every tip and its reachable history. Review a patch against the upstream port before applying it. Old-code removal is deferred until a finished, rights-cleared v1 has actually been published. Archive history remains recoverable.
 
 The existing main README-only commit is merged into the rebuild history, then replaced with current project documentation. Main advances normally, without force pushing or dropping its prior history. Visibility stays private.
+
+## Completed consolidation
+
+The rebuild and old-main histories were merged as `34b721f11c573c38b044e36910092a67b3c57d88`. Main advanced normally, with no force push. All 22 original branch tips were checked against their remote archive tags. The 21 obsolete branch heads were then removed in one atomic push with an exact expected-tip lease per head. A head that had moved would have stopped the deletion. The two remaining remote heads are `main` and `legacy/pre-openvulcan`.
+
+[branch-audit-20261113.tsv](branch-audit-20261113.tsv) records reachability/unique-patch counts before cleanup. [branch-cleanup-20261113.json](branch-cleanup-20261113.json) records the exact removed tips, archive tags and verified remaining heads. Unique work remains in reachable tagged history, not erased. The old-code recovery branch is still present; v1 has not been published.
