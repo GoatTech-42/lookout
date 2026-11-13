@@ -18,6 +18,7 @@ processResources {
 	inputs.property "mc", project.mc_range
 	inputs.property "java", project.java_min
 	filesMatching("fabric.mod.json") { expand "version": project.version, "mc": project.mc_range, "java": project.java_min }
+	filesMatching("meshac.mixins.json") { expand "java": project.java_min }
 }
 
 tasks.withType(JavaCompile).configureEach { it.options.release = 25; it.options.compilerArgs += ["-Xmaxerrs", "10000", "-Xmaxwarns", "10000"] }
@@ -36,3 +37,5 @@ if (!(variant in ["26.1.2", "26.2", "26.3"])) {
 sourceSets.main.java.srcDir "src/mc${variant}/java"
 
 base { archivesName = "meshac-${project.minecraft_version}" }
+
+if (project.java_min.toString() != "25") throw new GradleException("java_min does not match this build route")

@@ -1,0 +1,42 @@
+plugins {
+	id "net.fabricmc.fabric-loom-remap" version "${loom_version}"
+}
+
+repositories {
+	maven { url = "https://repo.opencollab.dev/main/" }
+}
+
+dependencies {
+	compileOnly "org.geysermc.floodgate:api:2.2.4-SNAPSHOT"
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	mappings loom.officialMojangMappings()
+	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+}
+
+processResources {
+	inputs.property "version", project.version
+	inputs.property "mc", project.mc_range
+	inputs.property "java", project.java_min
+	filesMatching("fabric.mod.json") { expand "version": project.version, "mc": project.mc_range, "java": project.java_min }
+	filesMatching("meshac.mixins.json") { expand "java": project.java_min }
+}
+
+tasks.withType(JavaCompile).configureEach { it.options.release = 21; it.options.compilerArgs += ["-Xmaxerrs", "10000", "-Xmaxwarns", "10000"] }
+
+java {
+	withSourcesJar()
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
+}
+
+// Keep protocol/API seams explicit. Unknown future targets do not inherit a guessed adapter.
+def variant = project.minecraft_version.toString()
+if (!(variant in ["1.21.11"])) {
+    throw new GradleException("No verified source adapter for Minecraft " + variant)
+}
+sourceSets.main.java.srcDir "src/mc${variant}/java"
+
+base { archivesName = "meshac-${project.minecraft_version}" }
+
+if (project.java_min.toString() != "21") throw new GradleException("java_min does not match this build route")

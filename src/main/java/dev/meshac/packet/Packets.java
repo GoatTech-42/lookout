@@ -1,6 +1,5 @@
 package dev.meshac.packet;
 
-import net.minecraft.network.protocol.game.ServerboundAttackPacket;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -36,13 +35,7 @@ public final class Packets {
 	}
 
 	public static InteractEntity toInteractEntity(ServerboundInteractPacket p) {
-		// 26.3: interact is a flat record; attack moved to ServerboundAttackPacket (see toAttackEntity).
-		InteractEntity.Action action = p.location() == null ? InteractEntity.Action.INTERACT : InteractEntity.Action.INTERACT_AT;
-		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
-	}
-
-	public static InteractEntity toAttackEntity(ServerboundAttackPacket p) {
-		return new InteractEntity(p.entityId(), InteractEntity.Action.ATTACK, InteractionHand.MAIN_HAND, null, false);
+		return dev.meshac.compat.VersionBridge.interact(p);
 	}
 
 	public static EntityAction toEntityAction(ServerboundPlayerCommandPacket p) {

@@ -266,3 +266,13 @@ Added explicit mc26.1.2/mc26.2/mc26.3 source adapters selected by exact minecraf
 All three 26.x builds now compile/package. Packaged checks validate target-specific fabric.mod.json, Java 25 class major version and all declared mixin class files. processResources tracks mc/java inputs so switching target cannot reuse stale metadata. Output names include the MC version. These checks do not validate mixin application or gameplay.
 
 Independent QA accepted the headless 2eb56ce safety batch and its exact reload-test delta (SHA256 23caceaa5f2c9bd6d3dfd02f08470efa1f405ce4130f9b7575893eb5bdb269b6). The unchanged reload-test delta is included here. No private-boot or client clearance inferred; world gate remains closed and veil off.
+
+## 2026-11-13 - 1.21.11 build/remap route
+
+The isolated baseline probe restored the old remap plugin route against 1.21.11 and used the nearest compiled adapter only to expose missing APIs. It reached compileJava and reported 18 errors. No baseline support or runtime result was implied.
+
+Added an explicit 1.21.11 adapter and Java 21/remap route. Native interact dispatch supplies ATTACK/INTERACT/INTERACT_AT (entity ID via exact accessor); 26.x retains its separate native attack hook. Both feed one common interaction-processing order, preserving raw packets, tracker updates and check dispatch. ChunkPos.toLong, motion packet getId/getMovement and a ServerPlayer-typed message local close the verified older API differences.
+
+All four targets now compile and package: 1.21.11 on the remap route with Java 21 bytecode, and 26.1.2/26.2/26.3 on the native route with Java 25 bytecode. Output metadata, bytecode major, mixin compatibility level and declared mixin class presence are checked per target. The 1.21.11 packaged mixins contain intermediary target references. A RED package check caught a Java-25 mixin compatibility declaration in the Java-21 jar; resource expansion now sets the correct per-target level. Each build route rejects mismatched java_min.
+
+Loom printed "Cannot remap modifiers because it does not exist in any of the targets [] or their parents" while preparing the 1.21.11 build. Build/remap succeeded; the warning is unresolved and retained in evidence, not dismissed as harmless. No mixin application or in-game boot has run. No check availability, threshold, enforcement mode or veil setting changed. Sneak/input feed, packet lifecycle and runtime qualification remain open across targets. Existing headless safety suites/mutations still pass after the shared interaction extraction.

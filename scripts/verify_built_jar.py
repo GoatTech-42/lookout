@@ -10,6 +10,7 @@ with zipfile.ZipFile(jar) as z:
  for path in ['dev/meshac/compat/VersionBridge.class','dev/meshac/mixin/AnimationMixin.class','dev/meshac/check/ContextGate.class','dev/meshac/packet/PacketDispatcher.class']:
   data=z.read(path);assert struct.unpack('>H',data[6:8])[0]==minimum+44,(path,'wrong bytecode target')
  mix=json.loads(z.read('meshac.mixins.json'))
+ assert mix['compatibilityLevel']=='JAVA_'+str(minimum), (mc,'wrong mixin Java compatibility',mix['compatibilityLevel'])
  for name in mix['mixins']:assert 'dev/meshac/mixin/'+name+'.class' in z.namelist(),name
  assert 'AnimationMixin' in mix['mixins']
  print('Packaged target metadata/class/mixin presence PASS:',mc,jar.name)

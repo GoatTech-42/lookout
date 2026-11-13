@@ -46,11 +46,6 @@ public abstract class ServerGamePacketListenerImplMixin {
 		PacketDispatcher.onInteractEntity(player, p);
 	}
 
-	@Inject(method = "handleAttack", at = @At("HEAD"))
-	private void meshac$attack(net.minecraft.network.protocol.game.ServerboundAttackPacket p, CallbackInfo ci) {
-		PacketDispatcher.onAttackEntity(player, p);
-	}
-
 	@Inject(method = "handlePlayerCommand", at = @At("HEAD"))
 	private void meshac$command(ServerboundPlayerCommandPacket p, CallbackInfo ci) {
 		PacketDispatcher.onEntityAction(player, p);

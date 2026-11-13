@@ -1,0 +1,225 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Configure project :
+Fabric Loom: 1.18.4
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using of the official minecraft mappings is at your own risk!
+Please make sure to read and understand the following license:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# (c) 2020 Microsoft Corporation. These mappings are provided "as-is" and you bear the risk of using them. You may copy and use the mappings for development purposes, but you may not redistribute the mappings complete and unmodified. Microsoft makes no warranties, express or implied, with respect to the mappings provided here.  Use and modification of this document or the source code (in any form) of Minecraft: Java Edition is governed by the Minecraft End User License Agreement available at https://account.mojang.com/documents/minecraft_eula.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Cannot remap modifiers because it does not exist in any of the targets [] or their parents.
+
+> Configure project :
+:remapping sources
+
+> Task :compileJava
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:50: error: cannot find symbol
+	private void meshac$attack(net.minecraft.network.protocol.game.ServerboundAttackPacket p, CallbackInfo ci) {
+	                                                              ^
+  symbol:   class ServerboundAttackPacket
+  location: package net.minecraft.network.protocol.game
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/PacketDispatcher.java:67: error: cannot find symbol
+	public static void onAttackEntity(ServerPlayer player, net.minecraft.network.protocol.game.ServerboundAttackPacket p) {
+	                                                                                          ^
+  symbol:   class ServerboundAttackPacket
+  location: package net.minecraft.network.protocol.game
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:3: error: cannot find symbol
+import net.minecraft.network.protocol.game.ServerboundAttackPacket;
+                                          ^
+  symbol:   class ServerboundAttackPacket
+  location: package net.minecraft.network.protocol.game
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:44: error: cannot find symbol
+	public static InteractEntity toAttackEntity(ServerboundAttackPacket p) {
+	                                            ^
+  symbol:   class ServerboundAttackPacket
+  location: class Packets
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:47: error: cannot find symbol
+		long packedPos = chunk.getPos().pack();
+		                               ^
+  symbol:   method pack()
+  location: class ChunkPos
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:113: error: cannot find symbol
+		playerData.getConfirmationTracker().runAfterConfirmation(() -> clearChunk(ChunkPos.getX(pos.pack()), ChunkPos.getZ(pos.pack())));
+		                                                                                           ^
+  symbol:   method pack()
+  location: variable pos of type ChunkPos
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:113: error: cannot find symbol
+		playerData.getConfirmationTracker().runAfterConfirmation(() -> clearChunk(ChunkPos.getX(pos.pack()), ChunkPos.getZ(pos.pack())));
+		                                                                                                                      ^
+  symbol:   method pack()
+  location: variable pos of type ChunkPos
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/player/CollisionState.java:1858: error: cannot find symbol
+                        player2.sendSystemMessage(TextUtil.parse(ghostBlocksFixMessage2));
+                               ^
+  symbol:   method sendSystemMessage(Component)
+  location: variable player2 of type Player
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/veil/Veil.java:94: error: cannot find symbol
+		return (pos.pack() << 12) | ((long) (dim.identifier().hashCode() & 0xF) << 8) | (secIdx & 0xFF);
+		           ^
+  symbol:   method pack()
+  location: variable pos of type ChunkPos
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/OutboundDispatcher.java:82: error: cannot find symbol
+			if (motion.id() == data.getEntityId())
+			          ^
+  symbol:   method id()
+  location: variable motion of type ClientboundSetEntityMotionPacket
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/OutboundDispatcher.java:83: error: cannot find symbol
+				data.getVelocityTracker().handleVelocity(new Vec3d(motion.movement().x, motion.movement().y, motion.movement().z));
+				                                                         ^
+  symbol:   method movement()
+  location: variable motion of type ClientboundSetEntityMotionPacket
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/OutboundDispatcher.java:83: error: cannot find symbol
+				data.getVelocityTracker().handleVelocity(new Vec3d(motion.movement().x, motion.movement().y, motion.movement().z));
+				                                                                              ^
+  symbol:   method movement()
+  location: variable motion of type ClientboundSetEntityMotionPacket
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/OutboundDispatcher.java:83: error: cannot find symbol
+				data.getVelocityTracker().handleVelocity(new Vec3d(motion.movement().x, motion.movement().y, motion.movement().z));
+				                                                                                                   ^
+  symbol:   method movement()
+  location: variable motion of type ClientboundSetEntityMotionPacket
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:40: error: cannot find symbol
+		InteractEntity.Action action = p.location() == null ? InteractEntity.Action.INTERACT : InteractEntity.Action.INTERACT_AT;
+		                                ^
+  symbol:   method location()
+  location: variable p of type ServerboundInteractPacket
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:41: error: cannot find symbol
+		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+		                           ^
+  symbol:   method entityId()
+  location: variable p of type ServerboundInteractPacket
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:41: error: cannot find symbol
+		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+		                                                 ^
+  symbol:   method hand()
+  location: variable p of type ServerboundInteractPacket
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:41: error: cannot find symbol
+		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+		                                                           ^
+  symbol:   method location()
+  location: variable p of type ServerboundInteractPacket
+/tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:41: error: cannot find symbol
+		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+		                                                                         ^
+  symbol:   method usingSecondaryAction()
+  location: variable p of type ServerboundInteractPacket
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+18 errors
+
+> Task :compileJava FAILED
+
+[Incubating] Problems report is available at: file:///tmp/meshac-1211-probe/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':compileJava' (registered by plugin class 'org.gradle.api.plugins.JavaBasePlugin').
+> Compilation failed; see the compiler output below.
+  Note: Recompile with -Xlint:deprecation for details.
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java:50: error: cannot find symbol
+  	private void meshac$attack(net.minecraft.network.protocol.game.ServerboundAttackPacket p, CallbackInfo ci) {
+  	                                                              ^
+    symbol:   class ServerboundAttackPacket
+    location: package net.minecraft.network.protocol.game
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/PacketDispatcher.java:67: error: cannot find symbol
+  	public static void onAttackEntity(ServerPlayer player, net.minecraft.network.protocol.game.ServerboundAttackPacket p) {
+  	                                                                                          ^
+    symbol:   class ServerboundAttackPacket
+    location: package net.minecraft.network.protocol.game
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:3: error: cannot find symbol
+  import net.minecraft.network.protocol.game.ServerboundAttackPacket;
+                                            ^
+    symbol:   class ServerboundAttackPacket
+    location: package net.minecraft.network.protocol.game
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:44: error: cannot find symbol
+  	public static InteractEntity toAttackEntity(ServerboundAttackPacket p) {
+  	                                            ^
+    symbol:   class ServerboundAttackPacket
+    location: class Packets
+  Note: Recompile with -Xlint:unchecked for details.
+  Note: Some input files use or override a deprecated API.
+  Note: Some input files use unchecked or unsafe operations.
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:47: error: cannot find symbol
+  		long packedPos = chunk.getPos().pack();
+  		                               ^
+    symbol:   method pack()
+    location: class ChunkPos
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:113: error: cannot find symbol
+  		playerData.getConfirmationTracker().runAfterConfirmation(() -> clearChunk(ChunkPos.getX(pos.pack()), ChunkPos.getZ(pos.pack())));
+  		                                                                                           ^
+    symbol:   method pack()
+    location: variable pos of type ChunkPos
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/tracker/WorldBlockTracker.java:113: error: cannot find symbol
+  		playerData.getConfirmationTracker().runAfterConfirmation(() -> clearChunk(ChunkPos.getX(pos.pack()), ChunkPos.getZ(pos.pack())));
+  		                                                                                                                      ^
+    symbol:   method pack()
+    location: variable pos of type ChunkPos
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/player/CollisionState.java:1858: error: cannot find symbol
+                          player2.sendSystemMessage(TextUtil.parse(ghostBlocksFixMessage2));
+                                 ^
+    symbol:   method sendSystemMessage(Component)
+    location: variable player2 of type Player
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/veil/Veil.java:94: error: cannot find symbol
+  		return (pos.pack() << 12) | ((long) (dim.identifier().hashCode() & 0xF) << 8) | (secIdx & 0xFF);
+  		           ^
+    symbol:   method pack()
+    location: variable pos of type ChunkPos
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/OutboundDispatcher.java:82: error: cannot find symbol
+  			if (motion.id() == data.getEntityId())
+  			          ^
+    symbol:   method id()
+    location: variable motion of type ClientboundSetEntityMotionPacket
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/OutboundDispatcher.java:83: error: cannot find symbol
+  				data.getVelocityTracker().handleVelocity(new Vec3d(motion.movement().x, motion.movement().y, motion.movement().z));
+  				                                                         ^
+    symbol:   method movement()
+    location: variable motion of type ClientboundSetEntityMotionPacket
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/OutboundDispatcher.java:83: error: cannot find symbol
+  				data.getVelocityTracker().handleVelocity(new Vec3d(motion.movement().x, motion.movement().y, motion.movement().z));
+  				                                                                              ^
+    symbol:   method movement()
+    location: variable motion of type ClientboundSetEntityMotionPacket
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/OutboundDispatcher.java:83: error: cannot find symbol
+  				data.getVelocityTracker().handleVelocity(new Vec3d(motion.movement().x, motion.movement().y, motion.movement().z));
+  				                                                                                                   ^
+    symbol:   method movement()
+    location: variable motion of type ClientboundSetEntityMotionPacket
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:40: error: cannot find symbol
+  		InteractEntity.Action action = p.location() == null ? InteractEntity.Action.INTERACT : InteractEntity.Action.INTERACT_AT;
+  		                                ^
+    symbol:   method location()
+    location: variable p of type ServerboundInteractPacket
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:41: error: cannot find symbol
+  		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+  		                           ^
+    symbol:   method entityId()
+    location: variable p of type ServerboundInteractPacket
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:41: error: cannot find symbol
+  		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+  		                                                 ^
+    symbol:   method hand()
+    location: variable p of type ServerboundInteractPacket
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:41: error: cannot find symbol
+  		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+  		                                                           ^
+    symbol:   method location()
+    location: variable p of type ServerboundInteractPacket
+  /tmp/meshac-1211-probe/src/main/java/dev/meshac/packet/Packets.java:41: error: cannot find symbol
+  		return new InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+  		                                                                         ^
+    symbol:   method usingSecondaryAction()
+    location: variable p of type ServerboundInteractPacket
+  18 errors
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 1m 17s
+1 actionable task: 1 executed

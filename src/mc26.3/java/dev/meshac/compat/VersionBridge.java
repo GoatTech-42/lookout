@@ -28,6 +28,13 @@ public final class VersionBridge {
   return state != null && state.getBlock() instanceof net.minecraft.world.level.block.PotentSulfurBlock
    && state.getValue(net.minecraft.world.level.block.PotentSulfurBlock.STATE) != net.minecraft.world.level.block.state.properties.PotentSulfurState.DRY;
  }
+ public static long chunkKey(net.minecraft.world.level.ChunkPos pos) { return pos.pack(); }
+ public static int motionEntity(ClientboundSetEntityMotionPacket p) { return p.id(); }
+ public static Vec3 motion(ClientboundSetEntityMotionPacket p) { return p.movement(); }
+ public static dev.meshac.packet.InteractEntity interact(ServerboundInteractPacket p) {
+  var action = p.location() == null ? dev.meshac.packet.InteractEntity.Action.INTERACT : dev.meshac.packet.InteractEntity.Action.INTERACT_AT;
+  return new dev.meshac.packet.InteractEntity(p.entityId(), action, p.hand(), p.location(), p.usingSecondaryAction());
+ }
  public static final EntityType<?> ENDER_DRAGON = net.minecraft.world.entity.EntityTypes.ENDER_DRAGON;
  public static final EntityType<?> FIREBALL = net.minecraft.world.entity.EntityTypes.FIREBALL;
  public static final EntityType<?> SMALL_FIREBALL = net.minecraft.world.entity.EntityTypes.SMALL_FIREBALL;

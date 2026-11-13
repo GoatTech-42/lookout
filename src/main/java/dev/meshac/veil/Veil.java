@@ -91,7 +91,7 @@ public final class Veil {
 	 * these so its view matches the payload clients really receive, not a recomputed guess. */
 	private static final java.util.Map<Long, java.util.Set<Integer>> EMITTED_MODS = new java.util.concurrent.ConcurrentHashMap<>();
 	private static long emitKey(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim, net.minecraft.world.level.ChunkPos pos, int secIdx) {
-		return (pos.pack() << 12) | ((long) (dim.identifier().hashCode() & 0xF) << 8) | (secIdx & 0xFF);
+		return (dev.meshac.compat.VersionBridge.chunkKey(pos) << 12) | ((long) (dim.identifier().hashCode() & 0xF) << 8) | (secIdx & 0xFF);
 	}
 
 	/** Records the swaps of one encode; an empty array marks a no-swap encode so stale swaps never linger. */

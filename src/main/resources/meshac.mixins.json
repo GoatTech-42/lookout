@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "dev.meshac.mixin",
-  "compatibilityLevel": "JAVA_25",
+  "compatibilityLevel": "JAVA_${java}",
   "mixins": [
     "ServerGamePacketListenerImplMixin",
     "ServerHandshakePacketListenerImplMixin",
@@ -14,7 +14,8 @@
     "ChunkMapMixin",
     "TrackedEntityMixin",
     "ClientboundMoveEntityPacketAccessor",
-    "AnimationMixin"
+    "AnimationMixin",
+    "AttackMixin"
   ],
   "injectors": {
     "defaultRequire": 1

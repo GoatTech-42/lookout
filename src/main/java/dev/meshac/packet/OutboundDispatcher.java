@@ -79,8 +79,8 @@ public final class OutboundDispatcher {
 			return;
 		}
 		if (packet instanceof ClientboundSetEntityMotionPacket motion) {
-			if (motion.id() == data.getEntityId())
-				data.getVelocityTracker().handleVelocity(new Vec3d(motion.movement().x, motion.movement().y, motion.movement().z));
+			if (dev.meshac.compat.VersionBridge.motionEntity(motion) == data.getEntityId())
+				data.getVelocityTracker().handleVelocity(new Vec3d(dev.meshac.compat.VersionBridge.motion(motion).x, dev.meshac.compat.VersionBridge.motion(motion).y, dev.meshac.compat.VersionBridge.motion(motion).z));
 			return;
 		}
 		if (packet instanceof ClientboundUpdateAttributesPacket attributes) {

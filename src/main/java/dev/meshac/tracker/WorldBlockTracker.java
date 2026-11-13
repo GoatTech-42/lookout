@@ -44,7 +44,7 @@ public class WorldBlockTracker {
 
 	public void handleChunkColumn(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension, LevelChunk chunk) {
 		if (chunk == null) return;
-		long packedPos = chunk.getPos().pack();
+		long packedPos = dev.meshac.compat.VersionBridge.chunkKey(chunk.getPos());
 		final int chunkX = ChunkPos.getX(packedPos), chunkZ = ChunkPos.getZ(packedPos);
 		// Freeze at send time: scan the sections and consume the emitted-mods record NOW, so the
 		// confirmation-deferred apply cannot observe a later world state or a later encode's swaps.
@@ -110,7 +110,7 @@ public class WorldBlockTracker {
 	}
 
 	public void handleChunkForget(ChunkPos pos) {
-		playerData.getConfirmationTracker().runAfterConfirmation(() -> clearChunk(ChunkPos.getX(pos.pack()), ChunkPos.getZ(pos.pack())));
+		playerData.getConfirmationTracker().runAfterConfirmation(() -> clearChunk(ChunkPos.getX(dev.meshac.compat.VersionBridge.chunkKey(pos)), ChunkPos.getZ(dev.meshac.compat.VersionBridge.chunkKey(pos))));
 	}
 
 	private void applyBlockChange(BlockPos pos, BlockState state) {

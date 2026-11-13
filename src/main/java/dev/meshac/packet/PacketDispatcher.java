@@ -50,9 +50,12 @@ public final class PacketDispatcher {
 	}
 
 	public static void onInteractEntity(ServerPlayer player, ServerboundInteractPacket p) {
+		dispatchInteraction(player, p, Packets.toInteractEntity(p));
+	}
+
+	public static void dispatchInteraction(ServerPlayer player, Object raw, InteractEntity interaction) {
 		PlayerData data = data(player);
 		if (data == null) return;
-		InteractEntity interaction = Packets.toInteractEntity(p);
 		data.setLastInteractionPacket(interaction);
 		data.getMotionState().handleEntityInteraction(interaction);
 		boolean attack = interaction.getAction() == InteractEntity.Action.ATTACK;
@@ -61,20 +64,7 @@ public final class PacketDispatcher {
 			net.minecraft.world.entity.Entity target = player.level().getEntity(interaction.getEntityId());
 			if (target != null) dev.meshac.veil.Veil.attacked(player, target, player.level().getServer().getTickCount());
 		}
-		dispatchChecks(data, new MeshPacketEvent(MeshPacketType.INTERACT_ENTITY, player, p, true));
-	}
-
-	public static void onAttackEntity(ServerPlayer player, net.minecraft.network.protocol.game.ServerboundAttackPacket p) {
-		// 26.3: entity attack split out of ServerboundInteractPacket; mirror the attack path of onInteractEntity.
-		PlayerData data = data(player);
-		if (data == null) return;
-		InteractEntity interaction = Packets.toAttackEntity(p);
-		data.setLastInteractionPacket(interaction);
-		data.getMotionState().handleEntityInteraction(interaction);
-		data.getRelativeMoveTracker().handleInteract(interaction.getEntityId(), true);
-		net.minecraft.world.entity.Entity target = player.level().getEntity(interaction.getEntityId());
-		if (target != null) dev.meshac.veil.Veil.attacked(player, target, player.level().getServer().getTickCount());
-		dispatchChecks(data, new MeshPacketEvent(MeshPacketType.INTERACT_ENTITY, player, p, true));
+		dispatchChecks(data, new MeshPacketEvent(MeshPacketType.INTERACT_ENTITY, player, raw, true));
 	}
 
 	public static void onEntityAction(ServerPlayer player, ServerboundPlayerCommandPacket p) {

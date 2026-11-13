@@ -1853,7 +1853,7 @@ public class CollisionState {
                     }
                     if (MeshSettings.ghostBlocksFixMessageEnabled) {
                         playerData2 = this.playerData;
-                        Player player2 = playerData2.getPlayer();
+                        net.minecraft.server.level.ServerPlayer player2 = playerData2.getPlayer();
                         String ghostBlocksFixMessage2 = MeshSettings.ghostBlocksFixMessage;
                         player2.sendSystemMessage(TextUtil.parse(ghostBlocksFixMessage2));
                     }
