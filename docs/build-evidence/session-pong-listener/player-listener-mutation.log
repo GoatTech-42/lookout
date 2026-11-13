@@ -1,0 +1,9 @@
+Exception in thread "main" java.lang.AssertionError: listener not owned by player.connection accepted PONG
+	at SessionPongTest.check(SessionPongTest.java:4)
+	at SessionPongTest.main(SessionPongTest.java:14)
+Traceback (most recent call last):
+  File "/tmp/meshac-listener-mutation-2zd9c1d_/sim/ownership/run_session_pong.py", line 50, in <module>
+    subprocess.run([str(jdk/'java'),'-cp',str(t/'classes'),'SessionPongTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-velocity-order-i5kmxjih/classes', 'SessionPongTest']' returned non-zero exit status 1.

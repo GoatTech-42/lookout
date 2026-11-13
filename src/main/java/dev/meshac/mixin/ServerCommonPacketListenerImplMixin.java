@@ -27,7 +27,9 @@ public abstract class ServerCommonPacketListenerImplMixin {
 		if (player == null) return;
 		var data = dev.meshac.data.PlayerDataManager.get(player);
 		var connection = ((ServerCommonPacketListenerImplAccessor) (Object) this).meshac$getConnection();
-		// A UUID match alone does not authenticate an old listener after session replacement.
+		// Authenticate this listener, not just its player UUID or shared Connection.
+		if (connection == null || connection.getPacketListener() != (Object) this
+				|| player.connection != (Object) this) return;
 		if (data != null && dev.meshac.tracker.ConfirmationTransport.isPlay(data, connection))
 			PacketDispatcher.onConfirmation(player, p.getId(), MeshPacketType.PONG, p);
 	}

@@ -1,10 +1,12 @@
-# Current-listener PONG admission candidate
+# Connection/session PONG admission candidate (superseded)
+
+Independent review found this candidate did not compare THIS listener identity. The same-player/same-Connection listener-replacement boundary is closed separately in ../session-pong-listener/. The original receipts below apply to the earlier connection/session guard, not a complete current-listener contract.
 
 This is a separate defensive session-boundary fix. It is not a claim of exact upstream parity, a global ownership fix, or changed-artifact runtime qualification.
 
 The common-listener PONG HEAD previously resolved PlayerData by UUID alone. An old listener could therefore process a PONG into a replacement session with the same UUID; a colliding anchor ID could complete the replacement handshake. The fixture forces that ID collision to expose the boundary, not to claim a real stale client produced it.
 
-Before dispatch, the hook now uses the existing ConfirmationTransport.isPlay contract with its own native Connection. This verifies the live connection, current session, current native player reference, game listener identity, player's current connection and actual outbound PLAY encoder phase. It prevents old-listener/same-UUID adoption, including replacement connections for the same native player object. No fallback, scheduling delay, detector gate, threshold, Veil or enforcement setting changes.
+Before dispatch, the hook now uses the existing ConfirmationTransport.isPlay contract with its own native Connection. This verifies the live connection, current session, current native player reference, current game listener player association, player's current connection and actual outbound PLAY encoder phase. It prevents old-listener/same-UUID adoption, including replacement connections for the same native player object. No fallback, scheduling delay, detector gate, threshold, Veil or enforcement setting changes.
 
 ## Evidence
 

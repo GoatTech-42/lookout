@@ -1,0 +1,40 @@
+===sim/safety/run_product_safety.py
+SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=kick fixture
+[meshac] contained effect (log-only): disconnect target=fixture detail=simulated staff ban: test
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=pardon
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=unban
+[meshac] contained effect (log-only): disconnect target=fixture detail=Unusual fly (fly forced isolated REMOVE)
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+ProductSafetyTest PASS (registered kick/ban/pardon/unban; persistence, escalation, disconnect, egress, inherited veil)
+===sim/safety/test_mutations.py
+REJECTED: kick-command-guard
+REJECTED: case-add-guard
+REJECTED: case-pardon-guard
+REJECTED: discord-egress-guard
+REJECTED: veil-qualification-hold
+Product mutation checks PASS (temporary copies only)
+===sim/lifecycle/test_anchor_mutations.py
+REJECTED: handshake-default
+REJECTED: missing-early-publication
+REJECTED: replace-fabric-session
+REJECTED: anchor-before-login-write
+REJECTED: no-anchor
+REJECTED: duplicate-anchor
+REJECTED: anchor-ID-after-send
+REJECTED: ignored-event-loop
+REJECTED: no-play-guard
+REJECTED: no-close-recheck
+REJECTED: skip-ban-on-reuse
+Join anchor mutations PASS
+===sim/lifecycle/test_join_mutations.py
+REJECTED: uuid
+REJECTED: name
+REJECTED: copy
+REJECTED: stale-copy
+Session identity mutation checks PASS

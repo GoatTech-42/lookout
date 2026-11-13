@@ -1,0 +1,9 @@
+Exception in thread "main" java.lang.AssertionError: replaced listener sharing current player and Connection accepted PONG
+	at SessionPongTest.check(SessionPongTest.java:4)
+	at SessionPongTest.main(SessionPongTest.java:13)
+Traceback (most recent call last):
+  File "/home/sandbox/meshac-repo/sim/ownership/run_session_pong.py", line 49, in <module>
+    subprocess.run([str(jdk/'java'),'-cp',str(t/'classes'),'SessionPongTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-velocity-order-mb5gxnyg/classes', 'SessionPongTest']' returned non-zero exit status 1.
