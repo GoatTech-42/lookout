@@ -1,0 +1,32 @@
+class net/minecraft/network/protocol/game/ClientboundLoginPacket
+       265: dup
+       266: aload_2
+       267: invokevirtual #271                // Method net/minecraft/server/level/ServerPlayer.getId:()I
+       270: aload         10
+       272: invokeinterface #367,  1          // InterfaceMethod net/minecraft/world/level/storage/LevelData.isHardcore:()Z
+       277: aload_0
+       278: getfield      #141                // Field server:Lnet/minecraft/server/MinecraftServer;
+       281: invokevirtual #371                // Method net/minecraft/server/MinecraftServer.levelKeys:()Ljava/util/Set;
+       284: aload_0
+       285: invokevirtual #374                // Method getMaxPlayers:()I
+       288: aload_0
+       289: invokevirtual #377                // Method getViewDistance:()I
+       292: aload_0
+       293: invokevirtual #380                // Method getSimulationDistance:()I
+       296: iload         14
+       298: iload         13
+       300: ifne          307
+       303: iconst_1
+       304: goto          308
+       307: iconst_0
+       308: iload         15
+       310: aload_2
+       311: aload         8
+       313: invokevirtual #388                // Method net/minecraft/server/level/ServerPlayer.createCommonSpawnInfo:(Lnet/minecraft/server/level/ServerLevel;)Lnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;
+       316: aload_0
+       317: getfield      #141                // Field server:Lnet/minecraft/server/MinecraftServer;
+       320: invokevirtual #391                // Method net/minecraft/server/MinecraftServer.enforceSecureProfile:()Z
+       323: invokespecial #394                // Method net/minecraft/network/protocol/game/ClientboundLoginPacket."<init>":(IZLjava/util/Set;IIIZZZLnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;Z)V
+       326: invokevirtual #398                // Method net/minecraft/server/network/ServerGamePacketListenerImpl.send:(Lnet/minecraft/network/protocol/Packet;)V
+
+Native game listener constructor assigns ServerPlayer.connection before PlayerList login send.

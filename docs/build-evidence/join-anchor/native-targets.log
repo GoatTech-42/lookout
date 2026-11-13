@@ -1,7 +1,7 @@
-Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS: 1.21.11
-Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS: 26.1.2
-Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS: 26.2
-Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS: 26.3
+Native anchor descriptor/accessors, event-loop handoff, initial login one-arg send path PASS: 1.21.11
+Native anchor descriptor/accessors, event-loop handoff, initial login one-arg send path PASS: 26.1.2
+Native anchor descriptor/accessors, event-loop handoff, initial login one-arg send path PASS: 26.2
+Native anchor descriptor/accessors, event-loop handoff, initial login one-arg send path PASS: 26.3
 Packaged required anchor mixins/classes PASS: 1.21.11
 Packaged required anchor mixins/classes PASS: 26.1.2
 Packaged required anchor mixins/classes PASS: 26.2

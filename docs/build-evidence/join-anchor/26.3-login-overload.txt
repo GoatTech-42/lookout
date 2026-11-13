@@ -1,0 +1,35 @@
+class net/minecraft/network/protocol/game/ClientboundLoginPacket
+       264: dup
+       265: aload_2
+       266: invokevirtual #172                // Method net/minecraft/server/level/ServerPlayer.getId:()I
+       269: aload         10
+       271: invokeinterface #269,  1          // InterfaceMethod net/minecraft/world/level/storage/LevelData.isHardcore:()Z
+       276: aload_0
+       277: getfield      #40                 // Field server:Lnet/minecraft/server/MinecraftServer;
+       280: invokevirtual #274                // Method net/minecraft/server/MinecraftServer.levelKeys:()Ljava/util/Set;
+       283: aload_0
+       284: invokevirtual #278                // Method getMaxPlayers:()I
+       287: aload_0
+       288: invokevirtual #281                // Method getViewDistance:()I
+       291: aload_0
+       292: invokevirtual #284                // Method getSimulationDistance:()I
+       295: iload         14
+       297: iload         13
+       299: ifne          306
+       302: iconst_1
+       303: goto          307
+       306: iconst_0
+       307: iload         15
+       309: aload_2
+       310: aload         8
+       312: invokevirtual #287                // Method net/minecraft/server/level/ServerPlayer.createCommonSpawnInfo:(Lnet/minecraft/server/level/ServerLevel;)Lnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;
+       315: aload_0
+       316: getfield      #40                 // Field server:Lnet/minecraft/server/MinecraftServer;
+       319: invokevirtual #291                // Method net/minecraft/server/MinecraftServer.usesAuthentication:()Z
+       322: aload_0
+       323: getfield      #40                 // Field server:Lnet/minecraft/server/MinecraftServer;
+       326: invokevirtual #294                // Method net/minecraft/server/MinecraftServer.enforceSecureProfile:()Z
+       329: invokespecial #297                // Method net/minecraft/network/protocol/game/ClientboundLoginPacket."<init>":(IZLjava/util/Set;IIIZZZLnet/minecraft/network/protocol/game/CommonPlayerSpawnInfo;ZZ)V
+       332: invokevirtual #300                // Method net/minecraft/server/network/ServerGamePacketListenerImpl.send:(Lnet/minecraft/network/protocol/Packet;)V
+
+Native game listener constructor assigns ServerPlayer.connection before PlayerList login send.

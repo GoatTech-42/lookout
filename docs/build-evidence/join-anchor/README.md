@@ -45,3 +45,7 @@ Common-listener send(Packet) declarations are now explicitly retained for all fo
 The existing join-PONG branch also is not idempotent: a duplicate matching anchor after handshake can enter ordinary confirmation handling even though the anchor was never queued. This also follows the pinned upstream branch structure. Exactly-once ingress must be established separately; no silent duplicate-PONG policy change is included here.
 
 Input refinement after the first evidence packet: PacketEvents v2.14.0 marks sneak EntityAction constants removed since1.21.6 (ID=-1 on newer servers); PlayerInput is separate. Upstream's pinned PacketListener does not consume PlayerInput. Missing modern sneak feed is explicit unsupported behavior, not automatically a defect in faithful porting. Do not synthesize detector inputs from shift bits without separate behavioral qualification.
+
+## Native initial-login overload pinned
+
+The target checker now disassembles current native PlayerList on all four versions, finds ClientboundLoginPacket construction, and asserts its FIRST subsequent send call is exactly ServerGamePacketListenerImpl.send(Packet)V. It also verifies the game-listener constructor assigns player.connection before that PlayerList call. This guards the source-level assumption that synchronous early-publication HEAD runs before native Connection.send queues the login write. All four pass. Direct two-argument or direct Connection login sends by other code remain outside this narrow native-route qualification; no fallback or timing workaround was added.

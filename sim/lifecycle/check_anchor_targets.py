@@ -18,7 +18,18 @@ for v in ['1.21.11','26.1.2','26.2','26.3']:
  assert 'private final net.minecraft.network.ProtocolInfo<T> protocolInfo;' in e
  send=re.search(r'private void sendPacket\(.*?(?=\n  (?:public|private|protected))',c,re.S).group()
  assert 'io/netty/channel/EventLoop.inEventLoop' in send and 'io/netty/channel/EventLoop.execute' in send and 'doSendPacket' in send
- print('Native anchor descriptor, one normal TAIL, channel/protocol accessors, event-loop handoff PASS:',v)
+ # Pin the native caller overload too: publication only hooks common send(Packet), not send(Packet, listener).
+ playerlist=subprocess.check_output([str(jdk/'javap'),'-p','-c','-classpath',str(jars[0]),'net.minecraft.server.players.PlayerList'],text=True)
+ login_start=playerlist.index('class net/minecraft/network/protocol/game/ClientboundLoginPacket')
+ after_login=playerlist[login_start:]
+ first_send=re.search(r'// Method ([^\n]*\.send:[^\n]+)',after_login)
+ assert first_send and first_send.group(1)=='net/minecraft/server/network/ServerGamePacketListenerImpl.send:(Lnet/minecraft/network/protocol/Packet;)V',(v,'initial login no longer reaches early-publication overload',first_send.group(1) if first_send else 'no send')
+ game=subprocess.check_output([str(jdk/'javap'),'-p','-c','-classpath',str(jars[0]),'net.minecraft.server.network.ServerGamePacketListenerImpl'],text=True)
+ constructor=game[:game.index('public void tick()')]
+ assert 'Field net/minecraft/server/level/ServerPlayer.connection:' in constructor,(v,'player.connection constructor initialization moved')
+ receipt=after_login[:first_send.end()]+'\n\nNative game listener constructor assigns ServerPlayer.connection before PlayerList login send.\n'
+ (outdir/(v+'-login-overload.txt')).write_text(receipt)
+ print('Native anchor descriptor/accessors, event-loop handoff, initial login one-arg send path PASS:',v)
 # Mixin metadata is executable integration configuration. Check source now; built jar reads below.
 needed={'ConnectionMixin','ConnectionAccessor','PacketEncoderAccessor'}
 assert needed <= set(json.loads((r/'src/main/resources/meshac.mixins.json').read_text())['mixins'])
