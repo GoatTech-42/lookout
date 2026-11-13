@@ -36,6 +36,7 @@ public abstract class ChunkDataMixin {
 		if (m == null || m.length == 0) { sec.write(buf); return; }
 		try {
 			for (Veil.Mod x : m) sec.setBlockState(x.idx() & 15, (x.idx() >> 4) & 15, x.idx() >> 8, x.fake(), false);
+			dev.meshac.veil.Veil.recordEmittedMods(c.getPos(), i, m);
 			sec.write(buf);
 		} finally {
 			for (Veil.Mod x : m) sec.setBlockState(x.idx() & 15, (x.idx() >> 4) & 15, x.idx() >> 8, x.real(), false);

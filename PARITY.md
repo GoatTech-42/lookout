@@ -188,3 +188,41 @@ terrain is not established parity. Correction applied:
   (-64..319) pending a dimension-aware source.
 - Version handshake proves protocol match only for vanilla paths; translators
   (ViaFabric) would still surface UNKNOWN and stay gated.
+
+## 2026-11-13 10:57 - product layer v1 ported (unqualified)
+- product/: Ladder, Cases, Config, Screens, Discord, Perm, Verdict, Trace,
+  MeshCommands ported from main with one adaptation: every removal (kick,
+  tempban, ban, staff kick, reconnect-ban disconnect) routes through
+  safety.Effects, so containment LOG_ONLY also covers the product ladder.
+  /mesh registered via CommandRegistrationCallback; join-time ban enforcement
+  active; Verdict heat forgotten on quit.
+- NOT wired: Vulcan-port AlertManager -> PunishmentHandler -> HeatLadder stub
+  and product Verdict heat ladder are currently two parallel systems. Luke's
+  design (IDENTITY.md) is signal->heat->ladder; integrating the 179 Vulcan
+  checks into Verdict.signal is product-integration work that must not change
+  check detection logic. Open.
+- Fingerprints (client brand/channel kicks) not ported; CombatLog, Movement/
+  Combat/etc. original check suite superseded by the Vulcan port. GUIs from
+  IDENTITY.md remain planned-not-built; building them is post-V1 unless Luke
+  re-prioritizes.
+- Veil config now honored: Config.applyVeil maps veilXray/veilEsp into Veil.
+
+## 2026-11-13 10:57 - multi-version scope (Luke: 1.21.11 and up)
+Grounded deltas from the original tree (versions/*.properties, per-version
+source dirs) and 26.3 javap verification:
+- 26.1.2/26.2: same Java 25 Mojmap line. Original isolated the delta to one
+  Packets.java (renamed accessors: getHitResult/getSequence/getHand/getLines/
+  position()) and one AttackMixin. 26.x attack split exists 26.1+, so our
+  AttackMixin path carries over; effort = per-version properties + a packets_a
+  alias source dir + dependency resolution + build + rig smoke each.
+- 1.21.11: heavier. Obfuscated toolchain with remap=1 + build-remap.gradle,
+  Java 21, attack inside ServerboundInteractPacket (Handler dispatch), older
+  EntityType/MobEffects/permission APIs (original kept a per-family Perm.java).
+  Rebuild code must stay Java 21 compatible to share the tree.
+- Concrete plan: keep one tree, add versions/*.properties + variant source
+  dirs exactly like the original, keep the packet/entity/effect accessor seam
+  in one place per version family. Monday V1 on all four targets is the risk:
+  26.3 itself is not yet runtime-qualified; each added target needs its own
+  build + rig smoke. Grounded choice for Luke: V1 Monday = 26.3 qualified,
+  26.2/26.1.2 fast-follow (same generation), 1.21.11 after (toolchain port);
+  or V1 date moves to include all four.

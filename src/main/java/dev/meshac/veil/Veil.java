@@ -87,6 +87,21 @@ public final class Veil {
 	}
 
 	/** Compute (cached) modifications for one section. secIdx = index in chunk.getSections(). */
+	/** Actual swaps emitted into the last encoded packet per chunk+section; the world tracker reads
+	 * these so its view matches the payload clients really receive, not a recomputed guess. */
+	private static final java.util.Map<Long, java.util.Set<Integer>> EMITTED_MODS = new java.util.concurrent.ConcurrentHashMap<>();
+	private static long emitKey(net.minecraft.world.level.ChunkPos pos, int secIdx) { return (pos.pack() << 8) | (secIdx & 0xFF); }
+
+	public static void recordEmittedMods(net.minecraft.world.level.ChunkPos pos, int secIdx, Mod[] mods) {
+		java.util.Set<Integer> idx = java.util.concurrent.ConcurrentHashMap.newKeySet();
+		for (Mod m : mods) idx.add(m.idx());
+		EMITTED_MODS.put(emitKey(pos, secIdx), idx);
+	}
+
+	public static java.util.Set<Integer> emittedMods(net.minecraft.world.level.ChunkPos pos, int secIdx) {
+		return EMITTED_MODS.getOrDefault(emitKey(pos, secIdx), java.util.Set.of());
+	}
+
 	public static Mod[] mods(LevelChunk c, int secIdx, net.minecraft.world.level.chunk.LevelChunkSection sec) {
 		if (!xrayOn || !(c.getLevel() instanceof ServerLevel lvl)) return null;
 		if (sec.hasOnlyAir() || !sec.maybeHas(Veil::hidden)) return null; // VERIFY maybeHas(Predicate<BlockState>)

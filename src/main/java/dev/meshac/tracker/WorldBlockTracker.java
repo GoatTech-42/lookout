@@ -54,9 +54,9 @@ public class WorldBlockTracker {
 			for (int i = 0; i < sections.length; i++) {
 				LevelChunkSection section = sections[i];
 				if (section == null || section.hasOnlyAir()) continue;
-				dev.meshac.veil.Veil.Mod[] mods = dev.meshac.veil.Veil.mods(chunk, i, section);
-				Set<Integer> hidden = new HashSet<>();
-				if (mods != null) for (dev.meshac.veil.Veil.Mod m : mods) hidden.add(m.idx());
+				// Actual emitted payload, recorded by ChunkDataMixin at encode time; if the chunk was
+				// never veil-encoded the set is empty and nothing is hidden, matching a plain client.
+				Set<Integer> hidden = new HashSet<>(dev.meshac.veil.Veil.emittedMods(chunk.getPos(), i));
 				int sectionMinY = chunk.getSectionYFromSectionIndex(i) << 4;
 				scanSection(chunkX, chunkZ, i, sectionMinY, section, hidden);
 			}
