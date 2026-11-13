@@ -1,0 +1,7 @@
+Native animation hook PASS: 1.21.11 handleAnimate ServerboundSwingPacket
+Native animation hook PASS: 26.1.2 handleAnimate ServerboundSwingPacket
+Native animation hook PASS: 26.2 handleAnimate ServerboundSwingPacket
+Traceback (most recent call last):
+  File "/home/sandbox/meshac-repo/sim/lifecycle/check_animation_target.py", line 12, in <module>
+    assert ' '+method+'(net.minecraft.network.protocol.game.'+packet+');' in out,(v,method,packet,'target missing')
+AssertionError: ('26.3', 'handleAnimate', 'ServerboundPunchPacket', 'target missing')

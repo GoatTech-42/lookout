@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class AnimationMixin {
  @Shadow public ServerPlayer player;
- @Inject(method="handleAnimate", at=@At("HEAD"))
+ @Inject(method="handlePunch", at=@At("HEAD"))
  private void meshac$animate(ServerboundPunchPacket packet, CallbackInfo ci) { PacketDispatcher.onSwing(player, packet); }
 }
