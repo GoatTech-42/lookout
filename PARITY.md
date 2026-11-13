@@ -243,3 +243,14 @@ Recorded OPEN (not fixed this round):
 - Upstream chunk-load tracks block entities only vs our full-section sulfur scan: PotentSulfurBlock block-entity status unverified in 26.3 jar.
 - Dispatcher gating regression test with mutation (QA proposed) not yet written; analyzer script STALE-still-PASS and git-failure gaps open.
 - Veil fixture lane: hidden block-entity NBT unfiltered, cache dimension-blindness (separate from emitted keys), encode swap race window, fake-ore Y plausibility, ESP tick-8 latency (real 400ms vs proposed 250ms bar - requirement unverified, behavior unchanged).
+
+## 2026-11-13 - Safety regression batch after independent 928f010 review
+
+The earlier statement that LOG_ONLY could no longer poison persistent punishment state was too broad: staff kick still persisted a case, and pardon/unban still changed real cases. That claim is superseded by the changes and limits below.
+
+- Staff kick, pardon and unban now identify a simulated action and leave the case store unchanged in LOG_ONLY. Cases.add/pardon/unban also enforce the same rule at the mutation boundary, protecting future callers. Simulated Cases.add returns an unstored object with ID SIMULATED.
+- Product Discord.send now checks containment before constructing a request. Empty config defaults were not an egress safety barrier. Nonblank inherited settings no longer bypass LOG_ONLY.
+- Config.applyVeil now holds xray/ESP/cullMobs off unconditionally. Reloading an inherited config cannot enable unqualified packet rewriting. Hidden block-entity NBT, concurrent live-world swap and dimension-blind cache findings remain open; no veil runtime use is cleared.
+- The real registered commands, store/config/Discord/Effects and Verdict REMOVE now have headless behavioral tests. The production dispatch bodies have synthetic-check behavioral tests on all four evaluation boundaries plus placement/digging callers. All four missing-guard mutations are rejected; five product safety mutations are rejected. See docs/SAFETY-TESTS.md for exact scope and limits. These are compiled fixture-jar tests, NOT full shipping-mod/Minecraft runtime qualification.
+- Analyzer --check now fails stale/missing generated metadata without writing it. The regression suite no longer relies on Git status or ignores a Git failure. The initial Containment mode assertion now inspects the fresh class before changing mode.
+- No world-context changes in this batch. The 928f010 live-at-send snapshot, lossy emitted-map key, consume-on-read multi-recipient fault, JOIN/confirmation lifecycle, world-reader parity and veil issues remain unresolved. World eligibility stays closed. No launch, no client session, no live deployment.

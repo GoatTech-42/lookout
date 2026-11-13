@@ -6,6 +6,7 @@ import java.util.List;
 public class ContainmentSelfTest {
 
 	public static void main(String[] args) {
+		check(Containment.mode() == Containment.Mode.LOG_ONLY, "fresh class must start in LOG_ONLY");
 		List<String> log = new ArrayList<>();
 		Containment.setLogger(log::add);
 
@@ -31,7 +32,7 @@ public class ContainmentSelfTest {
 		check(Containment.recorded().size() == 3, "all effects recorded");
 
 		// Default mode on a fresh class state is LOG_ONLY (static initializer contract).
-		check(Containment.Mode.LOG_ONLY.name().equals("LOG_ONLY"), "mode enum stable");
+
 		Containment.setMode(Containment.Mode.LOG_ONLY);
 		System.out.println("ContainmentSelfTest: PASS");
 	}

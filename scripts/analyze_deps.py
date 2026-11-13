@@ -87,5 +87,10 @@ public final class CheckDependencies {
 	%s
 }
 ''' % (javacset('KNOWN', checks), javacset('NEEDS_CLIENT_VERSION', needs_v), javacset('NEEDS_WORLD_CACHE', needs_w))
-open(OUT, 'w', encoding='utf-8').write(out)
+if '--check' in sys.argv:
+    if not os.path.exists(OUT) or open(OUT, encoding='utf-8').read() != out:
+        print('STALE: regenerate CheckDependencies.java with scripts/analyze_deps.py', file=sys.stderr)
+        sys.exit(1)
+else:
+    open(OUT, 'w', encoding='utf-8').write(out)
 print('checks:', len(checks), 'needsVersion:', len(needs_v), 'needsWorld:', len(needs_w))

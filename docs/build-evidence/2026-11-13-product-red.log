@@ -1,0 +1,33 @@
+SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+[meshac] contained effect (log-only): disconnect target=fixture detail=test
+FAIL: mesh kick fixture test changed persistent store
+FAIL: mesh kick fixture test changed escalation
+FAIL: mesh kick fixture test did not identify simulation
+[meshac] contained effect (log-only): disconnect target=fixture detail=simulated staff ban: test
+FAIL: mesh ban fixture 1m test changed persistent store
+FAIL: mesh ban fixture 1m test changed escalation
+FAIL: mesh pardon MA-XZVV changed persistent store
+FAIL: mesh pardon MA-XZVV changed active ban
+FAIL: mesh pardon MA-XZVV changed escalation
+FAIL: mesh pardon MA-XZVV did not identify simulation
+FAIL: mesh unban fixture changed persistent store
+FAIL: mesh unban fixture changed active ban
+FAIL: mesh unban fixture changed escalation
+FAIL: mesh unban fixture did not identify simulation
+FAIL: LOG_ONLY webhook escaped: IllegalArgumentException
+FAIL: inherited config enabled unqualified veil
+[meshac] containment mode: ENFORCE
+FAIL: ENFORCE kick did not persist exactly once
+[meshac] containment mode: LOG_ONLY
+Exception in thread "main" java.lang.AssertionError: 16 product safety failures
+	at ProductSafetyTest.main(ProductSafetyTest.java:43)
+Traceback (most recent call last):
+  File "/home/sandbox/meshac-repo/sim/safety/run_product_safety.py", line 38, in <module>
+    subprocess.run([str(JDK/'java'),'-cp',str(t/'classes')+os.pathsep+cp,'-Dfixture.config='+str(t),'ProductSafetyTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-product-test-nywigi73/classes:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/com.mojang/brigadier/1.3.11/3373d1e7bf00c8b99bed1ea4efb8c47344e4a887/brigadier-1.3.11.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/com.google.code.gson/gson/2.14.0/efc0e34ede4e3204eaefb84a00e55e8c86634382/gson-2.14.0.jar:/home/sandbox/.gradle-meshac/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.7/41eb7184ea9d556f23e18b5cb99cad1f8581fc00/slf4j-api-2.0.7.jar', '-Dfixture.config=/tmp/meshac-product-test-nywigi73', 'ProductSafetyTest']' returned non-zero exit status 1.

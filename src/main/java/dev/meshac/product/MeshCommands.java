@@ -18,9 +18,11 @@ public final class MeshCommands {
 				.then(Commands.argument("player", StringArgumentType.word()).executes(c -> list(c.getSource(), Cases.of(StringArgumentType.getString(c, "player"))))))
 			.then(Commands.literal("case").then(Commands.argument("id", StringArgumentType.word()).executes(c -> show(c.getSource(), StringArgumentType.getString(c, "id")))))
 			.then(Commands.literal("pardon").then(Commands.argument("id", StringArgumentType.word()).executes(c -> {
+				if (simulate(c.getSource(), "pardon")) return 1;
 				boolean ok = Cases.pardon(StringArgumentType.getString(c, "id"));
 				c.getSource().sendSuccess(() -> Component.literal(ok ? "Pardoned." : "No such case."), true); return ok ? 1 : 0; })))
 			.then(Commands.literal("unban").then(Commands.argument("player", StringArgumentType.word()).executes(c -> {
+				if (simulate(c.getSource(), "unban")) return 1;
 				int n = Cases.unban(StringArgumentType.getString(c, "player"));
 				c.getSource().sendSuccess(() -> Component.literal(n > 0 ? "Lifted " + n + " ban(s)." : "No active ban."), true); return n; })))
 			.then(Commands.literal("ban").then(Commands.argument("player", StringArgumentType.word())
@@ -38,11 +40,18 @@ public final class MeshCommands {
 				.then(Commands.literal("off").executes(c -> { Config.get().monitorOnly = false; c.getSource().sendSuccess(() -> Component.literal("Monitor mode off."), true); return 1; })))
 			.then(Commands.literal("kick").then(Commands.argument("player", net.minecraft.commands.arguments.EntityArgument.player()).then(Commands.argument("reason", StringArgumentType.greedyString()).executes(c -> {
 				ServerPlayer t = net.minecraft.commands.arguments.EntityArgument.getPlayer(c, "player"); String why = StringArgumentType.getString(c, "reason");
+				if (simulate(c.getSource(), "kick " + t.getGameProfile().name())) return 1;
 				Cases.Case cs = Cases.add(t.getGameProfile().name(), t.getUUID(), "kick", why, c.getSource().getTextName(), 0, List.of("Staff kick")); dev.meshac.safety.Effects.disconnect(t, Screens.kick(why, cs));
 				c.getSource().sendSuccess(() -> Component.literal("Kicked " + t.getGameProfile().name() + ", case " + cs.id), true); return 1; }))))
 			.then(Commands.literal("reload").executes(c -> { Config.load(); Config.applyVeil(); Cases.load(); c.getSource().sendSuccess(() -> Component.literal("meshac reloaded."), true); return 1; })));
 	}
 
+	private static boolean simulate(CommandSourceStack source, String action) {
+		if (dev.meshac.safety.Containment.mode() == dev.meshac.safety.Containment.Mode.ENFORCE) return false;
+		dev.meshac.safety.Containment.dispatch(new dev.meshac.safety.Containment.Effect("staff-action", source.getTextName(), action), null);
+		source.sendSuccess(() -> Component.literal("[log-only] simulated " + action + ": no case changes or player effects."), false);
+		return true;
+	}
 	private static int list(CommandSourceStack s, List<Cases.Case> cs) {
 		if (cs.isEmpty()) { s.sendSuccess(() -> Component.literal("No cases."), false); return 0; }
 		for (Cases.Case c : cs) s.sendSuccess(() -> Component.literal(c.id + "  " + c.action + "  " + c.player + "  " + c.reason + (c.pardoned ? "  (pardoned)" : c.lifted ? "  (lifted)" : "")), false);

@@ -20,6 +20,8 @@ public final class Discord {
 		if (Config.get().discordOnHold) send("**flag** " + player + " | " + check + "\n" + detail);
 	}
 	private static void send(String text) {
+		// Config is data, not permission: inherited webhook settings cannot bypass containment.
+		if (dev.meshac.safety.Containment.mode() != dev.meshac.safety.Containment.Mode.ENFORCE) return;
 		String url = Config.get().discordWebhook;
 		if (url == null || url.isBlank()) return;
 		JsonObject o = new JsonObject();

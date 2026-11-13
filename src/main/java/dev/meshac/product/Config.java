@@ -92,7 +92,13 @@ public final class Config {
 	private static Config cur = new Config();
 	public static Config get() { return cur; }
 
-	public static void applyVeil() { dev.meshac.veil.Veil.xrayOn = get().veilXray != null && get().veilXray; dev.meshac.veil.Veil.espOn = get().veilEsp != null && get().veilEsp; dev.meshac.veil.Veil.clear(); }
+	public static void applyVeil() {
+		// Qualification hold: inherited settings cannot enable untested packet rewriting.
+		dev.meshac.veil.Veil.xrayOn = false;
+		dev.meshac.veil.Veil.espOn = false;
+		dev.meshac.veil.Veil.cullMobs = false;
+		dev.meshac.veil.Veil.clear();
+	}
 	public static void load() {
 		Path p = FabricLoader.getInstance().getConfigDir().resolve("meshac.json");
 		Gson g = new GsonBuilder().setPrettyPrinting().serializeNulls().create();

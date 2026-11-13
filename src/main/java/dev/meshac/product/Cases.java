@@ -36,6 +36,11 @@ public final class Cases {
 		var r = new java.util.Random(); for (int i = 0; i < 4; i++) b.append(abc.charAt(r.nextInt(abc.length())));
 		c.id = b.toString(); c.player = player; c.uuid = uuid.toString(); c.action = action; c.reason = reason; c.by = by;
 		c.at = System.currentTimeMillis(); c.until = until; c.evidence = new ArrayList<>(evidence);
+		if (dev.meshac.safety.Containment.mode() != dev.meshac.safety.Containment.Mode.ENFORCE) {
+			c.id = "SIMULATED";
+			LOG.info("[meshac] simulated case {} {} (not stored)", action, player);
+			return c;
+		}
 		all.add(c); save(); return c;
 	}
 	/** Active ban for this player, or null. Permanent bans have action "ban" and until 0; tempbans expire. */
@@ -57,13 +62,14 @@ public final class Cases {
 	}
 	/** Lifts every active ban on this player but keeps the offences on record, so the next one still escalates. Returns how many were lifted. */
 	public static synchronized int unban(String name) {
+		if (dev.meshac.safety.Containment.mode() != dev.meshac.safety.Containment.Mode.ENFORCE) return 0;
 		long now = System.currentTimeMillis(); int n = 0;
 		for (Case c : all) if (c.player.equalsIgnoreCase(name) && !c.pardoned && !c.lifted && (c.action.equals("ban") || (c.action.equals("tempban") && c.until > now))) { c.lifted = true; n++; }
 		if (n > 0) save();
 		return n;
 	}
 	public static synchronized Case find(String id) { for (Case c : all) if (c.id.equalsIgnoreCase(id)) return c; return null; }
-	public static synchronized boolean pardon(String id) { Case c = find(id); if (c == null) return false; c.pardoned = true; save(); return true; }
+	public static synchronized boolean pardon(String id) { if (dev.meshac.safety.Containment.mode() != dev.meshac.safety.Containment.Mode.ENFORCE) return false; Case c = find(id); if (c == null) return false; c.pardoned = true; save(); return true; }
 	public static synchronized List<Case> recent(int n) { return new ArrayList<>(all.subList(Math.max(0, all.size() - n), all.size())); }
 	public static synchronized List<Case> of(String name) { List<Case> o = new ArrayList<>(); for (Case c : all) if (c.player.equalsIgnoreCase(name)) o.add(c); return o; }
 }
