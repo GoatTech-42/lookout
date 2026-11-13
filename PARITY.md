@@ -165,3 +165,26 @@ config wiring/testing. A successful jar is not a usable release yet.
   by the two implementations above rather than suppressed. KillAuraL remains
   explicitly gated (maximum damage window). docs/ELIGIBILITY.md lists per-check
   needs.
+
+## 2026-11-13 10:54 - world readiness claim RETRACTED and tracker made faithful
+The 10:47 "satisfied" claim was wrong: chunk presence plus sparse updates is not
+a client-acknowledged world view, and returning air for unmirrored loaded
+terrain is not established parity. Correction applied:
+- ContextGate.worldCacheAvailable() is false again; world-dependent checks stay
+  gated until runtime qualification proves the mirrored state.
+- Upstream source review (OpenVulcan WorldBlockTracker) showed the real design:
+  outbound-packet mirroring with EVERY apply deferred through the confirmation
+  tracker, and hasTrackedBlockNearby is a wet-potent-sulfur proximity query
+  (26.1+ feature), not generic chunk presence. My presence-based implementation
+  was semantically wrong and is replaced.
+- Tracker now mirrors upstream: chunk columns (veil-adjusted sulfur scan),
+  section multi-block updates (runUpdates), single block updates, chunk forget,
+  respawn/login reset, client placements - all confirmation-deferred.
+  PotentSulfurBlock.STATE verified in the 26.3 jar (DRY/WET/DORMANT/ERUPTING/
+  CONTINUOUS; wet = any non-DRY, matching upstream).
+- getBlockState keeps the empty-cache air fallback; it has no current consumer
+  and any future consumer re-opens parity review. Dimension handling: reset on
+  respawn packet covers dimension change; min/max Y fixed at 26.3 values
+  (-64..319) pending a dimension-aware source.
+- Version handshake proves protocol match only for vanilla paths; translators
+  (ViaFabric) would still surface UNKNOWN and stay gated.

@@ -48,7 +48,9 @@ public final class OutboundDispatcher {
 			return;
 		}
 		if (packet instanceof net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket chunk) {
-			data.getWorldBlockTracker().handleChunkLoad(chunk.x(), chunk.z());
+			// Faithful mirror point: the chunk the client is being sent, veil-adjusted inside the tracker.
+			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
+			data.getWorldBlockTracker().handleChunkColumn(levelChunk);
 			return;
 		}
 		if (packet instanceof net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket forget) {
@@ -57,6 +59,14 @@ public final class OutboundDispatcher {
 		}
 		if (packet instanceof net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket blockUpdate) {
 			data.getWorldBlockTracker().handleBlockUpdate(blockUpdate.getPos(), blockUpdate.getBlockState());
+			return;
+		}
+		if (packet instanceof net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket sectionUpdates) {
+			data.getWorldBlockTracker().handleSectionUpdates(sectionUpdates::runUpdates);
+			return;
+		}
+		if (packet instanceof net.minecraft.network.protocol.game.ClientboundRespawnPacket) {
+			data.getWorldBlockTracker().reset();
 			return;
 		}
 		if (packet instanceof ClientboundPingPacket ping) {

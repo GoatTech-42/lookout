@@ -20,9 +20,9 @@ public final class ContextGate {
 		return data.getClientVersion() != MeshVersion.UNKNOWN;
 	}
 
-	/** Presence cache mirrors outbound chunk load/forget/block-update packets. */
+	/** Stays closed until the mirrored tracker is runtime-qualified; presence alone is not readiness. */
 	public static boolean worldCacheAvailable() {
-		return true;
+		return false;
 	}
 
 	private static final java.util.Set<String> gatedLogged = java.util.concurrent.ConcurrentHashMap.newKeySet();

@@ -120,6 +120,12 @@ public final class PacketDispatcher {
 		if (data == null) return;
 		data.setLastPlacementPacket(Packets.toPlacement(p));
 		data.getClickTimingData().recordPlacement();
+		// Upstream WorldBlockTracker.handleBlockPlace: cache the placed block's default state.
+		var placedItem = player.getItemInHand(p.hand());
+		if (placedItem.getItem() instanceof net.minecraft.world.item.BlockItem blockItem) {
+			net.minecraft.core.BlockPos placedPos = p.hitResult().getBlockPos().relative(p.hitResult().getDirection());
+			data.getWorldBlockTracker().handleBlockUpdate(placedPos, blockItem.getBlock().defaultBlockState());
+		}
 		dispatchChecks(data, new MeshPacketEvent(MeshPacketType.PLAYER_BLOCK_PLACEMENT, player, p, true));
 	}
 
