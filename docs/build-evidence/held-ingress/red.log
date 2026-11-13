@@ -1,0 +1,10 @@
+Exception in thread "main" java.lang.AssertionError: held packet must enter real dispatcher exactly once at admitted channel boundary
+	at RestIngressTest.check(RestIngressTest.java:2)
+	at RestIngressTest.read(RestIngressTest.java:10)
+	at RestIngressTest.main(RestIngressTest.java:16)
+Traceback (most recent call last):
+  File "/tmp/meshac-ingress-rest/sim/ownership/run_rest_ingress.py", line 53, in <module>
+    subprocess.run([str(jdk/'java'),'-cp',str(t/'classes'),'RestIngressTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-rest-ingress-9lg2mdht/classes', 'RestIngressTest']' returned non-zero exit status 1.

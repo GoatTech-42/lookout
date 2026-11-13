@@ -1,0 +1,9 @@
+REJECTED: duplicate-dispatch
+REJECTED: missing-dispatch
+REJECTED: wrong-slot
+REJECTED: reordered-stage
+REJECTED: missing-shutdown
+REJECTED: missing-client-close
+REJECTED: truncated-runner
+REJECTED: failed-first-run
+Held native validator mutation checks PASS

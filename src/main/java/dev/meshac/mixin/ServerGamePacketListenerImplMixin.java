@@ -6,7 +6,6 @@ import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
-import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -60,11 +59,6 @@ public abstract class ServerGamePacketListenerImplMixin {
 	@Inject(method = "handleUseItemOn", at = @At("HEAD"))
 	private void meshac$useOn(ServerboundUseItemOnPacket p, CallbackInfo ci) {
 		PacketDispatcher.onPlacement(player, p);
-	}
-
-	@Inject(method = "handleSetCarriedItem", at = @At("HEAD"))
-	private void meshac$carried(ServerboundSetCarriedItemPacket p, CallbackInfo ci) {
-		PacketDispatcher.onHeldItemChange(player, p);
 	}
 
 	@Inject(method = "handlePlayerAbilities", at = @At("HEAD"))

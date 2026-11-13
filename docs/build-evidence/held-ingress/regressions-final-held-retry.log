@@ -1,0 +1,8 @@
+RestIngressTest PASS finite held-item actual-hook/dispatcher replay boundary; modeled native acceptance/handoff, not global ownership or runtime weave
+REJECTED: wrong-heldIngress-descriptor
+REJECTED: late-heldIngress-shift
+REJECTED: missing-channel-dispatch
+REJECTED: replayed-head-dispatch
+REJECTED: missing-held-listener-guard
+REJECTED: missing-held-transport-guard
+Finite held-item mutation checks PASS

@@ -1,0 +1,9 @@
+REJECTED: wrong-movementIngress-descriptor
+REJECTED: late-movementIngress-shift
+REJECTED: no-ingress
+REJECTED: duplicate-handler-dispatch
+REJECTED: network-capture
+REJECTED: no-current-player-listener
+REJECTED: no-transport-admission
+REJECTED: wrong-ingress-target
+Movement ingress mutation checks PASS

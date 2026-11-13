@@ -1,0 +1,144 @@
+=== scripts/test_analyze_deps.py
+checks: 3 needsVersion: 1 needsWorld: 1
+ok: call site getClientVersion seeds version need
+ok: world-only check does not gain version need
+ok: declaration file does not seed
+ok: call site getWorldBlockTracker seeds world need
+ok: comment mention does not seed world need
+ok: plain check is known
+ok: plain check has no propagated needs through declaration-only PlayerData
+ok: metadata is current (read-only comparison): checks: 180 needsVersion: 179 needsWorld: 179
+test_analyze_deps: PASS
+=== scripts/test_analyzer_cli.py
+checks: 1 needsVersion: 0 needsWorld: 0
+test_analyzer_cli: PASS (stale/missing fail, check does not write, no Git required)
+=== sim/dispatch/run_dispatch_safety.py
+PASS: inbound-packet world/unknown suppressed, eligible control executed
+PASS: event-dispatch world/unknown suppressed, eligible control executed
+PASS: placement-packet world/unknown suppressed, eligible control executed
+PASS: digging-and-event world/unknown suppressed, eligible control executed
+PASS: outbound-position world/unknown suppressed, eligible control executed
+PASS: movement-event world/unknown suppressed, eligible control executed
+=== sim/dispatch/test_mutations.py
+REJECTED missing production guard: inbound
+REJECTED missing production guard: event
+REJECTED missing production guard: outbound
+REJECTED missing production guard: move
+Dispatcher mutation checks PASS
+=== sim/lifecycle/run_join_identity.py
+JoinIdentityTest PASS (missed-login, UUID/name, copy/stale-copy, two sessions, quit/rejoin)
+=== sim/lifecycle/test_join_mutations.py
+REJECTED: uuid
+REJECTED: name
+REJECTED: copy
+REJECTED: stale-copy
+Session identity mutation checks PASS
+=== sim/lifecycle/run_join_anchor.py
+JoinAnchorTest PASS (real session/tracker/dispatch/hooks; deterministic channel boundaries, not weave/runtime)
+=== sim/lifecycle/test_anchor_mutations.py
+REJECTED: handshake-default
+REJECTED: missing-early-publication
+REJECTED: replace-fabric-session
+REJECTED: anchor-before-login-write
+REJECTED: no-anchor
+REJECTED: duplicate-anchor
+REJECTED: anchor-ID-after-send
+REJECTED: ignored-event-loop
+REJECTED: no-play-guard
+REJECTED: no-close-recheck
+REJECTED: skip-ban-on-reuse
+Join anchor mutations PASS
+=== sim/ownership/run_session_pong.py
+SessionPongTest PASS (real common hook, session/listener/phase/close boundary, ordinary policy retained)
+=== sim/ownership/run_move_ingress.py
+MoveIngressTest PASS: real dispatcher once per admitted channel read, zero on native rejection/close/stale/phase; server replay capture separate (modeled boundary, not weave)
+=== sim/ownership/test_move_mutations.py
+REJECTED: no-ingress
+REJECTED: duplicate-handler-dispatch
+REJECTED: network-capture
+REJECTED: no-current-player-listener
+REJECTED: no-transport-admission
+REJECTED: wrong-ingress-target
+Movement ingress mutation checks PASS
+=== sim/ownership/test_movement_validator.py
+FINAL GREEN {'packets': 62, 'dispatches': 62, 'handlerHEAD': 124, 'serverCaptureTailEvents': 62, 'changedPositions': 47}
+REJECTED: swap-admission-dispatch ('1', 'native stage order', ['DISPATCH', 'ADMITTED_CHANNEL', 'HANDLER_HEAD:network', 'HANDLER_HEAD:server', 'SERVER_CAPTURE', 'HANDLER_TAIL'])
+REJECTED: truncate-before-stop deliberate server shutdown missing
+REJECTED: missing-client-close client did not observe deliberate server close
+REJECTED: missing-runner-completion runner completion/cleanup markers missing
+REJECTED: failed-native-run native movement exception observed
+Movement validator mutation checks PASS
+=== sim/ownership/run_ground_materials.py
+Note: /tmp/meshac-ingress-rest/src/main/java/dev/meshac/player/CollisionState.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: /tmp/meshac-ingress-rest/src/main/java/dev/meshac/player/CollisionState.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+WARNING: A terminally deprecated method in sun.misc.Unsafe has been called
+WARNING: sun.misc.Unsafe::objectFieldOffset has been called by org.joml.MemUtil$MemUtilUnsafe (file:/tmp/meshac-smoke-26.3/server/libraries/org/joml/joml/1.10.9/joml-1.10.9.jar)
+WARNING: Please consider reporting this to the maintainers of class org.joml.MemUtil$MemUtilUnsafe
+WARNING: sun.misc.Unsafe::objectFieldOffset will be removed in a future release
+[14:20:55] [main/INFO]: [STDOUT]: GroundMaterialsTest PASS actual CollisionState and real native block states, no server/thread execution
+=== sim/safety/run_product_safety.py
+SLF4J: No SLF4J providers were found.
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See https://www.slf4j.org/codes.html#noProviders for further details.
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=kick fixture
+[meshac] contained effect (log-only): disconnect target=fixture detail=simulated staff ban: test
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=pardon
+[meshac] contained effect (log-only): staff-action target=fixture-staff detail=unban
+[meshac] contained effect (log-only): disconnect target=fixture detail=Unusual fly (fly forced isolated REMOVE)
+[meshac] containment mode: ENFORCE
+[meshac] containment mode: LOG_ONLY
+ProductSafetyTest PASS (registered kick/ban/pardon/unban; persistence, escalation, disconnect, egress, inherited veil)
+=== sim/safety/test_mutations.py
+REJECTED: kick-command-guard
+REJECTED: case-add-guard
+REJECTED: case-pardon-guard
+REJECTED: discord-egress-guard
+REJECTED: veil-qualification-hold
+Product mutation checks PASS (temporary copies only)
+=== sim/version/run_version_contract.py
+VersionContractTest PASS (native initialization, UNKNOWN -1, known chronology)
+=== sim/version/test_mutations.py
+REJECTED: native-init
+REJECTED: unknown-newest
+REJECTED: known-order
+Version contract mutation checks PASS
+=== sim/world/run_world_snapshot.py
+WorldSnapshotTest PASS (payload freeze, negative coordinates, updates, reset generation)
+=== sim/world/test_mutations.py
+REJECTED: late-payload-read
+REJECTED: reset-generation
+REJECTED: mutable-update-pos
+REJECTED: unmodifiable-live-cache
+REJECTED: unsigned-negative-z
+REJECTED: unsigned-negative-y
+World snapshot mutation checks PASS
+=== sim/ownership/run_outbound_encoded.py
+EncodedHookTest PASS actual operation callback, real native codec encode-failure and delayed/failed/sync/void/reentrant/bundle promise; argument capture modeled, no weave claim
+=== sim/ownership/run_outbound_write.py
+OutboundOrderTest PASS actual callback factory/dispatcher/velocity/confirmation; actual encoded-write callback and real Netty promise through isolated loader; native invocation capture and Minecraft API modeled
+=== sim/ownership/test_outbound_mutations.py
+REJECTED: no-task
+REJECTED: method-return
+REJECTED: late-registration
+REJECTED: success-only
+REJECTED: void-not-unvoided
+REJECTED: native-promise-replaced
+REJECTED: non-native-encoder
+REJECTED: empty-buffer
+REJECTED: no-session-recheck
+REJECTED: no-listener-recheck
+REJECTED: immediate-velocity-confirmation
+REJECTED: no-self-entity-filter
+Outbound encoded-write mutation checks PASS
+=== sim/ownership/run_rest_ingress.py
+RestIngressTest PASS finite held-item actual-hook/dispatcher replay boundary; modeled native acceptance/handoff, not global ownership or runtime weave
+=== sim/ownership/test_rest_ingress_mutations.py
+REJECTED: missing-channel-dispatch
+REJECTED: replayed-head-dispatch
+REJECTED: missing-held-listener-guard
+REJECTED: missing-held-transport-guard
+Finite held-item mutation checks PASS

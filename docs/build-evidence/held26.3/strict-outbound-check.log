@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/tmp/meshac-ingress-rest/sim/ownership/verify_outbound_trace.py", line 37, in <module>
+    if len(sys.argv)==4:validate(*(Path(p).read_text() for p in sys.argv[1:]))
+  File "/tmp/meshac-ingress-rest/sim/ownership/verify_outbound_trace.py", line 21, in validate
+    assert len(motions)==3 and len({p for p,t in motions})==3,'expected three distinct direct/twoarg/bundled native motions'
+AssertionError: expected three distinct direct/twoarg/bundled native motions

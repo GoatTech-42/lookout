@@ -1,0 +1,38 @@
+{
+  "handleInteract": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundInteractPacket;)V"
+  },
+  "handlePlayerCommand": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundPlayerCommandPacket;)V"
+  },
+  "handlePlayerAction": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundPlayerActionPacket;)V"
+  },
+  "handleUseItemOn": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundUseItemOnPacket;)V"
+  },
+  "handleSetCarriedItem": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket;)V"
+  },
+  "handlePlayerAbilities": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundPlayerAbilitiesPacket;)V"
+  },
+  "handleClientCommand": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundClientCommandPacket;)V"
+  },
+  "handleAnimate": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundSwingPacket;)V"
+  },
+  "handleAttack": {
+    "hasHandoff": true,
+    "descriptor": "(Lnet/minecraft/network/protocol/game/ServerboundAttackPacket;)V"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "build/libs/meshac-26.3-2.9.7.28-meshac-0.1.0.jar": "1f777c1f87f6810223bc2b57bec8c7c4f6684b9a0b1a38dbe6794d871c225943",
+  "/tmp/meshac-smoke-26.3/server/mods/meshac-26.3-2.9.7.28-meshac-0.1.0.jar": "1f777c1f87f6810223bc2b57bec8c7c4f6684b9a0b1a38dbe6794d871c225943",
+  "src/main/java/dev/meshac/mixin/ConnectionMixin.java": "03e39f013e99fc81c2f4d9a0e05597d69c5445df47d5540f428d49887db47549",
+  "src/main/java/dev/meshac/mixin/ServerGamePacketListenerImplMixin.java": "8a80d5e4170d8ecafae56c2e03379c39c1886654766ad2915c2cf07a45ef0817"
+}

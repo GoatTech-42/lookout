@@ -1,0 +1,9 @@
+{
+  "priorJarSHA256": "50ee984dcc14027464d72021e017806c01097253ce3d9e64f542cdfc4557fd53",
+  "heldJarSHA256": "1f777c1f87f6810223bc2b57bec8c7c4f6684b9a0b1a38dbe6794d871c225943",
+  "changedClasses": [
+    "dev/meshac/mixin/ConnectionMixin.class",
+    "dev/meshac/mixin/ServerGamePacketListenerImplMixin.class"
+  ],
+  "allOtherMeshacClassBytesIdentical": true
+}
