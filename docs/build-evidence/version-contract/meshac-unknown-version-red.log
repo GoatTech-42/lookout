@@ -1,0 +1,8 @@
+Exception in thread "main" java.lang.AssertionError: UNKNOWN client compared as newest
+	at VersionContractTest.main(VersionContractTest.java:5)
+Traceback (most recent call last):
+  File "/home/sandbox/meshac-repo/sim/version/run_version_contract.py", line 24, in <module>
+    p=t/'VersionContractTest.java';p.write_text(test);files.extend([str(p),str(r/'src/main/java/dev/meshac/config/MeshVersion.java'),str(r/'src/main/java/dev/meshac/check/ExemptionManager.java')]);subprocess.run([str(jdk/'javac'),'-d',str(t/'classes'),*files],check=True);subprocess.run([str(jdk/'java'),'-cp',str(t/'classes'),'VersionContractTest'],check=True)
+  File "/usr/lib/python3.10/subprocess.py", line 526, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['/home/sandbox/jdk25/bin/java', '-cp', '/tmp/meshac-version-eenzgre_/classes', 'VersionContractTest']' returned non-zero exit status 1.

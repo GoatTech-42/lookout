@@ -10,7 +10,8 @@ import dev.meshac.config.MeshVersion;
  */
 public final class ExemptionManager {
 
-	private static volatile MeshVersion serverVersion = MeshVersion.UNKNOWN;
+	private static volatile MeshVersion serverVersion = MeshVersion.fromName(
+			net.minecraft.SharedConstants.getCurrentVersion().name());
 
 	private ExemptionManager() {
 	}

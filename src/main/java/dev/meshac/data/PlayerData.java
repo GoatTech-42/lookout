@@ -33,8 +33,7 @@ import net.minecraft.server.level.ServerPlayer;
 /**
  * Per-player session data. Ported from Vulcan's PlayerData: packetevents User/ClientVersion became
  * ServerPlayer/MeshVersion; last-packet slots hold our own packet records.
- * PARITY BLOCKER: clientVersion stays UNKNOWN (all version predicates false, same as packetevents
- * UNKNOWN) until a translator-aware resolution hook (ViaVersion/Geyser) is implemented. Do not
+ * PARITY BLOCKER: clientVersion stays UNKNOWN (PacketEvents protocol -1 ordering) until a translator-aware resolution hook (ViaVersion/Geyser) is implemented. Do not
  * assume the server version implies the client version.
  */
 public class PlayerData {

@@ -8,18 +8,21 @@ package dev.meshac.config;
 public enum MeshVersion {
 	V_1_7_10, V_1_8, V_1_9, V_1_11, V_1_12, V_1_12_2, V_1_13, V_1_14, V_1_15, V_1_16, V_1_17, V_1_18, V_1_19, V_1_20, V_1_20_2, V_1_21, V_1_21_2, V_1_21_11, V_26_1, V_26_2, V_26_3, UNKNOWN;
 
+	// PacketEvents ClientVersion.UNKNOWN has protocol -1, before every supported client.
+	private int comparisonOrder() { return this == UNKNOWN ? -1 : ordinal(); }
+
 	public boolean isNewerThan(MeshVersion other) {
-		return this.ordinal() > other.ordinal();
+		return this.comparisonOrder() > other.comparisonOrder();
 	}
 
 	public boolean isNewerThanOrEquals(MeshVersion other) {
-		return this.ordinal() >= other.ordinal();
+		return this.comparisonOrder() >= other.comparisonOrder();
 	}
 
-	public boolean isOlderThanOrEquals(MeshVersion other) { return this.ordinal() <= other.ordinal(); }
+	public boolean isOlderThanOrEquals(MeshVersion other) { return this.comparisonOrder() <= other.comparisonOrder(); }
 
 	public boolean isOlderThan(MeshVersion other) {
-		return this.ordinal() < other.ordinal();
+		return this.comparisonOrder() < other.comparisonOrder();
 	}
 
 	/** Parses names like "1.20.4", "1.21.11", "26.3" from DetectedVersion. */
