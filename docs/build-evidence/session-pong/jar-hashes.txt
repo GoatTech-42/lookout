@@ -1,0 +1,4 @@
+fe9beb7b4ed8e03d21d0d5a6d417252a82ff8910a9e3ae4e23ca1c5873dceb81  build/libs/meshac-1.21.11-2.9.7.28-meshac-0.1.0.jar
+bb881d7c794b7fd255145f21cb92ca23f4a04f841da02cd0f8e3580dc0568fad  build/libs/meshac-26.1.2-2.9.7.28-meshac-0.1.0.jar
+867ea7089cd9e7f3ef11895e8f658fa6a676ff7f4e924e65bb0ca4bc57e5a31e  build/libs/meshac-26.2-2.9.7.28-meshac-0.1.0.jar
+46783597954523e25cf7e4c934d507b5e54b57e0d086d0fe050468bb72e1d602  build/libs/meshac-26.3-2.9.7.28-meshac-0.1.0.jar

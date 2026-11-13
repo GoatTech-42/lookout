@@ -24,7 +24,12 @@ public abstract class ServerCommonPacketListenerImplMixin {
 	@Inject(method = "handlePong", at = @At("HEAD"))
 	private void meshac$pong(ServerboundPongPacket p, CallbackInfo ci) {
 		ServerPlayer player = meshac$player();
-		if (player != null) PacketDispatcher.onConfirmation(player, p.getId(), MeshPacketType.PONG, p);
+		if (player == null) return;
+		var data = dev.meshac.data.PlayerDataManager.get(player);
+		var connection = ((ServerCommonPacketListenerImplAccessor) (Object) this).meshac$getConnection();
+		// A UUID match alone does not authenticate an old listener after session replacement.
+		if (data != null && dev.meshac.tracker.ConfirmationTransport.isPlay(data, connection))
+			PacketDispatcher.onConfirmation(player, p.getId(), MeshPacketType.PONG, p);
 	}
 
 	/** Resolves the ServerPlayer on the game-listener subclass; null during configuration phase. */

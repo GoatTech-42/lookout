@@ -362,3 +362,7 @@ Shipping jarbf0697545885b23bbfb5d271d842a392c5d6de3d0fbd337a3eb0a601c8e729a8, co
 ### 12:44 native login route contract pinned
 
 All four actual PlayerList initial-login paths invoke the one-argument game-listener send(Packet)V overload. The game-listener constructor sets player.connection first. The native target checker now verifies that first-send descriptor rather than assuming every login reaches the early-publication hook. Thus the confirmed native route publishes PlayerData before the Netty task can perform login write; alternate direct two-argument/Connection login routes remain unqualified. No production change or fallback added.
+
+## 2026-11-13 12:49 - defensive current-listener PONG admission, runtime pending
+
+Separate candidate: common PONG hook verifies its own live native Connection against current PlayerData/player/listener/PLAY state before dispatch. This closes a source-reproduced stale-listener same-UUID/colliding-ID boundary; it is defensive session isolation, not a claim of exact upstream rejection policy. Actual-class RED/GREEN/mutation cover stale/replacement/same-player connections, phase/close, valid copied-player and ordinary replies. All four current builds execute compileJava; headless regressions pass. No changed-artifact runtime yet; bf069754 native anchor evidence does not migrate. Duplicate anchor tolerance, ownership/after-send and stale-quit behavior remain unchanged and open. Gates stay closed.
