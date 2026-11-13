@@ -4,6 +4,8 @@
 	"compatibilityLevel": "JAVA_25",
 	"mixins": [
 		"ServerGamePacketListenerImplMixin",
+		"ServerHandshakePacketListenerImplMixin",
+		"ServerCommonPacketListenerImplAccessor",
 		"ServerCommonPacketListenerImplMixin",
 		"ServerPlayerGameModeMixin",
 		"ServerGamePacketListenerSendMixin",

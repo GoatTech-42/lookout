@@ -44,6 +44,19 @@ public final class OutboundDispatcher {
 
 		if (packet instanceof ClientboundLoginPacket login) {
 			data.setEntityId(login.playerId());
+			data.getWorldBlockTracker().reset();
+			return;
+		}
+		if (packet instanceof net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket chunk) {
+			data.getWorldBlockTracker().handleChunkLoad(chunk.x(), chunk.z());
+			return;
+		}
+		if (packet instanceof net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket forget) {
+			data.getWorldBlockTracker().handleChunkForget(forget.pos());
+			return;
+		}
+		if (packet instanceof net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket blockUpdate) {
+			data.getWorldBlockTracker().handleBlockUpdate(blockUpdate.getPos(), blockUpdate.getBlockState());
 			return;
 		}
 		if (packet instanceof ClientboundPingPacket ping) {

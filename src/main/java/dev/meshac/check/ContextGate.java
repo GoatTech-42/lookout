@@ -20,9 +20,9 @@ public final class ContextGate {
 		return data.getClientVersion() != MeshVersion.UNKNOWN;
 	}
 
-	/** False until the client-acknowledged world cache is implemented. */
+	/** Presence cache mirrors outbound chunk load/forget/block-update packets. */
 	public static boolean worldCacheAvailable() {
-		return false;
+		return true;
 	}
 
 	private static final java.util.Set<String> gatedLogged = java.util.concurrent.ConcurrentHashMap.newKeySet();

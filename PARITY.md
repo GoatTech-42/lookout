@@ -145,3 +145,23 @@ config wiring/testing. A successful jar is not a usable release yet.
   5 vehicle-ejection checks. Queued acknowledgedTasks runnables reach effects
   only through these wrapped calls, so scheduled callbacks are contained
   transitively.
+
+## 2026-11-13 10:47 - dependency roots implemented, analyzer de-over-approximated
+- ClientVersionResolver: client version now comes from the handshake protocol
+  number (ClientIntentionPacket capture mixin, applied at join). Only the
+  running server's protocol maps (computed at runtime); anything else stays
+  UNKNOWN and stays gated. ViaFabric/multi-version is out of scope.
+- WorldBlockTracker: presence cache fed by outbound level-chunk-load,
+  forget-chunk and single-block-update packets; reset on login. Chunk payload
+  blocks not mirrored - outside tracked single-block updates, block lookups keep
+  Vulcan's empty-cache air behavior. ServerLevel is never substituted here.
+  ContextGate.worldCacheAvailable() now true; ack-confirmation (chunk batch
+  received) not modeled, noted.
+- analyze_deps: seeds restricted to call sites (dot-prefixed); declarations and
+  comments no longer seed. Regression test scripts/test_analyze_deps.py covers
+  seeding rules and stale-metadata freshness. 179/180 needsVersion/needsWorld
+  at class granularity is genuine transitive coupling through
+  CollisionState/MotionState/ExemptType, not analyzer noise; it is now satisfied
+  by the two implementations above rather than suppressed. KillAuraL remains
+  explicitly gated (maximum damage window). docs/ELIGIBILITY.md lists per-check
+  needs.

@@ -12,6 +12,7 @@ public final class PlayerDataManager {
 
 	public static void onJoin(ServerPlayer player) {
 		PlayerData data = new PlayerData(player);
+		data.setClientVersion(ClientVersionResolver.resolve(player.connection == null ? null : ((dev.meshac.mixin.ServerCommonPacketListenerImplAccessor) player.connection).meshac$getConnection()));
 		data.setChecks(CheckManager.createChecks(data));
 		MeshServices.players().put(player.getUUID(), data);
 		dev.meshac.veil.Veil.grace(player, player.level().getServer().getTickCount());

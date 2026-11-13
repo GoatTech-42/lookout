@@ -15,15 +15,14 @@ OUT = os.path.join(ROOT, 'check', 'CheckDependencies.java')
 
 # direct-dependency markers (on the class's own source text)
 VERSION_PATTERNS = [
-    r'getClientVersion\s*\(',
-    r'\bisAtLeast1_1[37]\s*\(\s*\)',       # PlayerData helpers wrap getClientVersion
-    r'\bisNewerThan1_9\s*\(\s*\)',
-    r'\bisOlderThan1_9\s*\(\s*\)',
-    r'\bisAtLeast1_21_2\s*\(\s*\)',
+    r'\.getClientVersion\s*\(',  # call sites only, not the PlayerData declaration
+    r'\.isAtLeast1_1[37]\s*\(\s*\)',       # call sites only
+    r'\.isNewerThan1_9\s*\(\s*\)',
+    r'\.isOlderThan1_9\s*\(\s*\)',
+    r'\.isAtLeast1_21_2\s*\(\s*\)',
 ]
 WORLD_PATTERNS = [
-    r'getWorldBlockTracker\s*\(',
-    r'WorldBlockTracker',
+    r'\.getWorldBlockTracker\s*\(',  # call sites only; declarations/comments do not seed
 ]
 
 classes = {}  # simpleName -> dict(path, text, refs, needsVersion, needsWorld)

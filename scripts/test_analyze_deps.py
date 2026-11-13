@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Regression tests for analyze_deps seeding: declarations and comments must not
+seed dependencies; call sites must. Run: python3 scripts/test_analyze_deps.py"""
+import os, re, subprocess, sys, tempfile, textwrap
+
+REPO = os.path.join(os.path.dirname(__file__), '..')
+
+def make_tree(root, files):
+    for rel, body in files.items():
+        path = os.path.join(root, 'src', 'main', 'java', 'dev', 'meshac', rel)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, 'w') as f:
+            f.write(textwrap.dedent(body))
+
+def run_analyzer(root):
+    script = open(os.path.join(REPO, 'scripts', 'analyze_deps.py')).read()
+    script = script.replace("os.path.dirname(__file__), '..'", repr(root))
+    ns = {'__file__': os.path.join(REPO, 'scripts', 'analyze_deps.py'), '__name__': '__main__'}
+    exec(compile(script, 'analyze_deps.py', 'exec'), ns)
+    out = open(os.path.join(root, 'src', 'main', 'java', 'dev', 'meshac', 'check', 'CheckDependencies.java')).read()
+    return out
+
+def check(ok, what):
+    if not ok:
+        raise AssertionError('FAIL: ' + what)
+    print('ok:', what)
+
+with tempfile.TemporaryDirectory() as root:
+    make_tree(root, {
+        'data/PlayerData.java': '''
+            package dev.meshac.data;
+            import dev.meshac.config.MeshVersion;
+            public class PlayerData {
+                public MeshVersion getClientVersion() { return MeshVersion.UNKNOWN; }
+                public dev.meshac.tracker.WorldBlockTracker getWorldBlockTracker() { return null; }
+            }
+        ''',
+        'tracker/WorldBlockTracker.java': '''
+            package dev.meshac.tracker;
+            public class WorldBlockTracker { public boolean hasTrackedBlockNearby(double x, double y, double z) { return false; } }
+        ''',
+        'config/MeshVersion.java': 'package dev.meshac.config; public enum MeshVersion { UNKNOWN }\n',
+        'check/impl/combat/FakeA.java': '''
+            package dev.meshac.check.impl.combat;
+            import dev.meshac.data.PlayerData;
+            public class FakeA {
+                // WorldBlockTracker mentioned in a comment is not a dependency.
+                public boolean f(PlayerData data) { return data.getClientVersion() != null; }
+            }
+        ''',
+        'check/impl/combat/FakeB.java': '''
+            package dev.meshac.check.impl.combat;
+            import dev.meshac.data.PlayerData;
+            public class FakeB {
+                public boolean f(PlayerData data) { return data.getWorldBlockTracker().hasTrackedBlockNearby(1, 2, 3); }
+            }
+        ''',
+        'check/impl/combat/FakeC.java': '''
+            package dev.meshac.check.impl.combat;
+            import dev.meshac.data.PlayerData;
+            public class FakeC { public boolean f(PlayerData data) { return data != null; } }
+        ''',
+    })
+    out = run_analyzer(root)
+    def aset(name):
+        return re.search(r'public static final java.util.Set<String> ' + name + r' = [^;]*;', out).group(0)
+    version_set = aset('NEEDS_CLIENT_VERSION')
+    check('FakeA' in version_set, 'call site getClientVersion seeds version need')
+    check('FakeB' not in version_set, 'world-only check does not gain version need')
+    world_set = aset('NEEDS_WORLD_CACHE')
+    check('PlayerData' not in version_set and 'PlayerData' not in world_set, 'declaration file does not seed')
+    check('FakeB' in world_set, 'call site getWorldBlockTracker seeds world need')
+    check('FakeA' not in world_set, 'comment mention does not seed world need')
+    check('FakeC' in aset('KNOWN'), 'plain check is known')
+    check('FakeC' not in version_set and 'FakeC' not in world_set, 'plain check has no propagated needs through declaration-only PlayerData')
+
+# stale-metadata check: committed generator output must match a fresh regeneration
+gen = subprocess.run(['python3', os.path.join(REPO, 'scripts', 'analyze_deps.py')], capture_output=True, text=True)
+check(gen.returncode == 0, 'analyzer regenerates cleanly: ' + gen.stdout.strip())
+dirty = subprocess.run(['git', '-C', REPO, 'status', '--short', 'src/main/java/dev/meshac/check/CheckDependencies.java'], capture_output=True, text=True).stdout.strip()
+print('stale-metadata:', 'STALE - commit the regenerated file' if dirty else 'fresh')
+print('test_analyze_deps: PASS')
