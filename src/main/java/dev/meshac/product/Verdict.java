@@ -50,7 +50,7 @@ public final class Verdict {
 		if (Config.get().monitor() && !Config.get().isEgregious(check)) step = Step.LOG; // soft mode: everything logs; only egregiousChecks enforce
 		LOG.warn("[meshac] SIGNAL {} {} {} heat={} -> {}", pl.getGameProfile().name(), check, detail, h.heat, step.name().toLowerCase());
 		alert(pl, check + " " + detail + " heat " + h.heat + " " + step.name().toLowerCase());
-		if (step == Step.HOLD && h.heat - weight < Config.get().holdAtI()) Discord.hold(pl.getGameProfile().name(), check, detail);
+		if (step == Step.HOLD && h.heat - weight < Config.get().holdAtI() && dev.meshac.safety.Containment.mode() == dev.meshac.safety.Containment.Mode.ENFORCE) Discord.hold(pl.getGameProfile().name(), check, detail);
 		if (step == Step.REMOVE) remove(pl, why, ev);
 		return step;
 	}
@@ -77,6 +77,13 @@ public final class Verdict {
 		double eff = Cases.offences(pl.getUUID());
 		int rung = Ladder.rung(eff, cf.kicks(), tierA && cf.skipRungOnTierA());
 		String name = pl.getGameProfile().name();
+		if (dev.meshac.safety.Containment.mode() != dev.meshac.safety.Containment.Mode.ENFORCE) {
+			// Log-only audit record: nothing persisted to the case store, no real disconnect, no webhook.
+			String action = rung <= cf.kicks() ? "kick" : (Ladder.permanent(cf.perma(), tierA || !cf.permanentNeedsTierA(), rung, cf.kicks() + 4) ? "ban" : "tempban");
+			LOG.warn("[meshac] SIMULATED CASE {} {} {} (log-only: not persisted, no webhook)", action, name, reason);
+			dev.meshac.safety.Effects.disconnect(pl, net.minecraft.network.chat.Component.literal(reason));
+			return;
+		}
 		Cases.Case c;
 		if (rung <= cf.kicks()) {
 			c = Cases.add(name, pl.getUUID(), "kick", reason, "meshac", 0, evidence);
@@ -90,7 +97,7 @@ public final class Verdict {
 			dev.meshac.safety.Effects.disconnect(pl, Screens.ban(c));
 		}
 		LOG.warn("[meshac] CASE {} {} {} {}", c.id, c.action, c.player, reason);
-		Discord.post(c);
+		if (c.id != null) Discord.post(c); // ENFORCE-only path: simulation returned above
 	}
 
 	public static void forget(UUID id) { HEAT.remove(id); }

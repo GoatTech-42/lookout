@@ -50,7 +50,7 @@ public final class OutboundDispatcher {
 		if (packet instanceof net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket chunk) {
 			// Faithful mirror point: the chunk the client is being sent, veil-adjusted inside the tracker.
 			net.minecraft.world.level.chunk.LevelChunk levelChunk = player.level().getChunk(chunk.x(), chunk.z());
-			data.getWorldBlockTracker().handleChunkColumn(levelChunk);
+			data.getWorldBlockTracker().handleChunkColumn(player.level().dimension(), levelChunk);
 			return;
 		}
 		if (packet instanceof net.minecraft.network.protocol.game.ClientboundForgetLevelChunkPacket forget) {
@@ -103,7 +103,7 @@ public final class OutboundDispatcher {
 			data.getMotionState().handleServerPosition(pos.x, pos.y, pos.z);
 			data.getRelativeMoveTracker().clearTargetPositions();
 			MeshPacketEvent event = new MeshPacketEvent(MeshPacketType.SERVER_POSITION, player, packet, false);
-			for (AbstractCheck check : data.getChecks()) check.handlePacket(event);
+			for (AbstractCheck check : data.getChecks()) { if (dev.meshac.check.ContextGate.isGated(check.getClass().getSimpleName(), data)) continue; check.handlePacket(event); }
 			return;
 		}
 		if (packet instanceof ClientboundSetEntityDataPacket metadata) {

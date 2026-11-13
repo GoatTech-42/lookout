@@ -90,16 +90,21 @@ public final class Veil {
 	/** Actual swaps emitted into the last encoded packet per chunk+section; the world tracker reads
 	 * these so its view matches the payload clients really receive, not a recomputed guess. */
 	private static final java.util.Map<Long, java.util.Set<Integer>> EMITTED_MODS = new java.util.concurrent.ConcurrentHashMap<>();
-	private static long emitKey(net.minecraft.world.level.ChunkPos pos, int secIdx) { return (pos.pack() << 8) | (secIdx & 0xFF); }
-
-	public static void recordEmittedMods(net.minecraft.world.level.ChunkPos pos, int secIdx, Mod[] mods) {
-		java.util.Set<Integer> idx = java.util.concurrent.ConcurrentHashMap.newKeySet();
-		for (Mod m : mods) idx.add(m.idx());
-		EMITTED_MODS.put(emitKey(pos, secIdx), idx);
+	private static long emitKey(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim, net.minecraft.world.level.ChunkPos pos, int secIdx) {
+		return (pos.pack() << 12) | ((long) (dim.identifier().hashCode() & 0xF) << 8) | (secIdx & 0xFF);
 	}
 
-	public static java.util.Set<Integer> emittedMods(net.minecraft.world.level.ChunkPos pos, int secIdx) {
-		return EMITTED_MODS.getOrDefault(emitKey(pos, secIdx), java.util.Set.of());
+	/** Records the swaps of one encode; an empty array marks a no-swap encode so stale swaps never linger. */
+	public static void recordEmittedMods(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim, net.minecraft.world.level.ChunkPos pos, int secIdx, Mod[] mods) {
+		java.util.Set<Integer> idx = java.util.concurrent.ConcurrentHashMap.newKeySet();
+		for (Mod m : mods) idx.add(m.idx());
+		EMITTED_MODS.put(emitKey(dim, pos, secIdx), idx);
+	}
+
+	/** Consume-on-read: the tracker takes the record for its freeze so a later encode cannot pollute an earlier deferred apply. */
+	public static java.util.Set<Integer> takeEmittedMods(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dim, net.minecraft.world.level.ChunkPos pos, int secIdx) {
+		java.util.Set<Integer> got = EMITTED_MODS.remove(emitKey(dim, pos, secIdx));
+		return got == null ? java.util.Set.of() : got;
 	}
 
 	public static Mod[] mods(LevelChunk c, int secIdx, net.minecraft.world.level.chunk.LevelChunkSection sec) {

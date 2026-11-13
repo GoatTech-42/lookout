@@ -44,21 +44,40 @@ public class WorldBlockTracker {
 		trackedSulfur.clear();
 	}
 
-	public void handleChunkColumn(LevelChunk chunk) {
+	public void handleChunkColumn(net.minecraft.resources.ResourceKey<net.minecraft.world.level.Level> dimension, LevelChunk chunk) {
 		if (chunk == null) return;
 		long packedPos = chunk.getPos().pack();
-		int chunkX = ChunkPos.getX(packedPos), chunkZ = ChunkPos.getZ(packedPos);
+		final int chunkX = ChunkPos.getX(packedPos), chunkZ = ChunkPos.getZ(packedPos);
+		// Freeze at send time: scan the sections and consume the emitted-mods record NOW, so the
+		// confirmation-deferred apply cannot observe a later world state or a later encode's swaps.
+		// Remaining delta vs exact per-packet payload: this still scans the live LevelChunk at send
+		// time rather than the packet-decoded bytes (PARITY.md); world gate stays CLOSED regardless.
+		Map<Integer, Set<Long>> frozen = new HashMap<>();
+		LevelChunkSection[] sections = chunk.getSections();
+		for (int i = 0; i < sections.length; i++) {
+			LevelChunkSection section = sections[i];
+			if (section == null || section.hasOnlyAir()) continue;
+			Set<Integer> hidden = new HashSet<>(dev.meshac.veil.Veil.takeEmittedMods(dimension, chunk.getPos(), i));
+			int sectionMinY = chunk.getSectionYFromSectionIndex(i) << 4;
+			Set<Long> wet = new HashSet<>();
+			for (int ly = 0; ly < 16; ly++) {
+				for (int lz = 0; lz < 16; lz++) {
+					for (int lx = 0; lx < 16; lx++) {
+						int idx = lx | (ly << 4) | (lz << 8);
+						if (hidden.contains(idx)) continue;
+						if (isWetPotentSulfur(section.getBlockState(lx, ly, lz)))
+							wet.add(positionKey((chunkX << 4) + lx, sectionMinY + ly, (chunkZ << 4) + lz));
+					}
+				}
+			}
+			if (!wet.isEmpty()) frozen.put(i, wet);
+		}
 		playerData.getConfirmationTracker().runAfterConfirmation(() -> {
 			clearChunk(chunkX, chunkZ);
-			LevelChunkSection[] sections = chunk.getSections();
-			for (int i = 0; i < sections.length; i++) {
-				LevelChunkSection section = sections[i];
-				if (section == null || section.hasOnlyAir()) continue;
-				// Actual emitted payload, recorded by ChunkDataMixin at encode time; if the chunk was
-				// never veil-encoded the set is empty and nothing is hidden, matching a plain client.
-				Set<Integer> hidden = new HashSet<>(dev.meshac.veil.Veil.emittedMods(chunk.getPos(), i));
-				int sectionMinY = chunk.getSectionYFromSectionIndex(i) << 4;
-				scanSection(chunkX, chunkZ, i, sectionMinY, section, hidden);
+			if (!frozen.isEmpty()) {
+				Map<Integer, Set<Long>> dst = new HashMap<>();
+				frozen.forEach((sec, keys) -> dst.put(sec, Set.copyOf(keys)));
+				trackedSulfur.put(chunkKey(chunkX, chunkZ), dst);
 			}
 		});
 	}
@@ -67,7 +86,7 @@ public class WorldBlockTracker {
 		for (int ly = 0; ly < 16; ly++) {
 			for (int lz = 0; lz < 16; lz++) {
 				for (int lx = 0; lx < 16; lx++) {
-					int idx = (ly << 8) | (lz << 4) | lx;
+					int idx = lx | (ly << 4) | (lz << 8); // must match Veil.Mod.idx layout (x | y<<4 | z<<8)
 					if (hidden.contains(idx)) continue;
 					BlockState state = section.getBlockState(lx, ly, lz);
 					if (isWetPotentSulfur(state)) {
@@ -173,9 +192,9 @@ public class WorldBlockTracker {
 		return ((long) x & 0x3FFFFFFL) << 38 | ((long) z & 0x3FFFFFFL) << 12 | (long) (y & 0xFFF);
 	}
 
-	private static int unpackX(long key) { return (int) (key >> 38); }
-	private static int unpackZ(long key) { return (int) ((key >> 12) & 0x3FFFFFFL); }
-	private static int unpackY(long key) { return (int) (key & 0xFFFL); }
+	private static int unpackX(long key) { return (int) (key >> 38); } // arithmetic: sign-extends the 26-bit field
+	private static int unpackZ(long key) { return (int) ((key << 26) >> 38); } // move 26-bit field to top, arithmetic back: signed
+	private static int unpackY(long key) { return (int) ((key << 52) >> 52); } // sign-extended 12-bit Y (negative Y decodes negative)
 
 	private static int floorInt(double value) {
 		int truncated = (int) value;

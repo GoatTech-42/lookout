@@ -57,7 +57,7 @@ public final class Config {
 	public Boolean combatLog; public Integer combatLogSeconds; // combat log protection: on by default, tag length 15 s
 	public boolean combatLog() { return combatLog == null || combatLog; }
 	public int combatLogSeconds() { return combatLogSeconds != null ? combatLogSeconds : 15; }
-	public boolean monitor() { return monitorOnly != null && monitorOnly; }
+	public boolean monitor() { return monitorOnly == null || monitorOnly; } // safe-closed default: monitor (log/alert only) unless the owner explicitly sets false; independent of safety.Containment which stays LOG_ONLY
 	public boolean perma() { return permanentBan != null ? permanentBan : false; }
 	public int holdAtI() { return (int) Math.round(holdAtD()); }
 	public double holdAtD() { return holdAt != null ? holdAt : 3; }

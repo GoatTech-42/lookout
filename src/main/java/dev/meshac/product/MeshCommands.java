@@ -69,9 +69,13 @@ public final class MeshCommands {
 		int minutes = ms == 0 ? 0 : 1;
 		ServerPlayer p = s.getServer().getPlayerList().getPlayerByName(name);
 		if (p == null) { s.sendFailure(Component.literal("Player must be online.")); return 0; }
+		if (dev.meshac.safety.Containment.mode() != dev.meshac.safety.Containment.Mode.ENFORCE) {
+			dev.meshac.safety.Effects.disconnect(p, Component.literal("simulated staff ban: " + reason));
+			s.sendSuccess(() -> Component.literal("[log-only] simulated ban of " + name + ": nothing persisted, player not disconnected, no webhook."), true);
+			return 1;
+		}
 		Cases.Case c = Cases.add(p.getGameProfile().name(), p.getUUID(), minutes == 0 ? "ban" : "tempban", reason, s.getTextName(), ms == 0 ? 0 : System.currentTimeMillis() + ms, List.of("staff action"));
-		p.connection.disconnect(Screens.ban(c));
-		Discord.post(c);
+		if (dev.meshac.safety.Effects.disconnect(p, Screens.ban(c))) Discord.post(c);
 		s.sendSuccess(() -> Component.literal("Banned " + name + ", case " + c.id), true);
 		return 1;
 	}

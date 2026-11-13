@@ -33,10 +33,10 @@ public abstract class ChunkDataMixin {
 		LevelChunk c = meshac$chunk.get();
 		int i = meshac$idx.get()[0]++;
 		Veil.Mod[] m = c == null ? null : Veil.mods(c, i, sec);
-		if (m == null || m.length == 0) { sec.write(buf); return; }
+		if (m == null || m.length == 0) { if (c != null) dev.meshac.veil.Veil.recordEmittedMods(c.getLevel().dimension(), c.getPos(), i, new dev.meshac.veil.Veil.Mod[0]); sec.write(buf); return; }
 		try {
 			for (Veil.Mod x : m) sec.setBlockState(x.idx() & 15, (x.idx() >> 4) & 15, x.idx() >> 8, x.fake(), false);
-			dev.meshac.veil.Veil.recordEmittedMods(c.getPos(), i, m);
+			dev.meshac.veil.Veil.recordEmittedMods(c.getLevel().dimension(), c.getPos(), i, m);
 			sec.write(buf);
 		} finally {
 			for (Veil.Mod x : m) sec.setBlockState(x.idx() & 15, (x.idx() >> 4) & 15, x.idx() >> 8, x.real(), false);

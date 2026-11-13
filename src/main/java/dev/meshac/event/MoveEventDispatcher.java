@@ -72,7 +72,7 @@ public final class MoveEventDispatcher {
 		}
 		List nearby = level.getEntities(player, AABB.ofSize(player.position(), 3.0, 4.0, 3.0));
 		collisionState.setNearbyEntities(nearby);
-		for (AbstractCheck check : data.getChecks()) check.handleEvent(event);
+		for (AbstractCheck check : data.getChecks()) { if (dev.meshac.check.ContextGate.isGated(check.getClass().getSimpleName(), data)) continue; check.handleEvent(event); }
 	}
 
 	private static boolean isWaterlogged(BlockState state) {

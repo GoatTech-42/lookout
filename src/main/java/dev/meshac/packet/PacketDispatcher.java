@@ -112,7 +112,7 @@ public final class PacketDispatcher {
 	}
 
 	public static void dispatchEvents(PlayerData data, dev.meshac.event.MeshEvent event) {
-		for (dev.meshac.check.AbstractCheck check : data.getChecks()) check.handleEvent(event);
+		for (dev.meshac.check.AbstractCheck check : data.getChecks()) { if (dev.meshac.check.ContextGate.isGated(check.getClass().getSimpleName(), data)) continue; check.handleEvent(event); }
 	}
 
 	public static void onPlacement(ServerPlayer player, ServerboundUseItemOnPacket p) {
@@ -173,6 +173,6 @@ public final class PacketDispatcher {
 	}
 
 	public static void dispatchChecks(PlayerData data, MeshPacketEvent event) {
-		for (AbstractCheck check : data.getChecks()) check.handlePacket(event);
+		for (AbstractCheck check : data.getChecks()) { if (dev.meshac.check.ContextGate.isGated(check.getClass().getSimpleName(), data)) continue; check.handlePacket(event); }
 	}
 }

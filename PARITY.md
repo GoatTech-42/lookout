@@ -226,3 +226,20 @@ source dirs) and 26.3 javap verification:
   build + rig smoke. Grounded choice for Luke: V1 Monday = 26.3 qualified,
   26.2/26.1.2 fast-follow (same generation), 1.21.11 after (toolchain port);
   or V1 date moves to include all four.
+
+## 2026-11-13 11:05 - Independent QA (fc30762) reconciliation, commit pending
+Fixed in this commit (source-verified):
+- ContextGate was dead code: all four dispatch loops (PacketDispatcher x2, OutboundDispatcher, MoveEventDispatcher) now skip ContextGate.isGated checks. A gated check gets no handleEvent/handlePacket call: no VL, heat, alerts or effects.
+- /mesh ban bypass: under LOG_ONLY the whole transaction is simulated (no Cases.add, no disconnect, no webhook; staff sees "[log-only] simulated ban"); under ENFORCE the case persists and Discord.post only fires if Effects.disconnect actually ran.
+- Verdict REMOVE under LOG_ONLY is now a SIMULATED audit log line only: no case-store persist, no escalation state, no webhook; Effects.disconnect records intent via containment. Discord.hold posts only in ENFORCE.
+- JOIN short-circuit only when the ban disconnect really executed; a contained (simulated) ban no longer leaves a connected player without PlayerData.
+- WorldBlockTracker unpack Z/Y sign extension (was unsigned: z=-1 -> 67108863, y=-1 -> 4095).
+- Sulfur local-index layout now matches Veil.Mod.idx (x | y<<4 | z<<8; was transposed y<->z).
+- handleChunkColumn freezes the section scan + consumes the emitted-mods record at send time; the confirmation-deferred step applies only the frozen immutable result. Emitted keys are dimension-qualified; no-swap encodes record an empty set so stale swaps cannot linger; takeEmittedMods consumes on read.
+Recorded OPEN (not fixed this round):
+- Exact per-packet payload capture: freeze still scans the live LevelChunk at send time (onSend precedes netty encode, so the consumed emitted record can lag one encode). Exact parity needs an encode-point hook with player identity. World gate stays CLOSED.
+- Checks read world via MeshBlock -> live ServerLevel, not the client-ack cache (arch finding): with the gate wired, world-dependent checks are suppressed; real client-view integration is required before reopening, not a flag toggle.
+- handshakeComplete defaults true / setJoinConfirmationId has no callers (dead join anchor) - confirmation join anchoring unproven.
+- Upstream chunk-load tracks block entities only vs our full-section sulfur scan: PotentSulfurBlock block-entity status unverified in 26.3 jar.
+- Dispatcher gating regression test with mutation (QA proposed) not yet written; analyzer script STALE-still-PASS and git-failure gaps open.
+- Veil fixture lane: hidden block-entity NBT unfiltered, cache dimension-blindness (separate from emitted keys), encode swap race window, fake-ore Y plausibility, ESP tick-8 latency (real 400ms vs proposed 250ms bar - requirement unverified, behavior unchanged).

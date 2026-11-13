@@ -37,10 +37,11 @@ public class Meshac implements DedicatedServerModInitializer {
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			// A banned player who reconnects sees the ban screen with the time left.
 			dev.meshac.product.Cases.Case activeBan = dev.meshac.product.Cases.activeBan(handler.getPlayer().getUUID());
-			if (activeBan != null) {
-				dev.meshac.safety.Effects.disconnect(handler.getPlayer(), dev.meshac.product.Screens.ban(activeBan));
-				return;
+			if (activeBan != null
+					&& dev.meshac.safety.Effects.disconnect(handler.getPlayer(), dev.meshac.product.Screens.ban(activeBan))) {
+				return; // disconnect really ran (ENFORCE)
 			}
+			// LOG_ONLY: contained (simulated) ban disconnect leaves the player connected; they still need anticheat state.
 			dev.meshac.data.PlayerDataManager.onJoin(handler.getPlayer());
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
