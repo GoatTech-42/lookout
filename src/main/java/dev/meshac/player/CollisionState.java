@@ -2863,7 +2863,7 @@ public class CollisionState {
     }
 
     private void teleportToLoadedChunk(Location location) {
-        this.playerData.getPlayer().connection.teleport(location.getX(), location.getY(), location.getZ(), this.playerData.getRotationTracker().getYaw(), this.playerData.getRotationTracker().getPitch());
+        dev.meshac.safety.Effects.teleport(this.playerData.getPlayer(), location.getX(), location.getY(), location.getZ(), this.playerData.getRotationTracker().getYaw(), this.playerData.getRotationTracker().getPitch());
     }
 
     private void applyPlayerAbilities(ServerAbilities wrapperPlayServerPlayerAbilities2) {

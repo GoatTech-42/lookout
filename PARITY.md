@@ -131,3 +131,17 @@ Outstanding: CollisionState hand-verification; dependency metadata regeneration
 and packaged/no-source/indirect dependency qualification; product layer;
 client-version resolver; client-acknowledged world cache; runtime tests; veil
 config wiring/testing. A successful jar is not a usable release yet.
+
+## 2026-11-13 10:40 - central side-effect containment
+- safety/Containment + safety/Effects: every gameplay-visible effect (disconnect,
+  teleport, rotation change, held-slot change, vehicle eject) routes through one
+  gate. Default LOG_ONLY records + logs, never executes. Headless self-test
+  sim/containment/ContainmentSelfTest passes; mutation check (gate bypassed)
+  fails as required. Measurement pings and veil chunk packets are protocol IO,
+  not punishments, and stay direct. HTTP client disconnect (DiscordWebhook) is
+  not gameplay. ENFORCE mode not enabled anywhere yet; wired to config later.
+- Covered call sites: CollisionState setback teleport, ConnectionTracker +
+  ConfirmationTracker kicks, CheckUtils hotbar shuffle + random rotation,
+  5 vehicle-ejection checks. Queued acknowledgedTasks runnables reach effects
+  only through these wrapped calls, so scheduled callbacks are contained
+  transitively.

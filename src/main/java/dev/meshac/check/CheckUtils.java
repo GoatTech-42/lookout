@@ -298,7 +298,7 @@ public final class CheckUtils {
 
 	public static void sendHotbarShuffle(ServerPlayer player) {
 		int index = ThreadLocalRandom.current().nextInt(8);
-		player.connection.send(new net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket(index));
+		dev.meshac.safety.Effects.send(player, new net.minecraft.network.protocol.game.ClientboundSetHeldSlotPacket(index), "hotbar-shuffle");
 	}
 
 	public static float getMaxSpeed(PlayerData playerData, float amount) {
@@ -314,7 +314,7 @@ public final class CheckUtils {
 		if (player == null) return;
 		float yaw = (float) ThreadLocalRandom.current().nextDouble(360.0) - 180.0f;
 		float pitch = (float) ThreadLocalRandom.current().nextDouble(180.0) - 90.0f;
-		MeshServices.mainThread(() -> player.connection.teleport(player.getX(), player.getY(), player.getZ(), yaw, pitch));
+		MeshServices.mainThread(() -> dev.meshac.safety.Effects.teleport(player, player.getX(), player.getY(), player.getZ(), yaw, pitch));
 	}
 
 	public static boolean isWearingNetheriteArmor(PlayerData playerData) {

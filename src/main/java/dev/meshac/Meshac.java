@@ -21,6 +21,7 @@ public class Meshac implements DedicatedServerModInitializer {
 	@Override
 	public void onInitializeServer() {
 		LOGGER.info("[meshac] loading (Vulcan 2.9.7.28 port, credits: frep, OpenVulcan)");
+		dev.meshac.safety.Containment.setLogger(MeshServices::log);
 		MeshConfig.load();
 		MeshSettings.loadSettings();
 		ServerLifecycleEvents.SERVER_STARTED.register(MeshServices::init);

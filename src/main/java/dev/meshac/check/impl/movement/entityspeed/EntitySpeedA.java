@@ -905,6 +905,6 @@ public class EntitySpeedA extends AbstractCheck {
     }
 
     private void ejectPlayer() {
-        this.playerData.getPlayer().stopRiding();
+        dev.meshac.safety.Effects.ejectVehicle(this.playerData.getPlayer());
     }
 }

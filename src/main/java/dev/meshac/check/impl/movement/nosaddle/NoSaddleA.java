@@ -49,7 +49,7 @@ public class NoSaddleA extends AbstractCheck {
                     dev.meshac.MeshServices.mainThread(() -> {
                         Player currentPlayer = playerData.getPlayer();
                         if (currentPlayer != null)
-                            currentPlayer.stopRiding();
+                            if (currentPlayer instanceof net.minecraft.server.level.ServerPlayer sp) dev.meshac.safety.Effects.ejectVehicle(sp);
                     });
             }
         } else

@@ -91,7 +91,7 @@ public class ConfirmationTracker {
 		MeshServices.mainThread(() -> {
 			ServerPlayer player = playerData.getPlayer();
 			if (player != null && !player.hasDisconnected())
-				player.connection.disconnect(TextUtil.parse(kickMessage));
+				dev.meshac.safety.Effects.disconnect(player, TextUtil.parse(kickMessage));
 		});
 	}
 
