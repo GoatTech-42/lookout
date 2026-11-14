@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Mutation gate for the JOIN stage-flow harness (both classpath modes): each mutation must fail
-run_join_stage_flow.py with AssertionError and a nonzero exit."""
+"""Mutation gate for the JOIN stage-flow harness v5 (all three classpath modes): each mutation must
+fail run_join_stage_flow.py with AssertionError and a nonzero exit. NOTE: a choose()-level
+bedrock-veto-dropped mutant cannot be killed here because resolve() wiring never consults Via or
+the handshake when bedrock classes are present (contract A is doubly enforced); that mutant is
+gated in run_translator_hook_mutations.py, where choose() is called directly."""
 from pathlib import Path
 import tempfile,shutil,subprocess,sys
 root=Path(__file__).resolve().parents[2]
 mutations=[
- ('join-stage-provisional-flag','data/PlayerDataManager.java','data.setClientVersion(TranslatorHooks.resolve(player.getUUID(), connection(player), false));','data.setClientVersion(TranslatorHooks.resolve(player.getUUID(), connection(player), true));'),
+ ('via-handshake-fallback','data/TranslatorHooks.java','if (viaClassPresence != Presence.ABSENT) return viaLoaded && via != null ? via : MeshVersion.UNKNOWN;','if (viaClassPresence != Presence.ABSENT) return viaLoaded && via != null ? via : handshake;'),
+ ('join-resolver-removed','data/PlayerDataManager.java','\t\tif (data.getClientVersion() == dev.meshac.config.MeshVersion.UNKNOWN) {\n\t\t\tdata.setClientVersion(TranslatorHooks.resolve(player.getUUID(), connection(player)));\n\t\t}',''),
+ ('null-guard-removed','data/TranslatorHooks.java','\t\tif (playerId == null) return MeshVersion.UNKNOWN;\n',''),
  ('join-stage-guard-inverted','data/PlayerDataManager.java','if (data.getClientVersion() == dev.meshac.config.MeshVersion.UNKNOWN) {','if (data.getClientVersion() != dev.meshac.config.MeshVersion.UNKNOWN) {'),
- ('provisional-ignores-via-class','data/TranslatorHooks.java','\t\t\tif (provisional && (bedrockPresence != Presence.ABSENT || viaClassPresence != Presence.ABSENT)) {','\t\t\tif (provisional && (bedrockPresence != Presence.ABSENT || viaPresence != Presence.ABSENT)) {'),
- ('join-stage-return-after-init','data/PlayerDataManager.java','\t\t\tonJoin(player);\n\t\t\tdata = get(player);\n\t\t\tif (data == null || data.getPlayer() != player) return;','\t\t\tonJoin(player);\n\t\t\treturn;'),
 ]
 with tempfile.TemporaryDirectory(prefix='meshac-stageflow-mutations-') as d:
  t=Path(d);shutil.copytree(root/'src',t/'src');shutil.copytree(root/'sim',t/'sim')

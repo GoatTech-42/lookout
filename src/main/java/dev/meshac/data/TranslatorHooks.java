@@ -11,22 +11,26 @@ import net.minecraft.network.Connection;
  * jars: on a server without those mods the nested impl classes are never loaded, nothing is
  * registered at runtime, and resolution is exactly the old handshake path.
  *
- * Order and fail-safes:
- *   1. Bedrock (Geyser/Floodgate): a Bedrock player is not any Java Edition version, so it always
- *      resolves UNKNOWN; the handshake must not relabel it as the server version.
- *   2. ViaVersion: when loaded, its answer is AUTHORITATIVE. A translated client's handshake
- *      carries the SERVER's protocol, so a Via miss, lookup error or unmapped protocol stays
- *      UNKNOWN and never falls back to the handshake.
- *   3. Handshake fallback, only when no Via is loaded: ClientVersionResolver, UNKNOWN on mismatch.
- * Presence is tri-state: ABSENT (class missing or translator not running), PRESENT, or BROKEN
- * (class failed to load / state check errored). BROKEN and lookup errors are indeterminate and
- * close to UNKNOWN. This class never registers, enables or sends anything.
- *
- * Lifecycle: the first (login-send HEAD) call is PROVISIONAL. When any translator CLASS is
- * present, even not yet loaded, registration for this player can lag that point, so a provisional call defers to UNKNOWN and
- * leaves the captured handshake untouched; the definitive Fabric JOIN call re-resolves fully.
- * A provisional KNOWN result is only ever produced when no translator CLASS exists at all, so
- * a provisional known version is final and never needs re-derivation.
+ * v5 contract (B103 design review): a KNOWN version never depends on local translator READINESS,
+ * because a negative or late translator answer is not proof of a native Java client.
+ *   A. ANY local Bedrock API class present (or broken): resolution is ALWAYS UNKNOWN. A negative
+ *      or indeterminate Geyser/Floodgate answer is not proof of Java origin (registration can lag
+ *      every observable stage), and a positive Via answer only describes the Java-side connection
+ *      Geyser itself creates. Detection loss for ALL players on such a server is explicit and
+ *      accepted: version-dependent checks stay closed there.
+ *   B. Via class present without any Bedrock API: not loaded / state error / lookup error /
+ *      unmapped / -1 all stay UNKNOWN with NO handshake fallback, because a translated client's
+ *      handshake carries the SERVER's protocol. A loaded Via's positive known protocol resolves,
+ *      under the documented assumption that the Via answer describes a Java-origin client: it is
+ *      a protocol number, not an identity proof, and this server cannot see upstream topology.
+ *   C. No translator classes at all: the handshake resolves natively. It is a protocol
+ *      OBSERVATION, not proof that no external Geyser/proxy translates upstream of this server;
+ *      the unknown-upstream-topology boundary is documented and no universal Bedrock-detection
+ *      claim is made.
+ * Resolution is stage-independent: the login-send HEAD and the Fabric JOIN stage return the best
+ * answer available at that moment, and the JOIN stage re-resolves an UNKNOWN so a Via that
+ * loaded between the two stages is picked up. This class never registers, enables or sends
+ * anything.
  */
 public final class TranslatorHooks {
 
@@ -38,61 +42,47 @@ public final class TranslatorHooks {
 	private TranslatorHooks() { }
 
 	/**
-	 * Resolves the joining player's client version; never throws, never invents a version.
-	 * provisional = the early login-send HEAD stage: with any translator CLASS present the result defers
-	 * to UNKNOWN and the handshake is NOT consumed, because Bedrock/Via registration for this
-	 * player can lag that point. The definitive JOIN stage re-resolves fully.
+	 * Resolves the player's client version; never throws, never invents a version, and never lets
+	 * a KNOWN result depend on translator readiness (contract A/B/C in the class javadoc).
 	 */
-	public static MeshVersion resolve(UUID playerId, Connection connection, boolean provisional) {
-		Boolean bedrock = Boolean.FALSE;
+	public static MeshVersion resolve(UUID playerId, Connection connection) {
+		// No identity: never resolve a version (contract A is unconditional for a null player).
+		if (playerId == null) return MeshVersion.UNKNOWN;
+		Presence bedrockPresence = Presence.ABSENT;
+		Presence viaClassPresence = Presence.ABSENT;
 		boolean viaLoaded = false;
 		MeshVersion via = MeshVersion.UNKNOWN;
-		Presence bedrockPresence = Presence.ABSENT;
-		Presence viaPresence = Presence.ABSENT;
-		Presence viaClassPresence = Presence.ABSENT;
-		if (playerId != null) {
-			bedrockPresence = BedrockLookup.presence();
-			viaPresence = ViaLookup.presence();
-			viaClassPresence = ViaLookup.classPresence();
-			// Deferral keys on CLASS presence, not loaded state: a Via jar on the classpath whose
-			// runtime is not loaded yet at login must still defer, or the provisional stage would
-			// return a false native KNOWN that the JOIN stage never re-derives.
-			if (provisional && (bedrockPresence != Presence.ABSENT || viaClassPresence != Presence.ABSENT)) {
-				// Deferred: registration may lag login; do not consume the handshake, do not guess.
-				return MeshVersion.UNKNOWN;
-			}
-			if (bedrockPresence == Presence.BROKEN) {
-				bedrock = null; // indeterminate: never guess
-			} else if (bedrockPresence == Presence.PRESENT) {
-				bedrock = BedrockLookup.check(playerId);
-			}
-			if (viaPresence == Presence.BROKEN) {
-				viaLoaded = true; // block the handshake fallback: it is unreliable when Via is broken
-			} else if (viaPresence == Presence.PRESENT) {
+		bedrockPresence = BedrockLookup.presence();
+		viaClassPresence = ViaLookup.classPresence();
+		// Only case B needs the Via runtime: case A is always UNKNOWN and case C has no Via.
+		if (bedrockPresence == Presence.ABSENT && viaClassPresence == Presence.PRESENT) {
+			Presence viaRuntime = ViaLookup.presence();
+			if (viaRuntime == Presence.PRESENT) {
 				viaLoaded = true;
 				via = ViaLookup.resolve(playerId);
 			}
+			// BROKEN or not loaded: stays UNKNOWN; the handshake is never consulted under B.
 		}
-		return choose(provisional, bedrockPresence, viaClassPresence, bedrock, viaLoaded, via, ClientVersionResolver.resolve(connection));
+		// The handshake is observed only in case C (no translator classes at all); under A or B it
+		// is not even consumed.
+		return choose(bedrockPresence, viaClassPresence, viaLoaded, via,
+				bedrockPresence == Presence.ABSENT && viaClassPresence == Presence.ABSENT
+						? ClientVersionResolver.resolve(connection) : null);
 	}
 
-	/** Pure decision, unit-tested directly: provisional deferral, Bedrock veto, loaded-Via
-	 *  authority, handshake fallback. */
-	static MeshVersion choose(boolean provisional, Presence bedrockPresence, Presence viaClassPresence,
-			Boolean bedrock, boolean viaLoaded, MeshVersion via, MeshVersion handshake) {
-		// Provisional with any translator CLASS present (loaded or not): defer to UNKNOWN; a
-		// provisional KNOWN is only possible with no translator class at all and is therefore final.
-		if (provisional && (bedrockPresence != Presence.ABSENT || viaClassPresence != Presence.ABSENT)) return MeshVersion.UNKNOWN;
-		// Indeterminate (null) and Bedrock (TRUE) both stay UNKNOWN: never guess a JE version for a
-		// client we could not classify; the handshake must not relabel a Bedrock player.
-		if (bedrock == null || bedrock.booleanValue()) return MeshVersion.UNKNOWN;
-		// A loaded Via is authoritative: misses, errors and unmapped protocols stay UNKNOWN because
-		// the handshake then carries the SERVER's protocol, not the client's.
-		if (viaLoaded) return via == null ? MeshVersion.UNKNOWN : via;
+	/** Pure decision, unit-tested directly: the A/B/C contract. */
+	static MeshVersion choose(Presence bedrockPresence, Presence viaClassPresence,
+			boolean viaLoaded, MeshVersion via, MeshVersion handshake) {
+		// A: any local Bedrock API class present/broken - always UNKNOWN (see class javadoc).
+		if (bedrockPresence != Presence.ABSENT) return MeshVersion.UNKNOWN;
+		// B: Via class present, no Bedrock API - loaded positive known protocol or UNKNOWN; never
+		// the handshake.
+		if (viaClassPresence != Presence.ABSENT) return viaLoaded && via != null ? via : MeshVersion.UNKNOWN;
+		// C: translator-free - handshake protocol observation, UNKNOWN on mismatch/absence.
 		return handshake == null ? MeshVersion.UNKNOWN : handshake;
 	}
 
-	/** Presence gates: the impl classes below load only when their translator jar is present. */
+	/** Class-presence gate: the impl classes below load only when their translator jar is present. */
 	private static final class BedrockLookup {
 		private static final Presence GEYSER = present("org.geysermc.geyser.api.GeyserApi");
 		private static final Presence FLOODGATE = present("org.geysermc.floodgate.api.FloodgateApi");
@@ -101,57 +91,18 @@ public final class TranslatorHooks {
 			if (GEYSER == Presence.BROKEN || FLOODGATE == Presence.BROKEN) return Presence.BROKEN;
 			return (GEYSER == Presence.PRESENT || FLOODGATE == Presence.PRESENT) ? Presence.PRESENT : Presence.ABSENT;
 		}
-
-		/** TRUE = Bedrock, FALSE = verified not Bedrock, null = indeterminate (lookup error). */
-		static Boolean check(UUID playerId) {
-			try {
-				if (GEYSER == Presence.PRESENT && GeyserImpl.isBedrock(playerId)) return Boolean.TRUE;
-				if (FLOODGATE == Presence.PRESENT && FloodgateImpl.isBedrock(playerId)) return Boolean.TRUE;
-				return Boolean.FALSE;
-			} catch (Throwable t) {
-				logLookupError("Bedrock detection", t);
-				return null;
-			}
-		}
-	}
-
-	/** Direct Geyser API references; loaded only when the GeyserApi class is present. */
-	private static final class GeyserImpl {
-		static boolean isBedrock(UUID playerId) {
-			// Exact bytecode, base-api 1.0.3 org.geysermc.api.Geyser: the ONLY benign absence is the
-			// message below. The same call throws RuntimeException with OTHER messages ("Api was not
-			// an instance of ...") on API-class mismatch; those must propagate as indeterminate.
-			final org.geysermc.geyser.api.GeyserApi api;
-			try {
-				api = org.geysermc.geyser.api.GeyserApi.api();
-			} catch (RuntimeException e) {
-				if ("Api has not been registered yet!".equals(e.getMessage())) return false;
-				throw e;
-			}
-			return api.connectionByUuid(playerId) != null;
-		}
-	}
-
-	/** Direct Floodgate API references; loaded only when the FloodgateApi class is present. */
-	private static final class FloodgateImpl {
-		static boolean isBedrock(UUID playerId) {
-			// Probed against floodgate api 2.2.4-20250930.181800-5: getInstance() returns null when
-			// Floodgate is not running. An isFloodgatePlayer error propagates as indeterminate.
-			final org.geysermc.floodgate.api.FloodgateApi api = org.geysermc.floodgate.api.FloodgateApi.getInstance();
-			return api != null && api.isFloodgatePlayer(playerId);
-		}
 	}
 
 	private static final class ViaLookup {
 		private static final Presence CLASS = present("com.viaversion.viaversion.api.Via");
 
-		/** Class presence alone, independent of runtime loaded state; gates provisional deferral. */
+		/** Class presence alone, independent of runtime loaded state. */
 		static Presence classPresence() {
 			return CLASS;
 		}
 
-		/** ABSENT = no Via translating (handshake is the client's real protocol); PRESENT = loaded
-		 *  and authoritative; BROKEN = present but its state check failed (indeterminate). */
+		/** ABSENT = no Via runtime; PRESENT = loaded; BROKEN = present but its state check failed
+		 *  (indeterminate). Used only in case B. */
 		static Presence presence() {
 			if (CLASS != Presence.PRESENT) return CLASS;
 			try {
@@ -162,7 +113,8 @@ public final class TranslatorHooks {
 			}
 		}
 
-		/** Authoritative Via answer: the mapped client version, UNKNOWN on any miss or error. */
+		/** Loaded Via's answer: the mapped client version, UNKNOWN on any miss or error. A
+		 *  protocol number, not a Java-origin identity proof (see class javadoc, case B). */
 		static MeshVersion resolve(UUID playerId) {
 			try {
 				return ViaImpl.protocol(playerId);

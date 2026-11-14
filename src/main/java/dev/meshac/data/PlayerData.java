@@ -34,7 +34,7 @@ import net.minecraft.server.level.ServerPlayer;
  * Per-player session data. Ported from Vulcan's PlayerData: packetevents User/ClientVersion became
  * ServerPlayer/MeshVersion; last-packet slots hold our own packet records.
  * Client version resolution: TranslatorHooks, provisional at login-send (UNKNOWN whenever any
- * translator class is present (loaded or not), handshake preserved), definitive at the Fabric JOIN stage (PlayerDataManager#onFabricJoin).
+ * stage-independent (TranslatorHooks contract A/B/C); the Fabric JOIN stage (PlayerDataManager#onFabricJoin) re-resolves an UNKNOWN, which picks up a Via that loaded after login.
  * Order: Geyser/Floodgate Bedrock always UNKNOWN; loaded ViaVersion authoritative via MeshVersion.fromProtocol;
  * raw handshake fallback only when no Via. UNKNOWN keeps PacketEvents protocol -1 ordering and never
  * assumes the server version implies the client version.

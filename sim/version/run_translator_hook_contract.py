@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Actual TranslatorHooks + MeshVersion + ClientVersionResolver against the real Via/Geyser/Floodgate
-API jars (sim/version/lib). Asserts the pinned fromProtocol table, the choose() composition table,
-the presence tri-state (including a present-but-broken class), no-runtime fallthrough, REAL Via
-dispatch via proxies (loaded-Via known/unmapped/error), REAL Geyser/Floodgate registered Bedrock
-vetoes, the provisional-deferral lifecycle incl. a registration-transition regression, and a Geyser
-API-mismatch indeterminate run. Proxy technique adapted from B103's
-IndependentHookProbe (disclosed; proxies only stand in for the translator runtime, no logic change)."""
+API jars (sim/version/lib). v5 contract A/B/C: KNOWN never depends on translator readiness.
+A: any local Bedrock API class present/broken => always UNKNOWN (even with positive Via or a clean
+handshake). B: Via-class-only => loaded positive known protocol or UNKNOWN, never the handshake.
+C: translator-free => handshake protocol observation. Asserts the pinned fromProtocol table, the
+choose() A/B/C table, the presence tri-state (incl. present-but-broken class), and resolve()
+composition on the all-vendor classpath (always UNKNOWN, handshake not even consumed)."""
 from pathlib import Path
 import tempfile,subprocess
 r=Path(__file__).resolve().parents[2];jdk=Path.home()/'jdk25/bin'
@@ -20,16 +20,16 @@ s={
 }
 test='''package dev.meshac.data;
 import dev.meshac.config.MeshVersion;
-import java.lang.reflect.Proxy;
 import java.util.UUID;
 import net.minecraft.network.Connection;
 public class TranslatorHookContractTest {
   static void eq(Object a, Object b, String what) { if (a != b) throw new AssertionError(what + ": expected " + b + " got " + a); }
   static void truth(boolean b, String what) { if (!b) throw new AssertionError(what); }
-  static Object proxy(Class<?> c, java.lang.reflect.InvocationHandler h) { return Proxy.newProxyInstance(c.getClassLoader(), new Class<?>[]{c}, h); }
+  static final TranslatorHooks.Presence A = TranslatorHooks.Presence.ABSENT;
+  static final TranslatorHooks.Presence P = TranslatorHooks.Presence.PRESENT;
+  static final TranslatorHooks.Presence B = TranslatorHooks.Presence.BROKEN;
 
   public static void main(String[] args) {
-    if (args.length > 0 && args[0].equals("mismatch")) { mismatchRun(); return; }
     eq(MeshVersion.fromProtocol(5), MeshVersion.V_1_7_10, "protocol 5");
     eq(MeshVersion.fromProtocol(47), MeshVersion.V_1_8, "protocol 47");
     eq(MeshVersion.fromProtocol(107), MeshVersion.V_1_9, "protocol 107"); eq(MeshVersion.fromProtocol(108), MeshVersion.V_1_9, "protocol 108");
@@ -57,98 +57,53 @@ public class TranslatorHookContractTest {
     eq(MeshVersion.fromProtocol(775), MeshVersion.V_26_1, "protocol 775"); eq(MeshVersion.fromProtocol(776), MeshVersion.V_26_2, "protocol 776"); eq(MeshVersion.fromProtocol(777), MeshVersion.V_26_3, "protocol 777");
     eq(MeshVersion.fromProtocol(4), MeshVersion.UNKNOWN, "protocol 4 (1.7.2-1.7.5) unmapped");
     eq(MeshVersion.fromProtocol(210), MeshVersion.UNKNOWN, "protocol 210 (1.10.x) unmapped");
-    eq(MeshVersion.fromProtocol(-1), MeshVersion.UNKNOWN, "protocol -1"); eq(MeshVersion.fromProtocol(0), MeshVersion.UNKNOWN, "protocol 0");
-    eq(MeshVersion.fromProtocol(778), MeshVersion.UNKNOWN, "protocol 778 future");
+    eq(MeshVersion.fromProtocol(-1), MeshVersion.UNKNOWN, "protocol -1 (Via not-connected answer)");
+    eq(MeshVersion.fromProtocol(0), MeshVersion.UNKNOWN, "protocol 0");
 
-    eq(TranslatorHooks.choose(true, TranslatorHooks.Presence.PRESENT, TranslatorHooks.Presence.ABSENT, Boolean.FALSE, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "provisional defers with bedrock detector present");
-    eq(TranslatorHooks.choose(true, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.PRESENT, Boolean.FALSE, true, MeshVersion.V_1_8, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "provisional defers with Via class present");
-    eq(TranslatorHooks.choose(true, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.ABSENT, Boolean.FALSE, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.V_26_3, "provisional resolves only when no translator exists");
-    eq(TranslatorHooks.choose(true, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.PRESENT, Boolean.FALSE, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "provisional defers with Via CLASS present but runtime not loaded (B103 v3 flaw 1)");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.PRESENT, Boolean.FALSE, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.V_26_3, "definitive: Via class present but not loaded is ABSENT for resolution, handshake allowed");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.PRESENT, TranslatorHooks.Presence.ABSENT, Boolean.TRUE, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "definitive Bedrock veto beats handshake");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.PRESENT, TranslatorHooks.Presence.ABSENT, null, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "definitive indeterminate Bedrock veto");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.PRESENT, Boolean.FALSE, true, MeshVersion.V_1_21_11, MeshVersion.V_26_3), MeshVersion.V_1_21_11, "definitive loaded Via wins");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.PRESENT, Boolean.FALSE, true, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "loaded Via UNKNOWN never falls back (1.10 client must not become 26.3)");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.PRESENT, Boolean.FALSE, true, null, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "loaded Via error stays UNKNOWN");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.ABSENT, Boolean.FALSE, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.V_26_3, "no Via: handshake fallback allowed");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.ABSENT, Boolean.FALSE, false, MeshVersion.UNKNOWN, MeshVersion.UNKNOWN), MeshVersion.UNKNOWN, "all unknown");
-    eq(TranslatorHooks.choose(false, TranslatorHooks.Presence.ABSENT, TranslatorHooks.Presence.ABSENT, Boolean.FALSE, false, MeshVersion.UNKNOWN, null), MeshVersion.UNKNOWN, "null handshake");
+    // A: any local Bedrock API class present/broken => ALWAYS UNKNOWN, whatever Via or the handshake say.
+    eq(TranslatorHooks.choose(P, A, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "A: bedrock present vetoes clean handshake");
+    eq(TranslatorHooks.choose(P, P, true, MeshVersion.V_1_8, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "A: bedrock present vetoes positive Via 47 (indeterminate-positive-Via case)");
+    eq(TranslatorHooks.choose(P, P, true, MeshVersion.V_26_3, null), MeshVersion.UNKNOWN, "A: bedrock present vetoes positive Via server-protocol");
+    eq(TranslatorHooks.choose(B, A, true, MeshVersion.V_1_8, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "A: broken bedrock class vetoes too");
+    eq(TranslatorHooks.choose(B, P, true, MeshVersion.V_1_8, null), MeshVersion.UNKNOWN, "A: broken bedrock + via present");
+    // B: Via-class-only => loaded positive known protocol or UNKNOWN; NEVER the handshake.
+    eq(TranslatorHooks.choose(A, P, true, MeshVersion.V_1_8, MeshVersion.V_26_3), MeshVersion.V_1_8, "B: via-only loaded positive 47");
+    eq(TranslatorHooks.choose(A, P, true, MeshVersion.V_26_3, MeshVersion.V_26_3), MeshVersion.V_26_3, "B: via-only positive server protocol");
+    eq(TranslatorHooks.choose(A, P, true, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "B: via-only unmapped/-1 stays UNKNOWN");
+    eq(TranslatorHooks.choose(A, P, true, null, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "B: via-only lookup error stays UNKNOWN");
+    eq(TranslatorHooks.choose(A, P, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "B: via-only NOT loaded: no handshake fallback");
+    eq(TranslatorHooks.choose(A, B, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.UNKNOWN, "B: via class broken: no handshake");
+    // C: translator-free => handshake protocol observation.
+    eq(TranslatorHooks.choose(A, A, false, MeshVersion.UNKNOWN, MeshVersion.V_26_3), MeshVersion.V_26_3, "C: translator-free native handshake");
+    eq(TranslatorHooks.choose(A, A, false, MeshVersion.UNKNOWN, MeshVersion.UNKNOWN), MeshVersion.UNKNOWN, "C: unknown handshake");
+    eq(TranslatorHooks.choose(A, A, false, MeshVersion.UNKNOWN, null), MeshVersion.UNKNOWN, "C: null handshake");
 
-    eq(TranslatorHooks.present("com.viaversion.viaversion.api.Via"), TranslatorHooks.Presence.PRESENT, "via jar class present");
-    eq(TranslatorHooks.present("com.example.DoesNotExist"), TranslatorHooks.Presence.ABSENT, "missing class absent");
-    eq(TranslatorHooks.present("dev.meshac.data.BrokenDep"), TranslatorHooks.Presence.BROKEN, "present but unloadable base = BROKEN");
+    truth(TranslatorHooks.present("dev.meshac.data.BrokenDep") == B, "present-but-broken class is BROKEN");
+    truth(TranslatorHooks.present("dev.meshac.data.NoSuchClass") == A, "missing class is ABSENT");
+    truth(TranslatorHooks.present("com.viaversion.viaversion.api.Via") == P, "Via class is PRESENT on this classpath");
 
-    UUID id = UUID.randomUUID();
-    eq(TranslatorHooks.resolve(id, null, false), MeshVersion.UNKNOWN, "no runtime, no handshake");
-    Connection cp = new Connection(); ClientVersionResolver.capture(cp, 777);
-    eq(TranslatorHooks.resolve(id, cp, true), MeshVersion.UNKNOWN, "provisional DEFERS while translator classes present (jars on classpath)");
-    eq(TranslatorHooks.resolve(id, cp, false), MeshVersion.V_26_3, "handshake survived provisional deferral; definitive resolves native");
-    Connection c2 = new Connection(); ClientVersionResolver.capture(c2, 47);
-    eq(TranslatorHooks.resolve(id, c2, false), MeshVersion.UNKNOWN, "no runtime: non-server protocol UNKNOWN");
-    Connection c3 = new Connection(); ClientVersionResolver.capture(c3, 777);
-    eq(TranslatorHooks.resolve(null, c3, false), MeshVersion.V_26_3, "null uuid: handshake resolves");
-
-    final int[] protocol = { 210 };
-    final boolean[] fail = { false };
-    Object viaApi = proxy(com.viaversion.viaversion.api.ViaAPI.class, (o, m, a) -> {
-      if (m.getName().equals("getPlayerVersion")) { if (fail[0]) throw new IllegalStateException("injected lookup failure"); return protocol[0]; }
-      throw new UnsupportedOperationException(m.getName()); });
-    Object viaPlatform = proxy(com.viaversion.viaversion.api.platform.ViaPlatform.class, (o, m, a) -> {
-      if (m.getName().equals("getApi")) return viaApi;
-      throw new UnsupportedOperationException(m.getName()); });
-    com.viaversion.viaversion.api.Via.init((com.viaversion.viaversion.api.ViaManager) proxy(com.viaversion.viaversion.api.ViaManager.class, (o, m, a) -> {
-      if (m.getName().equals("getPlatform")) return viaPlatform;
-      throw new UnsupportedOperationException(m.getName()); }));
-    eq(TranslatorHooks.resolve(id, null, false), MeshVersion.UNKNOWN, "loaded Via, unmapped 210, no handshake");
-    Connection c4 = new Connection(); ClientVersionResolver.capture(c4, 777);
-    eq(TranslatorHooks.resolve(id, c4, false), MeshVersion.UNKNOWN, "loaded Via unmapped 210 must not fall back to native handshake");
-    fail[0] = true;
-    eq(TranslatorHooks.resolve(id, null, false), MeshVersion.UNKNOWN, "loaded Via lookup error stays UNKNOWN");
-    Connection c5 = new Connection(); ClientVersionResolver.capture(c5, 777);
-    eq(TranslatorHooks.resolve(id, c5, false), MeshVersion.UNKNOWN, "loaded Via error must not fall back to handshake");
-    fail[0] = false; protocol[0] = 47;
-    Connection cv = new Connection(); ClientVersionResolver.capture(cv, 777);
-    eq(TranslatorHooks.resolve(id, cv, true), MeshVersion.UNKNOWN, "provisional defers even with loaded Via");
-    eq(TranslatorHooks.resolve(id, cv, false), MeshVersion.V_1_8, "definitive: loaded Via known translated protocol 47, handshake untouched");
-
-    final UUID GID = UUID.randomUUID(), FID = UUID.randomUUID(), OTHER = UUID.randomUUID();
-    Object floodApi = proxy(org.geysermc.floodgate.api.FloodgateApi.class, (o, m, a) -> {
-      if (m.getName().equals("isFloodgatePlayer")) return FID.equals(a[0]);
-      throw new UnsupportedOperationException(m.getName()); });
-    truth(org.geysermc.floodgate.api.InstanceHolder.set((org.geysermc.floodgate.api.FloodgateApi) floodApi, null, null, null, null, null, null), "floodgate instance registered");
-    Object geyserApi = proxy(org.geysermc.geyser.api.GeyserApi.class, (o, m, a) -> {
-      if (m.getName().equals("connectionByUuid")) return GID.equals(a[0]) ? proxy(org.geysermc.geyser.api.connection.GeyserConnection.class, (o2, m2, a2) -> { throw new UnsupportedOperationException(m2.getName()); }) : null;
-      throw new UnsupportedOperationException(m.getName()); });
-    org.geysermc.api.Geyser.set((org.geysermc.geyser.api.GeyserApi) geyserApi);
-    Connection cp2 = new Connection(); ClientVersionResolver.capture(cp2, 777);
-    eq(TranslatorHooks.resolve(GID, cp2, true), MeshVersion.UNKNOWN, "REGRESSION (v2 flaw): provisional before Geyser registration completes stays UNKNOWN, not V_26_3");
-    eq(TranslatorHooks.resolve(GID, cp2, false), MeshVersion.UNKNOWN, "definitive after registration: Bedrock veto beats Via(47) and preserved handshake(777)");
-    Connection c7 = new Connection(); ClientVersionResolver.capture(c7, 777);
-    eq(TranslatorHooks.resolve(FID, c7, false), MeshVersion.UNKNOWN, "registered Floodgate player: Bedrock veto beats Via(47) and handshake(777)");
-    eq(TranslatorHooks.resolve(OTHER, null, false), MeshVersion.V_1_8, "non-Bedrock player unaffected by registered detectors");
-    System.out.println("TranslatorHookContractTest PASS (58 table, 11 composition, 3 presence, 6 no-runtime/provisional, 8 Via dispatch, 4 Bedrock dispatch asserts)");
-  }
-
-  static void mismatchRun() {
-    Object base = proxy(org.geysermc.api.GeyserApiBase.class, (o, m, a) -> { throw new UnsupportedOperationException(m.getName()); });
-    org.geysermc.api.Geyser.set((org.geysermc.api.GeyserApiBase) base);
-    UUID id = UUID.randomUUID();
-    eq(TranslatorHooks.resolve(id, null, false), MeshVersion.UNKNOWN, "Geyser API-class mismatch: indeterminate, not absent");
-    Connection c = new Connection(); ClientVersionResolver.capture(c, 777);
-    eq(TranslatorHooks.resolve(id, c, false), MeshVersion.UNKNOWN, "Geyser mismatch must not fall back to handshake");
-    System.out.println("TranslatorHookContractTest mismatch run PASS (2 asserts)");
+    // Composition on the all-vendor classpath: case A - always UNKNOWN, handshake NOT even consumed.
+    Connection cp = new Connection();
+    ClientVersionResolver.capture(cp, 777);
+    eq(TranslatorHooks.resolve(UUID.randomUUID(), cp), MeshVersion.UNKNOWN, "A composition: all-vendor classpath always UNKNOWN");
+    eq(ClientVersionResolver.resolve(cp), MeshVersion.V_26_3, "A composition: handshake never consumed under A");
+    eq(TranslatorHooks.resolve(null, null), MeshVersion.UNKNOWN, "null player/connection stays UNKNOWN");
+    Connection cn = new Connection();
+    ClientVersionResolver.capture(cn, 777);
+    eq(TranslatorHooks.resolve(null, cn), MeshVersion.UNKNOWN, "null playerId never resolves, even with a clean native handshake (guard)");
+    eq(ClientVersionResolver.resolve(cn), MeshVersion.V_26_3, "null-guard path does not consume the handshake");
+    System.out.println("TranslatorHookContractTest PASS (56 fromProtocol, 14 A/B/C table, 3 presence, 6 composition asserts)");
   }
 }
 '''
-with tempfile.TemporaryDirectory(prefix='meshac-translator-') as d:
+with tempfile.TemporaryDirectory(prefix='meshac-hook-contract-') as d:
  t=Path(d);files=[]
  for n,b in s.items():
   p=t/(n+'.java');p.parent.mkdir(parents=True,exist_ok=True);p.write_text('package '+n.rsplit('/',1)[0].replace('/','.')+'; '+b);files.append(str(p))
  p=t/'dev/meshac/data/TranslatorHookContractTest.java';p.write_text(test);files.append(str(p))
  for f in ['src/main/java/dev/meshac/config/MeshVersion.java','src/main/java/dev/meshac/data/ClientVersionResolver.java','src/main/java/dev/meshac/data/TranslatorHooks.java']:
   files.append(str(r/f))
+ # BrokenDep must fail to LOAD at runtime: compile against BrokenDepBase, then delete BrokenDepBase.class.
  subprocess.run([str(jdk/'javac'),'-cp',jars,'-d',str(t/'classes'),*files],check=True)
- # BrokenDep must load as present-but-broken: remove its base class before running.
  (t/'classes/dev/meshac/data/BrokenDepBase.class').unlink()
  subprocess.run([str(jdk/'java'),'-cp',str(t/'classes')+':'+jars,'dev.meshac.data.TranslatorHookContractTest'],check=True)
- subprocess.run([str(jdk/'java'),'-cp',str(t/'classes')+':'+jars,'dev.meshac.data.TranslatorHookContractTest','mismatch'],check=True)

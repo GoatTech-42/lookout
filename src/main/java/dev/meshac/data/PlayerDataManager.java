@@ -19,30 +19,28 @@ public final class PlayerDataManager {
 		data.setEntityId(player.getId());
 		data.setUniqueId(player.getUUID());
 		data.setPlayerName(player.getName().getString());
-		// Provisional: whenever any translator CLASS is present (loaded or not) this returns UNKNOWN and preserves the
-		// captured handshake, because Bedrock/Via registration for this player can lag login.
-		data.setClientVersion(TranslatorHooks.resolve(player.getUUID(), connection(player), true));
+		// Stage-independent resolution (TranslatorHooks contract A/B/C); a Via loading after this
+		// point is picked up by the JOIN stage re-resolution below.
+		data.setClientVersion(TranslatorHooks.resolve(player.getUUID(), connection(player)));
 		data.setChecks(CheckManager.createChecks(data));
 		MeshServices.players().put(player.getUUID(), data);
 		dev.meshac.veil.Veil.grace(player, player.level().getServer().getTickCount());
 	}
 
-	/** Fabric JOIN client-version stage; translator registration readiness here is assumed, not runtime-verified. */
+	/** Fabric JOIN client-version stage: re-resolves an UNKNOWN so a Via that loaded after the login-send HEAD is picked up; a Via loading only after JOIN stays UNKNOWN (fail-closed, no retry hook). */
 	public static void onFabricJoin(ServerPlayer player) {
 		PlayerData data = get(player);
 		if (data == null || data.getPlayer() != player) {
-			// No login-send HEAD ran for this session; initialize (provisional), then fall
-			// through to the definitive resolution below: this stage must never leave a
-			// deferred UNKNOWN unresolved when it is the only stage that ran.
+			// No login-send HEAD ran for this session; initialize now (resolution is
+			// stage-independent, so initialization already resolves with current state).
 			onJoin(player);
-			data = get(player);
-			if (data == null || data.getPlayer() != player) return;
+			return;
 		}
-		// Re-resolve only an UNKNOWN: a provisional KNOWN was only possible with no translator
-		// present, so it is final. The handshake is still cached (the provisional stage never
-		// consumed it). Still-unknown stays UNKNOWN (fail-closed).
+		// Re-resolve only an UNKNOWN: a KNOWN from the HEAD stage is final under the
+		// stage-independent A/B/C contract; an UNKNOWN can still upgrade here when Via loaded
+		// between the stages. Still-unknown stays UNKNOWN (fail-closed).
 		if (data.getClientVersion() == dev.meshac.config.MeshVersion.UNKNOWN) {
-			data.setClientVersion(TranslatorHooks.resolve(player.getUUID(), connection(player), false));
+			data.setClientVersion(TranslatorHooks.resolve(player.getUUID(), connection(player)));
 		}
 	}
 
