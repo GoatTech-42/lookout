@@ -35,7 +35,9 @@ check/CheckDependencies.java. Packaged jars carry no sources, so there is no run
 FAIL-CLOSED: a check with no metadata entry (new check, stale generation) is gated as if it needed
 every unavailable context. Upstream semantics are restored only when the real context lands.
 
-QUALIFICATION (not yet done - required before calling the gate qualified):
+QUALIFICATION (status: the three conditions below passed at class level for the packaged 26.3 jar only;
+see the 2026-11-14 section at the end of this file for the result and its limits. Not done: other targets,
+runtime, and any claim beyond that section. The conditions are kept as originally written):
 - packaged/no-source condition: build the jar, confirm the gate behaves identically without any
   source tree present.
 - indirect dependency: a check that only calls a helper which reads WorldBlockTracker must be
@@ -403,3 +405,29 @@ Changed26.3 artifact1f777c1f87f6810223bc2b57bec8c7c4f6684b9a0b1a38dbe6794d871c22
 ### Finite player-abilities native-constructed handoff candidate
 
 Only abilities HEAD tracking moves to a separate admitted channel hook with existing session guards. Actual hook/dispatcher modeled replay RED/GREEN and6mutation probes pass;4build/package routes pass. Final26headless suites pass across explicit interrupted/retry logs. Native26.3shippingjara9a1d272ae0f87192b142b400bb53b15db1b6ac5990105acb80cdd9b18496b5d observes2nativeconstructedtrue/falseidentities from real pipeline context immediately before packet_handler through admitted/dispatcher/event/networkHEAD/serverHEAD/TAIL. Event direction/currentplayer validated. This excludes wire/clientcodec/UI/flightpermission/checkeffects, with failed realclient attempts retained. Ordinary movement35/35/70/35allchanged, strict outbound finite validator passes, cases unchanged, gatesclosed/Veiloff/LOG_ONLY. See docs/build-evidence/abilities26.3 for exact scope, failed attempts and validator mutations. Pending independent final closeout, not landed or released.
+
+## 2026-11-14 - dependency gate class-level qualification (26.3 jar only)
+Result for the three QUALIFICATION conditions listed in the ContextGate section, on the packaged
+26.3 jar built from 337e768 (SHA256 d2a33809dcccf95a4c3e26ba269b597b7ee4ee765fee4b72fa94ef8b9e311f0b,
+381 classes, 17 mixin classes, no sources). Independently reproduced by a second builder, same bytes.
+- packaged/no-source: PASS. Gate decisions (366: 183 names x 2 client-version fixtures) from the
+  packaged jar in an empty directory are byte-identical to those from ContextGate and
+  CheckDependencies compiled from source.
+- indirect dependency: PASS. All 179 world-needing checks reach the world cache transitively
+  (AimA -> PlayerData -> CollisionState -> getWorldBlockTracker) and are gated.
+- stale metadata: PASS for one case only: a check whose KNOWN entry is missing fails closed
+  ("UNSUPPORTED (no metadata)"). Removing NEEDS flags while keeping KNOWN was not tested.
+
+NOT established by this:
+- Not runtime, mixin-application, server or gameplay proof. Other targets (26.1.2, 26.2,
+  1.21.11) are not covered.
+- The metadata comes from a lexical, simple-name analyzer. Its soundness and completeness over
+  every possible world-cache access is not proven.
+- worldCacheAvailable() is hardcoded false, so 179 of 180 checks stay gated. The client-version
+  branch is masked by the world branch (NEEDS_CLIENT_VERSION equals NEEDS_WORLD_CACHE) and is
+  covered only by the harness and a simulator, not a live gate path.
+- JumpD is metadata-active only. That is not a statement that a runtime detector is enabled or
+  registered. No check is claimed ready.
+- Harness used Unsafe-allocated PlayerData and a pre-seeded log-once set; constructors, native
+  services and logging side effects did not run.
+The gate is qualified at class level only. Client-version and world-cache blockers remain open.
