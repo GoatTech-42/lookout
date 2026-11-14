@@ -4,10 +4,13 @@ plugins {
 
 repositories {
 	maven { url = "https://repo.opencollab.dev/main/" }
+	maven { url = "https://repo.viaversion.com/" }
 }
 
 dependencies {
 	compileOnly "org.geysermc.floodgate:api:2.2.4-SNAPSHOT"
+	compileOnly "org.geysermc.geyser:api:2.12.1-20261112.131201-30" // timestamp-pinned snapshot (moving -SNAPSHOT rejected in review)
+	compileOnly "com.viaversion:viaversion-api:5.12.2"
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"

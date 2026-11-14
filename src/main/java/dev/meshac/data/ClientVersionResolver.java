@@ -11,7 +11,7 @@ import net.minecraft.network.Connection;
  * captured at ClientIntentionPacket and applied at join. Only the running server's
  * protocol is mapped (computed at runtime, not a memorized table); anything else
  * stays UNKNOWN and ContextGate keeps version-dependent checks closed, which is
- * the correct behavior on a vanilla-compatible server (ViaFabric is out of scope).
+ * the correct fallback behavior on a vanilla-compatible server; translator-aware resolution lives in TranslatorHooks.
  */
 public final class ClientVersionResolver {
 
