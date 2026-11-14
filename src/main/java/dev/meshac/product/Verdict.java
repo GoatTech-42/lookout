@@ -96,6 +96,7 @@ public final class Verdict {
 			c = Cases.add(name, pl.getUUID(), "ban", reason, "meshac", 0, evidence);
 			dev.meshac.safety.Effects.disconnect(pl, Screens.ban(c));
 		}
+		if (!c.persisted) LOG.warn("[meshac] case {} was NOT persisted (store write failed); the removal of {} proceeds and stays enforced in memory (rejoin check and escalation count it); it persists on the next successful save and is lost on restart otherwise", c.id, name);
 		LOG.warn("[meshac] CASE {} {} {} {}", c.id, c.action, c.player, reason);
 		if (c.id != null) Discord.post(c); // ENFORCE-only path: simulation returned above
 	}
