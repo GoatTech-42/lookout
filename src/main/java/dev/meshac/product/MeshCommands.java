@@ -19,8 +19,14 @@ public final class MeshCommands {
 			.then(Commands.literal("case").then(Commands.argument("id", StringArgumentType.word()).executes(c -> show(c.getSource(), StringArgumentType.getString(c, "id")))))
 			.then(Commands.literal("pardon").then(Commands.argument("id", StringArgumentType.word()).executes(c -> {
 				if (simulate(c.getSource(), "pardon")) return 1;
-				boolean ok = Cases.pardon(StringArgumentType.getString(c, "id"));
-				c.getSource().sendSuccess(() -> Component.literal(ok ? "Pardoned." : "No such case."), true); return ok ? 1 : 0; })))
+				String pid = StringArgumentType.getString(c, "id");
+				Cases.PardonResult pr = Cases.pardon(pid);
+				switch (pr) {
+					case PARDONED -> c.getSource().sendSuccess(() -> Component.literal("Pardoned."), true);
+					case NOT_FOUND -> c.getSource().sendFailure(Component.literal("No such case (or already pardoned)."));
+					case AMBIGUOUS -> c.getSource().sendFailure(Component.literal("Case id " + pid + " is shared by several stored cases (duplicate historical id); refusing to pardon by id. Use /mesh case " + pid + " to review them and /mesh unban <player> to lift a ban."));
+				}
+				return pr == Cases.PardonResult.PARDONED ? 1 : 0; })))
 			.then(Commands.literal("unban").then(Commands.argument("player", StringArgumentType.word()).executes(c -> {
 				if (simulate(c.getSource(), "unban")) return 1;
 				int n = Cases.unban(StringArgumentType.getString(c, "player"));
@@ -58,8 +64,15 @@ public final class MeshCommands {
 		return cs.size();
 	}
 	private static int show(CommandSourceStack s, String id) {
-		Cases.Case c = Cases.find(id);
-		if (c == null) { s.sendSuccess(() -> Component.literal("No such case."), false); return 0; }
+		java.util.List<Cases.Case> matches = Cases.findAll(id);
+		if (matches.isEmpty()) { s.sendSuccess(() -> Component.literal("No such case."), false); return 0; }
+		if (matches.size() > 1) {
+			s.sendSuccess(() -> Component.literal(matches.size() + " cases share id " + id + " (duplicate historical id):"), false);
+			for (Cases.Case c : matches) s.sendSuccess(() -> Component.literal("  " + c.id + "  " + c.action + "  " + c.player + "  " + c.uuid + (c.pardoned ? "  (pardoned)" : c.lifted ? "  (lifted)" : "")), false);
+			s.sendSuccess(() -> Component.literal("Pardon by id is refused for ambiguous ids; use /mesh unban <player> to lift a ban."), false);
+			return 0;
+		}
+		Cases.Case c = matches.get(0);
 		s.sendSuccess(() -> Component.literal(c.id + " " + c.action + " " + c.player + "\n" + c.reason + "\nEvidence:\n" + String.join("\n", c.evidence)), false);
 		return 1;
 	}

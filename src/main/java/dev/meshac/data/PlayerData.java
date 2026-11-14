@@ -202,6 +202,7 @@ public class PlayerData {
 	public void setTimerViolations(int timerViolations) { this.timerViolations = timerViolations; }
 	public void setLastClientBrandAlert(long lastClientBrandAlert) { this.lastClientBrandAlert = lastClientBrandAlert; }
 	public void clearPunishmentCooldown() { this.lastPunishmentAtMillis = 0L; }
+	public void setLastPunishmentAtMillis(long lastPunishmentAtMillis) { this.lastPunishmentAtMillis = lastPunishmentAtMillis; }
 	public void setLastFlyingPacket(Flying lastFlyingPacket) { this.lastFlyingPacket = lastFlyingPacket; }
 	public void setLastInteractionPacket(InteractEntity lastInteractionPacket) { this.lastInteractionPacket = lastInteractionPacket; }
 	public void setLastDiggingPacket(Digging lastDiggingPacket) { this.lastDiggingPacket = lastDiggingPacket; }
