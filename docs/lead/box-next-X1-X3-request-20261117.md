@@ -1,0 +1,10 @@
+# Box: next request, Xray static group X1 + X2 + X3 (one request, one arena, bot only)
+Same bundle/build as P1 (v7c, `sh APPLY-ORDER-v7.sh rig`; add `held` with `legacy-particle` on 26.1.2 since X1/X6 chunk paths run through H2/I2/L2/M only for the later X8/X9 scenarios, so for THIS request use the base train + rig, no held). Server 26.1.2 offline rig, mineflayer 26.1.2. JVM -Dmeshac.rig=1, meshac.json veilXray=true, veilEsp=false (rig/bots/setveil.py). Remove the P1 instrumentation lines (they were temporary).
+Arena: per run sheet section 0 item 1 (flat stone, 20x20x20 buried ore field, 20 layers y=-30..-11, cave pocket with exactly 3 exposed ores). If the rig has no arena yet, building it is the first deliverable: record the world seed and layout, and the expected exposed-ore coordinates, in the report (these are the oracle for X1/X2).
+- X1: bot in the cave pocket reads received chunk sections and classifies every ore state. Pass = real ore states equal the exposed set (3), zero buried real ores. Also run once with xrayOn=false as the baseline (all real ores arrive) to show the rig can see a difference.
+- X2: fakeOreRatio 0.15 vs 0. Oracle is deterministic per seed+position+eligibility (XrayCore thresholds each position with SplittableRandom), NOT round(0.15*N): compute the expected fake set from the same seed/positions/eligibility rule first and write it in the report BEFORE reading the bot count (so it cannot be fitted to the result).
+- X3: hash received chunk sections, relog 5 times, identical hashes required.
+Report: JSONL per the sheet, build hash, seed, the oracle numbers, raw counts, bot version, server log. Unconstrained-perf caveat applies. If any assertion cannot be made with mineflayer (e.g. chunk-section access), say which and stop that scenario instead of approximating.
+Guards: foreground, one test at a time, no docker stop, disk soft 70% / hard stop 85%, no real accounts, nothing pushed, no key material in logs. A result without the baseline control is NOT_QUALIFIED.
+
+Spec fixes approved by Main after Box review (7:50 AM): arena is 20 layers y=-30..-11; X2 oracle as above. Use run sheet v5b (75ffca34) from now.
