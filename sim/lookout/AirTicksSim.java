@@ -62,6 +62,16 @@ public class AirTicksSim {
         for (int k = 0; k < after; k++) { WALL[0] += 50; e.tick(1, "steve", s(t++, x, 66, false, false), FLAT); }
         return alerts.stream().filter(a -> a.equals("flight")).count();
     }
+    /** `before` unsupported hover ticks (ticks 0..before-1), a teleport event, then a
+     *  sampling gap: hover resumes at tick `resume` through `end`. returns flight alerts */
+    static long gapTeleport(int before, long resume, long end) {
+        LookoutEngine e = eng(true); long t = 0; double x = 0;
+        for (int k = 0; k < before; k++) { WALL[0] += 50; e.tick(1, "steve", s(t++, x, 66, false, false), FLAT); }
+        e.onTeleport(1);
+        t = resume;
+        for (long k = resume; k < end; k++) { WALL[0] += 50; e.tick(1, "steve", s(t++, x, 66, false, false), FLAT); }
+        return alerts.stream().filter(a -> a.equals("flight")).count();
+    }
     static int fails; static final List<String> failed = new ArrayList<>();
     static void check(String id, boolean expectPass, boolean ok, String detail) {
         String tag = ok ? "PASS" : "FAIL";
@@ -89,6 +99,12 @@ public class AirTicksSim {
         // hover time before it does not count after it (kills the M8 join-grace hole)
         long jr = joinHover(29, 29), jc = joinHover(29, 45);
         check("T6-join-grace-relocation-zeroes-airTicks", true, jr == 0 && jc > 0, "reloc=" + jr + " control=" + jc);
+        // T7 GUARD: a sample gap past the 5-tick teleport window must not revive
+        // pre-teleport airtime. the teleport-event zeroing in the engine is the only
+        // reset that survives a gap - windows compare sample ticks, so a gap expires
+        // them. kills M8 (QA probe: 29 air, tp at 28, resume at 40, 0 alerts original)
+        long g7 = gapTeleport(29, 40, 57), g7c = gapTeleport(29, 40, 80);
+        check("T7-teleport-event-zeroing-survives-sample-gap", true, g7 == 0 && g7c > 0, "gap=" + g7 + " control=" + g7c);
         System.out.println(fails == 0 ? "SUITE: all guards pass" : "SUITE: guard failures " + failed);
         System.exit(fails == 0 ? 0 : 1);
     }

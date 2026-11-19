@@ -137,7 +137,11 @@ clocks).
   airborne reset reads the engine-owned, support-derived air count (real
   airtime with no ground support), not a count of airborne flags: a lone flicker
   over solid ground is not evaluated, genuine airtime (2+ ticks) exempts and
-  resets. bounded tolerances: a run of fast use-ticks padded with short releases
+  resets. the counter is engine-owned and maintained every sample, so no
+  verdict depends on another check's toggle. sampling gaps (entitiesForRendering
+  can skip ticks) are handled by tick-difference windows, which a gap can only
+  expire, never pause; the teleport-event reset is the gap-proof zeroing and is
+  pinned by the T7 sample-gap regression. bounded tolerances: a run of fast use-ticks padded with short releases
   (19 fast + 6 released) stays silent, and a 6+ tick break re-arms the grace.
   the flicker controls move slowly by design, so they prove low-speed silence
   only, not high-speed jump/eating physics.
