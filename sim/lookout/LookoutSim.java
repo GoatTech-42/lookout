@@ -16,6 +16,7 @@ public class LookoutSim {
 
     static List<String> alerts;
     static final AlertSink SINK = (id, name, check, message) -> alerts.add(check + " " + name + ": " + message);
+    static final long[] WALL = {0}; // fake wall clock, advanced by fixtures that care
 
     // world model: solid at y<=63 everywhere except open water (x in [100,120), block y=63
     // is liquid, not solid). frost-walker ice (x in [400,420)) is SOLID, not liquid (the
@@ -75,7 +76,32 @@ public class LookoutSim {
 
     static LookoutEngine fresh(LookoutConfig cfg) {
         alerts = new ArrayList<>();
-        return new LookoutEngine(cfg, SINK);
+        WALL[0] = 0;
+        return new LookoutEngine(cfg, SINK, () -> WALL[0]);
+    }
+
+    /** engine with the opt-in stage-3 checks (timer, multi-aura) turned on */
+    static LookoutEngine freshT3() {
+        LookoutConfig cfg = new LookoutConfig();
+        cfg.timer = true;
+        cfg.multiAura = true;
+        return fresh(cfg);
+    }
+
+    static void legitT3(String name, java.util.function.Consumer<LookoutEngine> scenario) {
+        LookoutEngine e = freshT3();
+        scenario.accept(e);
+        if (!alerts.isEmpty()) throw new AssertionError("FAIL legit fixture [" + name + "] flagged: " + alerts);
+        System.out.println("legit ok: " + name + " (opt-in checks on)");
+    }
+
+    static void cheatT3(String name, String check, java.util.function.Consumer<LookoutEngine> scenario) {
+        LookoutEngine e = freshT3();
+        scenario.accept(e);
+        if (alerts.stream().noneMatch(a -> a.startsWith(check + " "))) {
+            throw new AssertionError("FAIL cheat fixture [" + name + "] produced no " + check + " alert (got: " + alerts + ")");
+        }
+        System.out.println("cheat caught: " + name + " -> " + alerts);
     }
 
     /** engine with the opt-in killaura-facing and reach checks turned on */
@@ -456,6 +482,72 @@ public class LookoutSim {
             for (int i = 0; i < 45; i++) { x += 1.9; e.tick(1, "alex", mkGlide(t++, x, 100, 0), PROBE); }
         });
 
+
+        // ---- stage 3 legit fixtures: zero alerts expected ----
+        legitT3("full-rate sprint on the wall clock", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 60; i++) { x += 0.28; WALL[0] += 50; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        });
+        legitT3("speed 2 sprint on the wall clock", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 60; i++) {
+                x += 0.39; WALL[0] += 50;
+                e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 2, false, false, 0f, 0f, false), PROBE);
+            }
+        });
+        legitT3("laggy local client", e -> {
+            // our own client runs at 10 tps: everyone's wall-clock speed is unreadable
+            long t = 0; double x = 500;
+            for (int i = 0; i < 40; i++) { x += 0.28; WALL[0] += 100; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        });
+        legitT3("local client freeze mid-window", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 45; i++) {
+                x += 0.28;
+                WALL[0] += (i == 20) ? 2000 : 50; // one big stall
+                e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
+            }
+        });
+        legitT3("single-target duel", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 12; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    e.tick(3, "ivy", mk(t, 495, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onDamage(2, 1, 1, "minecraft:player_attack"); // always just sam
+            }
+        });
+        legitT3("sweep doubles at a legit cadence", e -> {
+            // vanilla sweep can hit two players in one tick, but only with a charged
+            // cooldown: seconds apart, not ticks
+            long t = 0;
+            for (int j = 0; j < 4; j++) {
+                for (int i = 0; i < 15; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    e.tick(3, "ivy", mk(t, 501, 64, 1.5, true), PROBE);
+                    t++;
+                }
+                e.onDamage(2, 1, 1, "minecraft:player_attack");
+                e.onDamage(3, 1, 1, "minecraft:player_attack");
+            }
+        });
+        legitT3("one double hit", e -> {
+            long t = 0;
+            for (int i = 0; i < 10; i++) {
+                e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                e.tick(3, "ivy", mk(t, 501, 64, 1.5, true), PROBE);
+                t++;
+            }
+            e.onDamage(2, 1, 1, "minecraft:player_attack");
+            e.onDamage(3, 1, 1, "minecraft:player_attack");
+        });
+
         // reconnect: clear() must forget seen projectile ids, or the next connection's
         // reused entity ids get their arrows silently dropped
         {
@@ -599,6 +691,25 @@ public class LookoutSim {
         cheat("level elytra at 3.0", "elytra", e -> {
             long t = 0; double x = 500;
             for (int i = 0; i < 45; i++) { x += 3.0; e.tick(1, "steve", mkGlide(t++, x, 100, 0), PROBE); }
+        });
+
+
+        cheatT3("2x wall-clock speed (timer)", "timer", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 60; i++) { x += 0.6; WALL[0] += 50; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+        });
+        cheatT3("multi-aura bursts", "multiaura", e -> {
+            long t = 0;
+            for (int j = 0; j < 4; j++) {
+                for (int i = 0; i < 3; i++) {
+                    e.tick(1, "steve", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    e.tick(3, "ivy", mk(t, 501, 64, 1.5, true), PROBE);
+                    t++;
+                }
+                e.onDamage(2, 1, 1, "minecraft:player_attack");
+                e.onDamage(3, 1, 1, "minecraft:player_attack"); // two victims every 3 ticks
+            }
         });
 
         System.out.println("LookoutSim: PASS");

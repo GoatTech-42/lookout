@@ -123,3 +123,27 @@ clocks).
   and exempt, and pullouts decay inside the sustain window.
 - the cap approximates unpowered and firework-boosted flight from outside; it is
   not a sourced vanilla maximum, and borderline notes are weak.
+
+## timer-like movement (off by default, opt-in)
+
+- honest scope: from another client there is no separate timer signal in positions,
+  because per-tick and per-second math use the same samples. this check only says
+  that real-time ground speed stays past what sprint, effects and ice explain. it
+  overlaps with the speed check on purpose; its edge is that wall-clock math is
+  robust to packet bunching and server lag spikes.
+- low multipliers are invisible to it. that is a known, stated miss.
+- only counts while our own client ticks near full rate; a laggy local client makes
+  everyone's wall-clock speed unreadable, so the check goes quiet instead of
+  guessing. local lag and freezes are covered by sim negatives.
+- only grounded, unexempt ticks count, same as speed.
+
+## multi-aura (off by default, opt-in)
+
+- typed evidence only: player-attack damage packets, so attacker and victims are
+  all real. no packet, no judgment.
+- a vanilla sweep attack can hit two players in one tick and looks identical per
+  event. what separates aura is cadence: sweeps need a charged cooldown and slow
+  movement, so legit multi-victim hits come seconds apart. only rapid repeats
+  count, one double-hit never flags, and the buffer fades over time.
+- sim negatives cover a single-target duel, sweep doubles at a legit cadence and a
+  lone double hit.

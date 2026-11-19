@@ -5,8 +5,10 @@ import dev.lookout.core.checks.FacingCheck;
 import dev.lookout.core.checks.FastBowCheck;
 import dev.lookout.core.checks.FlightCheck;
 import dev.lookout.core.checks.JesusCheck;
+import dev.lookout.core.checks.MultiAuraCheck;
 import dev.lookout.core.checks.NoSlowCheck;
 import dev.lookout.core.checks.ReachCheck;
+import dev.lookout.core.checks.TimerCheck;
 import dev.lookout.core.checks.LookoutCheck;
 import dev.lookout.core.checks.SpeedCheck;
 import dev.lookout.core.checks.StepCheck;
@@ -27,9 +29,16 @@ public class LookoutEngine {
     private final Map<String, Long> lastAlertAt = new ConcurrentHashMap<>();
     private final java.util.Set<Integer> seenProjectileIds = new java.util.LinkedHashSet<>();
 
+    private final java.util.function.LongSupplier wallClock;
+
     public LookoutEngine(LookoutConfig config, AlertSink sink) {
+        this(config, sink, System::currentTimeMillis);
+    }
+
+    public LookoutEngine(LookoutConfig config, AlertSink sink, java.util.function.LongSupplier wallClock) {
         this.config = config;
         this.sink = sink;
+        this.wallClock = wallClock;
     }
 
     public LookoutConfig config() {
@@ -49,6 +58,8 @@ public class LookoutEngine {
             if (config.noslow) list.add(new NoSlowCheck());
             if (config.reach) list.add(new ReachCheck());
             if (config.elytra) list.add(new ElytraCheck());
+            if (config.timer) list.add(new TimerCheck());
+            if (config.multiAura) list.add(new MultiAuraCheck());
             return list;
         });
     }
@@ -68,6 +79,7 @@ public class LookoutEngine {
         if (!config.enabled) return;
         ObservedPlayer p = players.computeIfAbsent(entityId, ObservedPlayer::new);
         if (name != null) p.name = name;
+        p.lastWallMillis = wallClock.getAsLong();
         ObservedSample prev = p.prev;
         p.add(sample);
         AlertSink gated = gatedSink();

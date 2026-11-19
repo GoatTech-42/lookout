@@ -14,6 +14,8 @@ public class LookoutConfig {
     public boolean noslow = true;
     public boolean reach = false; // opt-in: roughest judgment in lookout
     public boolean elytra = true;
+    public boolean timer = false; // opt-in: only readable as wall-clock overspeed
+    public boolean multiAura = false; // opt-in: sweep attacks look identical per event
 
     /** air ticks of grace before flight math engages (covers legit jumps + lag) */
     public int flightGraceTicks = 30;
@@ -54,6 +56,16 @@ public class LookoutConfig {
     /** level-glide speed in blocks/tick past elytra + fireworks that reads as overspeed */
     public double elytraMaxLevel = 2.2;
     public int elytraSustainTicks = 30;
+    /** wall-clock ground speed in m/s past legit play that reads as timer-like (heuristic) */
+    public double timerMaxWallSpeed = 10.0;
+    public int timerWindowTicks = 40;
+    /** our own client must tick at least this fast, or wall-clock math is meaningless */
+    public double timerMinLocalTps = 19.0;
+    /** distinct victims inside this window that read as a multi-target hit */
+    public int multiAuraWindowTicks = 2;
+    /** repeated multi-hits must come faster than this (legit sweep cadence is slower) */
+    public int multiAuraRapidGapTicks = 8;
+    public int multiAuraCount = 3;
 
     /** seconds before the same player+check can alert again */
     public long alertCooldownSeconds = 10;

@@ -16,6 +16,8 @@ public class ObservedPlayer {
     public long lastTeleportTick = -1000;
     public long lastTotemPopTick = -1000;
 
+    public long lastWallMillis;
+
     // filled by the engine right before the projectile event fires
     public double lastProjectileSpeed;
     public long lastProjectileTick = -1000;

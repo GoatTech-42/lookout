@@ -34,6 +34,8 @@ on a real client or server yet. treat every alert as a hint, not a signal.
 - noslow: moving at full speed while eating, drinking, drawing or blocking
 - rough reach (opt-in): hits landing from too far away
 - elytra overspeed: gliding level far past ordinary elytra flight
+- timer-like movement (opt-in): real-time ground speed past legit play
+- multi-aura (opt-in): one player damaging several players at once, over and over
 
 each alert is hedged on purpose ("flight-like movement"), rate-limited per player
 and check, and means "worth a look", never a verdict. see docs/lookout-false-positives.md for
@@ -46,9 +48,9 @@ drop the jar in your mods folder with fabric for 26.3. done.
 ## config
 
 `config/lookout.json` after first launch: per-check toggles, thresholds, and the
-alert cooldown. killaura facing and rough reach are off by default; both judge only
-real hits from damage packets, and both are heuristic, so they ship opt-in. noslow
-and elytra are experimental heuristics with configurable lines.
+alert cooldown. killaura facing, rough reach, timer and multi-aura are off by
+default: each is heuristic, so they ship opt-in. noslow and elytra are experimental
+heuristics with configurable lines.
 
 ## build
 
@@ -59,6 +61,25 @@ use JDK 25 to run Gradle:
 python3 scripts/verify_built_jar.py 26.3 25
 python3 sim/lookout/run_lookout_sim.py
 ```
+
+## what is left for a real client
+
+everything so far is validated at the source level with synthetic fixtures. before
+trusting any of it in play, run a real smoke pass:
+
+1. build the 26.3 jar and drop it in a fabric 26.3 mods folder.
+2. join a disposable local world with a second account (the "target").
+3. legit pass first: 10 minutes of normal play on the target (sprinting, jumping,
+   climbing stairs, swimming, riding a boat, eating, drawing a bow, trading hits,
+   elytra with fireworks, dying with a totem). expect zero notes in your chat.
+4. then provoke each check on the target: hover/fly, run across water, climb
+   without jumping, high ground speed, rapid totem restocks, full-power bow taps,
+   sprinting while eating, long elytra level flight. each should produce one
+   hedged note, then respect the cooldown.
+5. opt-in checks: enable killaura, reach, timer and multiaura in lookout.json and
+   repeat with two targets for the multi-victim cases. expect silence during
+   legit duels and sweep attacks.
+6. toggle checks off in lookout.json and confirm the notes stop.
 
 ## meshac build and evidence
 
