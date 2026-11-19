@@ -100,6 +100,72 @@ public class LookoutSim {
         for (int i = 0; i < 45; i++) { x += 1.1; WALL[0] += 100; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
     }
 
+    /** join relocation: the server moves a freshly-appeared player with no S2C
+     *  teleport event and the client lerps the jump over ~3 ticks (lane-run FP) */
+    static void scnJoinRelocate(LookoutEngine e) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 6; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        e.tick(1, "alex", mk(t++, x + 4.7, 64, 0, true), PROBE);
+        e.tick(1, "alex", mk(t++, x + 9.4, 64, 0, true), PROBE);
+        e.tick(1, "alex", mk(t++, x + 14.1, 64, 0, true), PROBE);
+        x += 14.1;
+        for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+    }
+
+    /** the original step-spam trace, kept unchanged as its own regression case:
+     *  the 10-block x jumps between groups are incidental fixture artifacts */
+    static void scnStepSpamOriginal(LookoutEngine e) {
+        long t = 0; double y = 64;
+        for (int j = 0; j < 4; j++) {
+            for (int i = 0; i < 3; i++) { y += 0.34; e.tick(1, "steve", mk(t++, j * 10 + 50, y, 0, true), PROBE); }
+        }
+    }
+
+    // ---- QA AMEND 6.2 adversarial probes: unsignaled >3-block relocation jumps
+    // (continuous, periodic, and established-player blinks) layered on each of
+    // speed / step / flight. Every one must still alert. ----
+    static void scnSpeedContinuous(LookoutEngine e) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 240; i++) { x += 4.1; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+    }
+    static void scnSpeedPeriodic(LookoutEngine e) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 240; i++) { x += 0.45 + (i % 4 == 3 ? 4.1 : 0); e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+    }
+    static void scnSpeedBlinks(LookoutEngine e) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 100; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+        for (int i = 0; i < 140; i++) { x += 0.45 + (i % 30 == 29 ? 4.1 : 0); e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+    }
+    static void scnStepContinuous(LookoutEngine e) {
+        long t = 0; double y = 64, x = 0;
+        for (int i = 0; i < 240; i++) { y += 0.34; x += 4.1; e.tick(1, "steve", mk(t++, x, y, 0, true), PROBE); }
+    }
+    static void scnStepPeriodic(LookoutEngine e) {
+        long t = 0; double y = 64, x = 0;
+        for (int i = 0; i < 240; i++) { y += 0.34; x += 0.3 + (i % 4 == 3 ? 4.1 : 0); e.tick(1, "steve", mk(t++, x, y, 0, true), PROBE); }
+    }
+    static void scnStepBlinks(LookoutEngine e) {
+        long t = 0; double y = 64, x = 0;
+        for (int i = 0; i < 100; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+        for (int i = 0; i < 140; i++) { y += 0.34; x += 0.3 + (i % 30 == 29 ? 4.1 : 0); e.tick(1, "steve", mk(t++, x, y, 0, true), PROBE); }
+    }
+    static void scnFlightContinuous(LookoutEngine e) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 10; i++) e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE);
+        for (int i = 0; i < 230; i++) { x += 4.1; e.tick(1, "steve", mk(t++, x, 66, 0, false), PROBE); }
+    }
+    static void scnFlightPeriodic(LookoutEngine e) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 10; i++) e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE);
+        for (int i = 0; i < 230; i++) { x += (i % 4 == 3 ? 4.1 : 0.0); e.tick(1, "steve", mk(t++, x, 66, 0, false), PROBE); }
+    }
+    static void scnFlightBlinks(LookoutEngine e) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 100; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+        for (int i = 0; i < 140; i++) { x += (i % 30 == 29 ? 4.1 : 0.0); e.tick(1, "steve", mk(t++, x, 66, 0, false), PROBE); }
+    }
+
     static void tickAll(LookoutEngine e, long t) {
         e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
         e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
@@ -273,17 +339,7 @@ public class LookoutSim {
             e.tick(1, "alex", mk(t++, x + 30, 70, 0, false), PROBE);
             for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x + 30, 70, 0, true), PROBE); }
         });
-        legit("observed player join: big first deltas without teleport packet", e -> {
-            long t = 0; double x = 0;
-            for (int i = 0; i < 6; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
-            // lane-run finding: at join the server relocates the player with no S2C
-            // teleport event and the client lerps the jump over ~3 ticks
-            e.tick(1, "alex", mk(t++, x + 4.7, 64, 0, true), PROBE);
-            e.tick(1, "alex", mk(t++, x + 9.4, 64, 0, true), PROBE);
-            e.tick(1, "alex", mk(t++, x + 14.1, 64, 0, true), PROBE);
-            x += 14.1;
-            for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
-        });
+        legit("observed player join: big first deltas without teleport packet", LookoutSim::scnJoinRelocate);
         legit("packet bunching on flat ground", e -> {
             long t = 0; double x = 0;
             for (int r = 0; r < 5; r++) {
@@ -774,15 +830,60 @@ public class LookoutSim {
             long t = 0;
             for (int i = 0; i < 30; i++) e.tick(1, "steve", mk(t++, 100.5 + i * 0.4, 64, 0, false), PROBE);
         });
-        cheat("one-block step spam", "step", e -> {
-            // continuous lateral movement: the old j*10+50 jumps were incidental 10-block
-            // unsignaled teleports, which the join-relocation gate (lane-run FP fix) now
-            // treats as teleports and exempts. Real step spam moves continuously.
+        cheat("one-block step spam", "step", LookoutSim::scnStepSpamOriginal);
+        cheat("one-block step spam, continuous lateral movement", "step", e -> {
+            // same steps without the original trace's incidental 10-block x jumps:
+            // real step spam moves continuously
             long t = 0; double y = 64; double x = 0;
             for (int j = 0; j < 4; j++) {
                 for (int i = 0; i < 3; i++) { y += 0.34; x += 0.3; e.tick(1, "steve", mk(t++, x, y, 0, true), PROBE); }
             }
         });
+
+        // ---- relocation-evasion fixtures (QA AMEND 6.2; expectations frozen before
+        // the gate rework): continuous >4 moves, periodic >4 moves, and
+        // established-player blinks, each across speed/step/flight, must alert ----
+        cheat("evasion: continuous relocation moves (speed)", "speed", LookoutSim::scnSpeedContinuous);
+        cheat("evasion: periodic relocation jumps (speed)", "speed", LookoutSim::scnSpeedPeriodic);
+        cheat("evasion: established-player blinks (speed)", "speed", LookoutSim::scnSpeedBlinks);
+        cheat("evasion: continuous relocation moves (step)", "step", LookoutSim::scnStepContinuous);
+        cheat("evasion: periodic relocation jumps (step)", "step", LookoutSim::scnStepPeriodic);
+        cheat("evasion: established-player blinks (step)", "step", LookoutSim::scnStepBlinks);
+        cheat("evasion: continuous relocation moves (flight)", "flight", LookoutSim::scnFlightContinuous);
+        cheat("evasion: periodic relocation jumps (flight)", "flight", LookoutSim::scnFlightPeriodic);
+        cheat("evasion: established-player blinks (flight)", "flight", LookoutSim::scnFlightBlinks);
+        {
+            // the discontinuity finding itself: the jumps are counted and surface
+            // as their own alert, next to the check they failed to silence
+            LookoutEngine e2 = fresh();
+            scnSpeedPeriodic(e2);
+            if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
+                throw new AssertionError("FAIL discontinuity finding: periodic relocation jumps produced no teleport alert (got: " + alerts + ")");
+            if (alerts.stream().noneMatch(a -> a.startsWith("speed ")))
+                throw new AssertionError("FAIL discontinuity finding: speed stayed silent through the jumps (got: " + alerts + ")");
+            System.out.println("cheat caught: periodic relocation jumps -> finding + movement " + alerts);
+        }
+        {
+            // gate mutation pairs, same scenarios with only the grace changed:
+            // no grace -> the legit join relocation goes red; an unbounded grace is
+            // the QA evasion itself -> the speed probe goes silent
+            scnJoinRelocate(fresh());
+            if (!alerts.isEmpty()) throw new AssertionError("FAIL join relocation flagged: " + alerts);
+            LookoutConfig noGrace = new LookoutConfig();
+            noGrace.joinGraceTicks = 0;
+            scnJoinRelocate(fresh(noGrace));
+            if (alerts.stream().noneMatch(a -> a.startsWith("speed ")))
+                throw new AssertionError("FAIL gate mutation: join relocation did not go red with the grace off (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected (grace off): " + alerts);
+            LookoutConfig openGrace = new LookoutConfig();
+            openGrace.joinGraceTicks = Integer.MAX_VALUE;
+            scnSpeedPeriodic(fresh(openGrace));
+            if (alerts.stream().anyMatch(a -> a.startsWith("speed ")))
+                throw new AssertionError("FAIL mutation setup: unbounded grace did not silence the speed probe (got: " + alerts + ")");
+            if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
+                throw new AssertionError("FAIL mutation setup: unbounded grace also silenced the finding (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected (grace unbounded): speed silenced, finding still up " + alerts);
+        }
         cheat("1.6x ground speed", "speed", e -> {
             long t = 0; double x = 0;
             for (int i = 0; i < 60; i++) { x += 0.45; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }

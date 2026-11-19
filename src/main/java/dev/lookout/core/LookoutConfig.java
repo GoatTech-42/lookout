@@ -68,6 +68,21 @@ public class LookoutConfig {
     public int multiAuraRapidGapTicks = 8;
     public int multiAuraCount = 3;
 
+    /** report repeated unsignaled relocation jumps as their own finding */
+    public boolean teleportJumps = true;
+    /** windowed lateral checks stay quiet about unsignaled jumps for this long after
+     *  a player first appears: at join the server can relocate a fresh player with no
+     *  S2C teleport event (lane-run FP). state-derived, never re-arms */
+    public int joinGraceTicks = 100;
+    /** single-tick horizontal jump past this counts as a relocation. measured basis:
+     *  legit per-tick horizontal movement tops out at boosted elytra ~2.0 (sprint 0.28,
+     *  packet bunching ~1.4); 3.0 clears all of it. horizontal only, so big falls
+     *  don't count */
+    public double unsignaledJumpBlocks = 3.0;
+    /** this many relocation jumps inside the window reads as its own finding */
+    public int teleportJumpCount = 3;
+    public long teleportJumpWindowTicks = 200;
+
     /** seconds before the same player+check can alert again */
     public long alertCooldownSeconds = 10;
 }

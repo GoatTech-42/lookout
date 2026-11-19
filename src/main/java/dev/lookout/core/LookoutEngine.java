@@ -75,19 +75,10 @@ public class LookoutEngine {
         };
     }
 
-    // Relative move packets cap at 8 blocks per packet, so an unsignaled relocation
-    // arrives as one sync jump or a couple of ~7-block relative moves; the client lerp
-    // can also slice a big jump into ~4-5 block samples. 4.0 stays clear of legit
-    // per-tick movement (bunching ~1.4, boosted elytra ~2) and of knockback, which
-    // arrives with a velocity packet and gates separately.
-    private static final double UNSIGNALED_TELEPORT_BLOCKS = 4.0;
-
-    private static double distance3d(ObservedSample a, ObservedSample b) {
-        double dx = a.x() - b.x();
-        double dy = a.y() - b.y();
-        double dz = a.z() - b.z();
-        return Math.sqrt(dx * dx + dy * dy + dz * dz);
-    }
+    // One relocation can arrive sliced over a few ticks (client lerp, or capped
+    // relative-move packets); consecutive big per-tick jumps count as one jump
+    // event. The cap keeps continuous fast movement from being one endless slice.
+    private static final long JUMP_CLUSTER_MAX_TICKS = 5;
 
     public void tick(int entityId, String name, ObservedSample sample, WorldProbe probe) {
         if (!config.enabled) return;
@@ -96,15 +87,46 @@ public class LookoutEngine {
         p.lastWallMillis = wallClock.getAsLong();
         ObservedSample prev = p.prev;
         p.add(sample);
-        // Lane-run finding: at join the server can relocate a player with no S2C teleport
-        // event, and the client lerps the jump over a few ticks. Without this gate the
-        // windowed checks read it as huge speed. Treat any unsignaled single-sample jump
-        // past 8 blocks as a teleport: same reset as onTeleport.
-        if (prev != null && distance3d(prev, sample) > UNSIGNALED_TELEPORT_BLOCKS) {
-            p.lastTeleportTick = prev.tick();
-            p.airTicks = 0;
+        if (prev == null) {
+            p.firstSampleTick = sample.tick();
         }
         AlertSink gated = gatedSink();
+        // Lane-run finding: right after a player appears, the server can relocate
+        // them with no S2C teleport event and the lerp slices read as huge speed.
+        // The grace is state-derived: it covers only joinGraceTicks after the
+        // observed-appear tick, never re-arms, and nothing the observed player does
+        // extends it. Past the grace an unsignaled jump never resets anything; it
+        // is counted, and a burst of jumps is its own finding.
+        if (prev != null) {
+            boolean signaled = p.ticksSince(p.lastTeleportTick, sample.tick()) < 5
+                    || p.ticksSince(p.lastVelocityTick, sample.tick()) < 5;
+            double dx = sample.x() - prev.x();
+            double dz = sample.z() - prev.z();
+            if (!signaled
+                    && dx * dx + dz * dz > config.unsignaledJumpBlocks * config.unsignaledJumpBlocks) {
+                if (p.lastJumpTick != prev.tick()
+                        || sample.tick() - p.jumpClusterStartTick >= JUMP_CLUSTER_MAX_TICKS) {
+                    p.jumpClusterStartTick = sample.tick();
+                    if (config.teleportJumps) {
+                        p.recentJumpTicks.addLast(sample.tick());
+                        while (!p.recentJumpTicks.isEmpty()
+                                && sample.tick() - p.recentJumpTicks.peekFirst() > config.teleportJumpWindowTicks) {
+                            p.recentJumpTicks.pollFirst();
+                        }
+                        if (p.recentJumpTicks.size() >= config.teleportJumpCount) {
+                            gated.alert(entityId, p.name, "teleport",
+                                    "repeated teleport-like jumps, no teleport packet ("
+                                            + p.recentJumpTicks.size() + " in " + config.teleportJumpWindowTicks / 20 + "s)");
+                        }
+                    }
+                }
+                p.lastJumpTick = sample.tick();
+                if (sample.tick() - p.firstSampleTick <= config.joinGraceTicks) {
+                    p.lastJoinRelocationTick = sample.tick();
+                    p.airTicks = 0;
+                }
+            }
+        }
         for (LookoutCheck check : checksFor(entityId)) {
             check.onSample(p, sample, prev, probe, config, gated);
         }

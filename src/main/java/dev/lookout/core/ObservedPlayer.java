@@ -16,6 +16,15 @@ public class ObservedPlayer {
     public long lastTeleportTick = -1000;
     public long lastTotemPopTick = -1000;
 
+    // join/reacquisition state: set on the first observed sample, never re-armed
+    public long firstSampleTick = -1;
+    /** unsignaled relocation jumps inside the appear grace gate lateral windows only */
+    public long lastJoinRelocationTick = -1000;
+    // unsignaled-jump cluster tracking for the discontinuity finding
+    public long lastJumpTick = -1000;
+    public long jumpClusterStartTick = -1000;
+    public final Deque<Long> recentJumpTicks = new ArrayDeque<>();
+
     public long lastWallMillis;
 
     // filled by the engine right before the projectile event fires

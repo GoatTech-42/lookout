@@ -35,7 +35,8 @@ public class SpeedCheck extends LookoutCheck {
             decay(0.25); // stale history: samples span far more wall time than the window
             return;
         }
-        if (p.lastVelocityTick >= windowStart.tick() || p.lastTeleportTick >= windowStart.tick()) {
+        if (p.lastVelocityTick >= windowStart.tick() || p.lastTeleportTick >= windowStart.tick()
+                || p.lastJoinRelocationTick >= windowStart.tick()) {
             decay(0.5);
             return;
         }
