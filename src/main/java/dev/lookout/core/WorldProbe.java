@@ -8,4 +8,6 @@ public interface WorldProbe {
     boolean isStairLikeAt(double x, double y, double z);
     boolean isSlipperyAt(double x, double y, double z);
     boolean isSoulGroundAt(double x, double y, double z);
+    /** web-type blocks: no collision shape, but they hold an entity in place */
+    default boolean isWebAt(double x, double y, double z) { return false; }
 }

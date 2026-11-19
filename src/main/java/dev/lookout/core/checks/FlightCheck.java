@@ -12,7 +12,8 @@ import dev.lookout.core.WorldProbe;
  * FP notes: exempts vehicles, elytra glide pose, water, climbables, levitation and
  * slow-falling effects, recent knockback/velocity (20 ticks) and recent teleports (5
  * ticks). Support means solid, liquid or climbable within a half block of the feet, or
- * stairs below. Lag spikes arrive as teleports and reset the clock. The long-airtime
+ * stairs below, or a web block at the feet (near-zero fall speed, no collision shape).
+ * Lag spikes arrive as teleports and reset the clock. The long-airtime
  * rule only engages when the player is NOT falling at speed (a real fall from any
  * height passes it), so ordinary drops never flag, while a slow-fall fly (sinking
  * gently instead of accelerating) still reads as not-falling and flags. Unloaded
@@ -35,6 +36,7 @@ public class FlightCheck extends LookoutCheck {
                 || w.isSolidAt(s.x(), s.y() - 0.5, s.z())
                 || w.isLiquidAt(s.x(), s.y() - 0.5, s.z())
                 || w.isClimbableAt(s.x(), s.y(), s.z())
+                || w.isWebAt(s.x(), s.y(), s.z())
                 || w.isStairLikeAt(s.x(), s.y() - 0.51, s.z());
         if (exempt || supported) {
             p.airTicks = 0;

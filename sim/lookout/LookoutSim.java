@@ -26,6 +26,7 @@ public class LookoutSim {
         public boolean isSolidAt(double x, double y, double z) {
             int bx = (int) Math.floor(x), by = (int) Math.floor(y);
             if (bx >= 200 && bx < 220) return by <= 63 + (bx - 200) / 2;
+            if (by == 64 && bx >= 100 && bx < 120) return true; // lily pads over the water region
             if (by > 63) return false;
             if (by == 63 && bx >= 100 && bx < 120) return false; // open water surface
             if (by == 63 && bx >= 0 && bx < 4 && (int) Math.floor(z) >= 0 && (int) Math.floor(z) < 4)
@@ -38,6 +39,10 @@ public class LookoutSim {
             return by == 63 && bx >= 100 && bx < 120; // frosted-ice region is NOT liquid
         }
         public boolean isClimbableAt(double x, double y, double z) { return false; }
+        public boolean isWebAt(double x, double y, double z) {
+            int bx = (int) Math.floor(x), by = (int) Math.floor(y);
+            return bx >= 300 && bx < 303 && by >= 64 && by <= 70; // web column, no collision shape
+        }
         public boolean isStairLikeAt(double x, double y, double z) {
             int bx = (int) Math.floor(x), by = (int) Math.floor(y);
             return bx >= 200 && bx < 220 && by == 63 + (bx - 200) / 2;
@@ -964,6 +969,23 @@ public class LookoutSim {
         cheat("jesus run", "jesus", e -> {
             long t = 0;
             for (int i = 0; i < 30; i++) e.tick(1, "steve", mk(t++, 100.5 + i * 0.4, 64, 0, false), PROBE);
+        });
+        // red team F3: crossing a lily pad field reads the water under the pads at
+        // y-0.2; the pads' collision right underfoot (26.3: top at 0.09375) is support
+        legit("walking a lily pad field", e -> {
+            long t = 0;
+            for (int i = 0; i < 30; i++) e.tick(1, "steve", mk(t++, 100.5 + i * 0.4, 64.09375, 0, false), PROBE);
+        });
+        // red team F2: a player stuck in a cobweb sinks at about -0.003/tick with
+        // no collision support; the web block itself is the support (control: the
+        // same slow sink in open air alerts below)
+        legit("stuck in a cobweb", e -> {
+            long t = 0; double y = 68;
+            for (int i = 0; i < 60; i++) { y -= 0.003; e.tick(1, "steve", mk(t++, 301, y, 0, false), PROBE); }
+        });
+        cheat("cobweb-style slow sink in open air", "flight", e -> {
+            long t = 0; double y = 68;
+            for (int i = 0; i < 60; i++) { y -= 0.003; e.tick(1, "steve", mk(t++, 500, y, 0, false), PROBE); }
         });
         cheat("one-block step spam", "step", LookoutSim::scnStepSpamOriginal);
         cheat("one-block step spam, continuous lateral movement", "step", e -> {

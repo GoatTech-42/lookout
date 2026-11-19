@@ -34,6 +34,10 @@ public class JesusCheck extends LookoutCheck {
         for (double[] pt : points) {
             if (!w.isLiquidAt(pt[0], y, pt[1])) return false;
             if (w.isSolidAt(pt[0], y, pt[1])) return false;
+            // a lily pad or carpet underfoot has no collision at y-0.2 (that reads
+            // the water below it) but a thin shape right under the feet; standing
+            // on it over water is legit (26.3: pad top is 0.09375 over the surface)
+            if (w.isSolidAt(pt[0], s.y() - 0.05, pt[1])) return false;
         }
         return true;
     }

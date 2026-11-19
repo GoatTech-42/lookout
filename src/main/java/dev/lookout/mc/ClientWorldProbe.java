@@ -57,4 +57,10 @@ public class ClientWorldProbe implements WorldProbe {
     public boolean isSoulGroundAt(double x, double y, double z) {
         return stateAt(x, y, z).is(BlockTags.SOUL_SPEED_BLOCKS);
     }
+
+    @Override
+    public boolean isWebAt(double x, double y, double z) {
+        // 26.3: WebBlock slows to Vec3(0.25, 0.05, 0.25) and resets fall distance
+        return stateAt(x, y, z).getBlock() instanceof net.minecraft.world.level.block.WebBlock;
+    }
 }
