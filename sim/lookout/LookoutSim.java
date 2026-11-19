@@ -537,8 +537,9 @@ public class LookoutSim {
             System.out.println("gate mutation red as expected: " + alerts);
         }
         {
-            // overcap sequence (24 m/s real-time, no effect): without gap rejection
-            // the window would span the stall and fire; the 2s wall pause resets it
+            // overcap sequence (24 m/s real-time, no effect): the 2s wall pause
+            // resets the window. combined protection: the tps bounds may also
+            // suppress this window, so this is not proof of gap rejection alone
             LookoutEngine e = freshTimerOnly(19.0);
             long t = 0; double x = 500;
             for (int i = 0; i < 50; i++) {
@@ -551,7 +552,8 @@ public class LookoutSim {
         }
         {
             // overcap sequence (24 m/s, no effect) with 10 ticks unobserved in the
-            // middle: the window must not straddle the hole
+            // middle: the window must not straddle the hole. combined protection:
+            // the tps bounds may also suppress it, as with the freeze case
             LookoutEngine e = freshTimerOnly(19.0);
             long t = 0; double x = 500;
             for (int i = 0; i < 30; i++) { x += 1.2; WALL[0] += 50; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }

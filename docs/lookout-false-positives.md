@@ -140,9 +140,13 @@ clocks).
   tick gaps (player left render) reset it, and the local rate must sit between 19
   and 21 tps. a slow local client makes wall-clock math unreadable; a fast one
   means catch-up processing after a stall. both go quiet instead of guessing.
+- the gated cadence being measured is our local observation cadence (how fast this
+  client ticks while tracking the player), not the server's TPS.
 - a laggy-client negative runs over the bare cap and stays silent behind the gate,
   and the sim re-runs that exact window with the gate floored to 0 and asserts it
-  goes red, so the negative is not vacuous.
+  goes red, so the negative is not vacuous. the freeze and sample-gap negatives
+  show combined protection: the gap rejection and the tps bounds can each suppress
+  them, so they are not proof of gap rejection alone.
 - low multipliers are invisible to it. that is a known, stated miss.
 
 ## multi-aura (off by default, opt-in)
