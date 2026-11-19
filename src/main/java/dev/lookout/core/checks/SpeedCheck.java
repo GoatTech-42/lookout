@@ -23,6 +23,13 @@ import dev.lookout.core.WorldProbe;
  */
 public class SpeedCheck extends LookoutCheck {
 
+    // QA: unlimited trimming lets a repeated spike hide (one 2.9-block delta every
+    // 12 ticks averages ~0.5 and every window trims it). the same spike (by its
+    // sample tick) may be trimmed across its whole residence in the window, but a
+    // NEW spike is trimmed at most once per 60 ticks.
+    private long lastTrimSpikeTick = -1000;
+    private long lastNewTrimTick = -1000;
+
     @Override public String id() { return "speed"; }
 
     @Override
@@ -45,6 +52,7 @@ public class SpeedCheck extends LookoutCheck {
         }
         double dist = 0;
         double maxDelta = 0;
+        long maxDeltaTick = 0;
         int maxSpeedLevel = 0;
         int airFlickers = 0;
         for (int i = size - n; i < size; i++) {
@@ -67,7 +75,7 @@ public class SpeedCheck extends LookoutCheck {
             if (i > 0) {
                 double d = Math.hypot(cur.x() - last[i - 1].x(), cur.z() - last[i - 1].z());
                 dist += d;
-                if (d > maxDelta) maxDelta = d;
+                if (d > maxDelta) { maxDelta = d; maxDeltaTick = cur.tick(); }
             }
         }
         if (airFlickers > cfg.speedAirFlickerTicks) {
@@ -76,8 +84,12 @@ public class SpeedCheck extends LookoutCheck {
         }
         // red team P3: a single unsignaled relocation under the teleport bar (2.9
         // blocks in one tick) used to poison the whole window. drop the largest
-        // per-tick delta: a lone spike is absorbed, sustained speed is untouched
-        double avg = (dist - maxDelta) / (n - 1);
+        // per-tick delta: a lone spike is absorbed, sustained speed is untouched.
+        // the trim is budgeted - a repeated spike is evidence, not noise
+        boolean spike = maxDelta > 1.0;
+        boolean trim = spike && (maxDeltaTick == lastTrimSpikeTick || s.tick() - lastNewTrimTick > 60);
+        if (trim && maxDeltaTick != lastTrimSpikeTick) { lastTrimSpikeTick = maxDeltaTick; lastNewTrimTick = s.tick(); }
+        double avg = trim ? (dist - maxDelta) / (n - 1) : dist / n;
         double cap = cfg.speedMax * (1.0 + 0.2 * maxSpeedLevel);
         if (avg > cap) {
             buffer += 1.0;

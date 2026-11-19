@@ -23,6 +23,9 @@ clocks).
 - a lag spike arrives as a teleport/position-sync and resets the air clock.
 - unloaded chunks read as support, so watching someone at the edge of render
   distance cannot flag.
+- web blocks at the feet count as support (a stuck player sinks at about
+  -0.003/tick). only the feet block is checked: contact at head or body alone is
+  not qualified.
 - known hole: fly that mimics a real fall at terminal-velocity-like speed (a block
   per tick or faster) passes the long-airtime rule. deliberate; telling that from a
   legit drop from outside is guesswork.
@@ -32,6 +35,9 @@ clocks).
 - support is probed across the whole player footprint (center, four edges and four
   diagonal corners), so standing with any corner over solid ground at the water's
   edge does not flag.
+- a thin collision right underfoot (lily pad, carpet) counts as support.
+  bounded tolerance: over a pad or carpet field, a cheat riding exactly at pad
+  height reads as standing on the pads.
 - gliding (elytra), recent velocity and recent teleports exempt, the same as
   flight. a low elytra glide skimming the surface stays quiet.
 - frost walker freezes the surface into frosted ice, which the probe reads as
@@ -46,6 +52,8 @@ clocks).
 - measured ground-to-ground over 3 ticks so client smoothing cannot hide it.
 - known FP risk: two legit 0.6 ledges inside 3 ticks without stairs/slabs is rare
   but possible; the buffer needs it to repeat before alerting.
+- a ground-flag flicker does not skip the window: two of three grounded flags
+  with no real airtime still counts.
 - jumps never read, because a jump leaves the ground.
 
 ## speed
@@ -57,8 +65,16 @@ clocks).
   ice patch onto normal ground does not retroactively flag the ice ticks.
 - a window with a long sample gap is treated as stale and skipped, so resumed
   movement after a stall cannot average in old deltas.
-- deliberate miss: subtle speed (5-15%) stays under the cap. catching that from
-  outside is not reliable; meshac on the server owns that fight.
+- up to 2 airborne-flag samples per window are tolerated and their hop deltas
+  still count; a window full of hops reads as bhop and skips. bounded tolerance:
+  fast movement with three false-air samples per 12 stays silent.
+- a lone spike (a per-tick delta over one block, e.g. an unsignaled relocation
+  under the teleport bar) is trimmed from the window, at most once per 60 ticks;
+  a repeated spike is evidence, not noise, and alerts.
+- deliberate miss: anything under the cap (0.44 b/t, ~57% over sprint's ~0.28)
+  stays silent. bhop momentum lives in that gap, and from outside the client
+  cannot separate a small cheat bonus from it; meshac on the server owns the
+  sub-cap fight.
 
 ## totem
 
@@ -114,6 +130,10 @@ clocks).
   ground exempts outright: sliding on ice while eating is legit and the difference
   is not readable from outside. that exemption is also a known hole.
 - vehicles, elytra, water, climbables, knockback and teleports exempt.
+- use-flag breaks up to 5 ticks hold state instead of restarting the grace, and
+  a lone airborne flag is not evaluated. bounded tolerances: a run of fast
+  use-ticks padded with short releases (19 fast + 6 released) stays silent, and
+  a 6+ tick break re-arms the grace.
 - unqualified FP risk: momentum sources the sim does not model (slopes, slime,
   water exits, wind charges) could push a legit using-player over the line.
 

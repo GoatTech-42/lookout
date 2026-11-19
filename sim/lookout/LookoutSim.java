@@ -1297,6 +1297,13 @@ public class LookoutSim {
             x += 2.9; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE);
             for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
         });
+        // QA on the P3 trim: a REPEATED spike is evidence, not noise - the trim
+        // budget (one per 60 ticks) must let it through
+        cheat("0.28 plus a 2.9 spike every 12 ticks", "speed", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 120; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+            for (int i = 0; i < 280; i++) { x += (i % 12 == 11) ? 2.9 : 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+        });
         // red team P1: one airborne flag per 11 ticks used to skip the window
         cheat("0.7 ground speed behind airborne flicker", "speed", e -> {
             long t = 0; double x = 500;
