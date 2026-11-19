@@ -37,7 +37,7 @@ Source and stub-test acceptance do not clear any live gate. Recheck after restar
    R3 one 50-block teleport gives exactly one trace; R4 melee+fall distinct typeKey;
    R5 totem pop; R6 offhand equip; R7 empty-hand swing. Match all target windows.
    R8: shipped required:true and runtime zero mixin errors, separate evidence.
-   R9: same alert in chat pixels and log. R10: Java/mixin level match.
+   R9: chat pixels matched to ID/check/time log evidence. R10: Java/mixin level match.
 6. Only then score approved rows. Combat requires stage -> server band verify ->
    sends -> exact per-arm deltas -> victim Health receipts. Timer/fastbow are separate.
 7. Stop, verify death and preserve evidence before reporting any result.
@@ -52,8 +52,9 @@ port release and RAM recovery; unconfirmed stop escalates to main, not success.
 
 ## evidence and pass boundary
 Retain source/jar/binary/version/config binding, server/watcher/stimulus logs,
-ID/time mapping, chat screenshots, gate results and teardown proof. Capture logs
-with names stay private and are scrubbed before sharing. Empty/unset trace is off;
+ID/time mapping, chat screenshots, gate results and teardown proof. Alert and stats
+logs must omit player names/message bodies; retain captures privately because IDs
+and chat pixels can still identify players. Empty/unset trace is off;
 any nonempty value, including "0", is on after the accepted empty-trace fix.
 Smoke PASS requires every approved stimulus and R1-R10 observation, not source text.
 Full check PASS additionally needs benign controls, coverage/receipt evidence and

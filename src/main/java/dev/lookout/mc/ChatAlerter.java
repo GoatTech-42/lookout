@@ -11,7 +11,7 @@ public class ChatAlerter implements AlertSink {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("lookout");
 
-    // Keep player names out of persistent logs unless capture tracing is on.
+    // Trace mode adds a marker only; names and messages stay in local chat.
     private static final boolean TRACE = !System.getenv().getOrDefault("MESHAC_TRACE", "").isEmpty();
 
     @Override
@@ -20,7 +20,7 @@ public class ChatAlerter implements AlertSink {
         // shim risk R9: the log line is the evidence surface and must exist even
         // when the chat route is unavailable.
         if (TRACE) {
-            LOGGER.info("[lookout] {}: {}", name, message);
+            LOGGER.info("[lookout] trace alert entity={} check={}", entityId, checkId);
         } else {
             LOGGER.info("[lookout] alert entity={} check={}", entityId, checkId);
         }

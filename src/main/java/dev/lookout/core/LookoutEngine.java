@@ -177,7 +177,7 @@ public class LookoutEngine {
             double horizontal2 = dx * dx + dz * dz;
             if (config.teleportJumpStats
                     && horizontal2 > config.teleportJumpStatsFloor * config.teleportJumpStatsFloor) {
-                System.out.println("[lookout-stats] " + p.name
+                System.out.println("[lookout-stats] entity=" + entityId
                         + " d=" + String.format("%.2f", Math.sqrt(horizontal2))
                         + " dy=" + String.format("%.2f", sample.y() - prev.y())
                         + " ground=" + sample.onGround() + " glide=" + sample.gliding()

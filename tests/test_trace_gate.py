@@ -54,16 +54,16 @@ def main():
     exercise('baseline', lambda r: None, set())
     exercise('M1-engine-trace-always-on', lambda r: replace(r, ENG, 'if (TRACE)', 'if (true)'), {'trace-env-gated'})
     exercise('M2-r9-constant-arguments', lambda r: replace(r, AL,
-             'LOGGER.info("[lookout] {}: {}", name, message);', 'LOGGER.info("alert");'),
-             {'R9-named-fields-main'})
+             'LOGGER.info("[lookout] trace alert entity={} check={}", entityId, checkId);', 'LOGGER.info("alert");'),
+             {'R9-trace-id-fields-main'})
     exercise('M3-trace-only-when-disabled', lambda r: replace(r, ENG,
              'trace("onSwing id=" + entityId);\n        if (!config.enabled) return;',
              'if (!config.enabled) { trace("onSwing id=" + entityId); return; }'), {'trace-onSwing'})
     exercise('F-A-silent-second-variant', second_variant,
-             {'R9-alert-logged-before-gui-mc1.21.11', 'R9-named-fields-mc1.21.11', 'R9-private-default-mc1.21.11'})
+             {'R9-alert-logged-before-gui-mc1.21.11', 'R9-trace-id-fields-mc1.21.11', 'R9-private-default-mc1.21.11'})
     exercise('F-B-named-default', lambda r: replace(r, AL, 'if (TRACE)', 'if (true)'), {'R9-private-default-main'})
     exercise('F-B-private-branch-name', lambda r: replace(r, AL,
-             'entityId, checkId);', 'entityId, name);'), {'R9-private-default-main'})
+             'LOGGER.info("[lookout] alert entity={} check={}", entityId, checkId);', 'LOGGER.info("[lookout] alert entity={} check={}", entityId, name);'), {'R9-private-default-main'})
     exercise('comment-return-not-code', lambda r: replace(r, ENG,
              'trace("onSwing id=" + entityId);', '// return is only a comment\n        trace("onSwing id=" + entityId);'), set())
     exercise('multiline-trace', lambda r: replace(r, ENG,

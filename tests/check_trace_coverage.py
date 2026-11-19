@@ -84,12 +84,12 @@ for path in alerters:
     prefix = body[:pos] if pos >= 0 else []
     check('R9-alert-logged-before-gui-' + variant,
           pos >= 0 and contains(prefix, tokens('LOGGER.info(')))
-    named = tokens('LOGGER.info("[lookout] {}: {}", name, message);')
-    check('R9-named-fields-' + variant, contains(prefix, named))
+    trace_fields = tokens('LOGGER.info("[lookout] trace alert entity={} check={}", entityId, checkId);')
+    check('R9-trace-id-fields-' + variant, contains(prefix, trace_fields))
     # Deliberately narrow accepted branch shape. Changes need reviewed fixtures.
     log_start = next((i for i in range(len(prefix)) if prefix[i:i + 4] == ['LOGGER', '.', 'info', '(']), -1)
-    named_call = first_statement(prefix[log_start:]) if log_start >= 0 else []
-    branch = tokens('if (TRACE) {') + named_call + tokens('} else { LOGGER.info("[lookout] alert entity={} check={}", entityId, checkId); }')
+    trace_call = first_statement(prefix[log_start:]) if log_start >= 0 else []
+    branch = tokens('if (TRACE) {') + trace_call + tokens('} else { LOGGER.info("[lookout] alert entity={} check={}", entityId, checkId); }')
     check('R9-private-default-' + variant,
           contains(tokens(text), tokens('private static final boolean TRACE = !System.getenv().getOrDefault("MESHAC_TRACE", "").isEmpty();'))
           and contains(prefix, branch) and prefix.count('LOGGER') == 2)

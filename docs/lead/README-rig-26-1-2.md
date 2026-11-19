@@ -36,7 +36,7 @@ Planning only. Source checks and stub tests are not client/runtime proof.
 | R7 | empty-hand swing | onSwing target ID |
 | R8 source/jar | inspect shipped config | lookout.mixins.json required:true; retain jar/hash evidence |
 | R8 runtime | watcher boot | zero lookout mixin apply errors; retain boot log |
-| R9 | known alerting provoke | same note in watcher chat screenshot AND watcher.log |
+| R9 | known alerting provoke | local chat screenshot + matching ID/check/time in watcher.log; no name in log |
 | R10 | boot/config | compatibilityLevel matches launched Java and target version |
 README is an operator checklist, not standalone evidence. Retain actual captures.
 All seven engine lines need [lookout-trace] prefix and the correct target/window.
@@ -46,8 +46,8 @@ G4 remains UNQUALIFIED without independent per-hit server receipt counts.
 
 ## trace privacy
 Unset or empty MESHAC_TRACE is off after the accepted empty-trace fix. Any nonempty
-value, including "0" or whitespace, is on. Enabled named capture logs are sensitive;
-keep raw logs private and scrub names before sharing. Default logs retain IDs only.
+value, including "0" or whitespace, is on. Alert/stats logs use entity IDs, never
+player names or alert messages. Keep captures private; ID-only is not anonymous.
 
 ## stop and teardown
 Stop on failed RAM/lane/version/boot/config proof, missing/wrong trace or duplicate

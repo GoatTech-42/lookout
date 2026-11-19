@@ -22,10 +22,11 @@ plus, from the first provoke:
   (a shim diff touching required is itself the finding, no capture needed).
 - R10 boot grep: the mixin apply block's compatibilityLevel matches the
   launched java (26.1.2 template, not a hardcoded literal).
-- R9 dual surface: one known provoke's note appears in BOTH watcher chat and
-  watcher.log; chat-only or log-only = R9 live and every chat-scored row is
-  invalid (7a2918f makes log-side unconditional; a missing log line on a fired
-  alert then means the sink never ran).
+- R9 dual surface: one known provoke's named note appears in watcher chat and
+  its entity ID/check ID/time match a record in watcher.log. The log must not
+  contain the name or alert message, including suppression-name lists. Retain
+  the chat screenshot privately. Missing either surface invalidates chat-scored
+  rows; an ID-only log is not proof of what the chat renderer displayed.
 
 any missing/aberrant line: that risk is live, the build is NOT reviewable,
 stop and report - do not score rows on a starved check.
