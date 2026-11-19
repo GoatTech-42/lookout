@@ -83,6 +83,16 @@ public class LookoutSim {
         return new LookoutEngine(cfg, SINK, () -> WALL[0]);
     }
 
+    /** engine with the opt-in discontinuity finding turned on */
+    static LookoutEngine freshTJ() { return freshTJ(new LookoutConfig()); }
+    static LookoutEngine freshTJ(LookoutConfig cfg) { cfg.teleportJumps = true; return fresh(cfg); }
+    static void legitTJ(String name, java.util.function.Consumer<LookoutEngine> scenario) {
+        LookoutEngine e = freshTJ();
+        scenario.accept(e);
+        if (!alerts.isEmpty()) throw new AssertionError("FAIL legit fixture [" + name + "] flagged: " + alerts);
+        System.out.println("legit ok: " + name + " (teleport finding on)");
+    }
+
     /** timer-isolated engine: speed off so only the timer path is exercised */
     static LookoutEngine freshTimerOnly(double minLocalTps) {
         alerts = new ArrayList<>();
@@ -164,6 +174,16 @@ public class LookoutSim {
         long t = 0; double x = 0;
         for (int i = 0; i < 100; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
         for (int i = 0; i < 140; i++) { x += (i % 30 == 29 ? 4.1 : 0.0); e.tick(1, "steve", mk(t++, x, 66, 0, false), PROBE); }
+    }
+
+    /** frozen QA 7.7.3 probe: three 4.7 relocations at ticks 10/30/50, all inside
+     *  the default join grace */
+    static void scnGraceJumps(LookoutEngine e) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 70; i++) {
+            x += (t == 10 || t == 30 || t == 50) ? 4.7 : 0.28;
+            e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
+        }
     }
 
     static void tickAll(LookoutEngine e, long t) {
@@ -340,6 +360,78 @@ public class LookoutSim {
             for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x + 30, 70, 0, true), PROBE); }
         });
         legit("observed player join: big first deltas without teleport packet", LookoutSim::scnJoinRelocate);
+
+        // ---- discontinuity-counter exemptions (QA interim on ff0e2c1): samples the
+        // movement checks exempt must not feed the jump counter either ----
+        legitTJ("creative relocation jumps exempt from the counter", e -> {
+            long t = 0; double x = 0;
+            for (int i = 0; i < 240; i++) {
+                x += 0.45 + (i % 4 == 3 ? 3.1 : 0);
+                e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, false, false, false, false, false, false,
+                        false, false, false, 0, 0, false, true, 0f, 0f, false), PROBE);
+            }
+        });
+        legitTJ("vehicle relocation jumps exempt from the counter", e -> {
+            long t = 0; double x = 0;
+            for (int i = 0; i < 240; i++) {
+                x += 0.45 + (i % 4 == 3 ? 3.1 : 0);
+                e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true, false, false, false, true,
+                        false, false, false, 0, 0, false, false, 0f, 0f, false), PROBE);
+            }
+        });
+        legitTJ("glide relocation jumps exempt from the counter", e -> {
+            long t = 0; double x = 0;
+            for (int i = 0; i < 240; i++) { x += 1.0 + (i % 4 == 3 ? 3.1 : 0); e.tick(1, "alex", mkGlide(t++, x, 100, 0), PROBE); }
+        });
+        legitTJ("dive and pullout relocation jumps exempt from the counter", e -> {
+            long t = 0; double x = 0;
+            for (int i = 0; i < 120; i++) { // underwater burst moves (the dive)
+                x += 0.3 + (i % 4 == 3 ? 3.1 : 0);
+                e.tick(1, "alex", new ObservedSample(t++, x, 60, 0, false, false, false, false, false, false,
+                        true, false, false, 0, 0, false, false, 0f, 0f, false), PROBE);
+            }
+            for (int i = 0; i < 60; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); } // pullout
+        });
+        legitTJ("delayed knockback inside the 20-tick velocity window", e -> {
+            // the hit lands, the victim keeps walking, and the knockback displacement
+            // arrives 12-18 ticks late: still the hit's movement, never counted
+            long t = 0; double x = 0;
+            for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            e.onVelocity(1);
+            for (int j = 0; j < 3; j++) {
+                for (int i = 0; i < 4; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+                x += 3.5; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
+            }
+        });
+        // legit relocation sources: pearls, chorus fruit, portals and dimension
+        // changes all arrive with an S2C teleport (signaled), so they never count;
+        // respawns reappear as a fresh entity; knockback arrives with velocity;
+        // bed/vehicle dismounts move under 3 blocks
+        legit("signaled relocation lands without counting (pearl/chorus-like)", e -> {
+            long t = 0; double x = 0;
+            for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            e.onTeleport(1);
+            e.tick(1, "alex", mk(t++, x + 8, 64, 0, true), PROBE);
+            x += 8;
+            for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        });
+        legit("dimension-change relocation (signaled sync) silent", e -> {
+            long t = 0; double x = 0;
+            for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            e.onTeleport(1); // respawn + position sync: the glue sees a teleport
+            e.tick(1, "alex", mk(t++, x + 1000, 64, 0, true), PROBE);
+            x += 1000;
+            for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        });
+        legit("repeated signaled teleports never build the counter", e -> {
+            long t = 0; double x = 0;
+            for (int j = 0; j < 5; j++) {
+                e.onTeleport(1);
+                x += 8;
+                e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
+                for (int i = 0; i < 3; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            }
+        });
         legit("packet bunching on flat ground", e -> {
             long t = 0; double x = 0;
             for (int r = 0; r < 5; r++) {
@@ -853,9 +945,10 @@ public class LookoutSim {
         cheat("evasion: periodic relocation jumps (flight)", "flight", LookoutSim::scnFlightPeriodic);
         cheat("evasion: established-player blinks (flight)", "flight", LookoutSim::scnFlightBlinks);
         {
-            // the discontinuity finding itself: the jumps are counted and surface
-            // as their own alert, next to the check they failed to silence
-            LookoutEngine e2 = fresh();
+            // the discontinuity finding itself: past the grace the jumps are
+            // counted and surface as their own alert, next to the check they
+            // failed to silence
+            LookoutEngine e2 = freshTJ();
             scnSpeedPeriodic(e2);
             if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
                 throw new AssertionError("FAIL discontinuity finding: periodic relocation jumps produced no teleport alert (got: " + alerts + ")");
@@ -877,12 +970,24 @@ public class LookoutSim {
             System.out.println("gate mutation red as expected (grace off): " + alerts);
             LookoutConfig openGrace = new LookoutConfig();
             openGrace.joinGraceTicks = Integer.MAX_VALUE;
-            scnSpeedPeriodic(fresh(openGrace));
-            if (alerts.stream().anyMatch(a -> a.startsWith("speed ")))
-                throw new AssertionError("FAIL mutation setup: unbounded grace did not silence the speed probe (got: " + alerts + ")");
+            scnSpeedPeriodic(freshTJ(openGrace));
+            if (alerts.stream().anyMatch(a -> a.startsWith("speed ") || a.startsWith("teleport ")))
+                throw new AssertionError("FAIL mutation setup: unbounded grace did not silence the probe (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected (grace unbounded): speed probe and finding both silenced " + alerts);
+        }
+        {
+            // frozen pair (QA 7.7.3): jumps inside the join grace are never counted.
+            // three 4.7 relocations at ticks 10/30/50: silent with the grace on,
+            // the finding fires with it off
+            scnGraceJumps(freshTJ());
+            if (!alerts.isEmpty()) throw new AssertionError("FAIL grace-window jumps counted: " + alerts);
+            System.out.println("legit ok: relocations inside the join grace never count");
+            LookoutConfig noGrace = new LookoutConfig();
+            noGrace.joinGraceTicks = 0;
+            scnGraceJumps(freshTJ(noGrace));
             if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
-                throw new AssertionError("FAIL mutation setup: unbounded grace also silenced the finding (got: " + alerts + ")");
-            System.out.println("gate mutation red as expected (grace unbounded): speed silenced, finding still up " + alerts);
+                throw new AssertionError("FAIL frozen pair: grace-off jumps did not fire the finding (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected (grace off, frozen pair): " + alerts);
         }
         cheat("1.6x ground speed", "speed", e -> {
             long t = 0; double x = 0;

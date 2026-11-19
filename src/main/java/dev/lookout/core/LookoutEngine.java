@@ -94,37 +94,58 @@ public class LookoutEngine {
         // Lane-run finding: right after a player appears, the server can relocate
         // them with no S2C teleport event and the lerp slices read as huge speed.
         // The grace is state-derived: it covers only joinGraceTicks after the
-        // observed-appear tick, never re-arms, and nothing the observed player does
-        // extends it. Past the grace an unsignaled jump never resets anything; it
-        // is counted, and a burst of jumps is its own finding.
+        // observed-appear tick of this ObservedPlayer, so it re-arms only when the
+        // entity is genuinely re-acquired (despawn + re-add), never by anything the
+        // observed player does. Inside the grace a relocation marks the lateral
+        // windows (lastJoinRelocationTick, read by SpeedCheck) and resets airTicks,
+        // and is never counted. Past the grace an unsignaled jump never resets
+        // anything; it is counted, and a burst of jumps is its own finding.
         if (prev != null) {
-            boolean signaled = p.ticksSince(p.lastTeleportTick, sample.tick()) < 5
-                    || p.ticksSince(p.lastVelocityTick, sample.tick()) < 5;
             double dx = sample.x() - prev.x();
             double dz = sample.z() - prev.z();
-            if (!signaled
-                    && dx * dx + dz * dz > config.unsignaledJumpBlocks * config.unsignaledJumpBlocks) {
-                if (p.lastJumpTick != prev.tick()
-                        || sample.tick() - p.jumpClusterStartTick >= JUMP_CLUSTER_MAX_TICKS) {
-                    p.jumpClusterStartTick = sample.tick();
-                    if (config.teleportJumps) {
-                        p.recentJumpTicks.addLast(sample.tick());
-                        while (!p.recentJumpTicks.isEmpty()
-                                && sample.tick() - p.recentJumpTicks.peekFirst() > config.teleportJumpWindowTicks) {
-                            p.recentJumpTicks.pollFirst();
-                        }
-                        if (p.recentJumpTicks.size() >= config.teleportJumpCount) {
-                            gated.alert(entityId, p.name, "teleport",
-                                    "repeated teleport-like jumps, no teleport packet ("
-                                            + p.recentJumpTicks.size() + " in " + config.teleportJumpWindowTicks / 20 + "s)");
-                        }
-                    }
-                }
-                p.lastJumpTick = sample.tick();
+            double horizontal2 = dx * dx + dz * dz;
+            if (config.teleportJumpStats
+                    && horizontal2 > config.teleportJumpStatsFloor * config.teleportJumpStatsFloor) {
+                System.out.println("[lookout-stats] " + p.name
+                        + " d=" + String.format("%.2f", Math.sqrt(horizontal2))
+                        + " dy=" + String.format("%.2f", sample.y() - prev.y())
+                        + " ground=" + sample.onGround() + " glide=" + sample.gliding()
+                        + " water=" + sample.inWater() + " vehicle=" + sample.inVehicle()
+                        + " exempt=" + sample.gamemodeExempt()
+                        + " vel=" + p.ticksSince(p.lastVelocityTick, sample.tick())
+                        + " tp=" + p.ticksSince(p.lastTeleportTick, sample.tick())
+                        + " grace=" + (sample.tick() - p.firstSampleTick <= config.joinGraceTicks));
+            }
+            // signaled relocations (S2C teleport, knockback velocity) never count;
+            // the velocity window matches Flight/Elytra (20 ticks)
+            boolean signaled = p.ticksSince(p.lastTeleportTick, sample.tick()) < 5
+                    || p.ticksSince(p.lastVelocityTick, sample.tick()) < 20;
+            // samples the movement checks exempt must not feed the counter either:
+            // creative/spectator, riding, gliding, water, swimming pose, levitation
+            // and slow falling all relocate or move fast legitimately
+            boolean exempt = sample.gamemodeExempt() || sample.inVehicle() || sample.gliding()
+                    || sample.inWater() || sample.swimmingPose() || sample.levitation() || sample.slowFalling();
+            if (!signaled && !exempt
+                    && horizontal2 > config.unsignaledJumpBlocks * config.unsignaledJumpBlocks) {
                 if (sample.tick() - p.firstSampleTick <= config.joinGraceTicks) {
                     p.lastJoinRelocationTick = sample.tick();
                     p.airTicks = 0;
+                } else if (config.teleportJumps
+                        && (p.lastJumpTick != prev.tick()
+                                || sample.tick() - p.jumpClusterStartTick >= JUMP_CLUSTER_MAX_TICKS)) {
+                    p.jumpClusterStartTick = sample.tick();
+                    p.recentJumpTicks.addLast(sample.tick());
+                    while (!p.recentJumpTicks.isEmpty()
+                            && sample.tick() - p.recentJumpTicks.peekFirst() > config.teleportJumpWindowTicks) {
+                        p.recentJumpTicks.pollFirst();
+                    }
+                    if (p.recentJumpTicks.size() >= config.teleportJumpCount) {
+                        gated.alert(entityId, p.name, "teleport",
+                                "repeated teleport-like jumps, no teleport packet ("
+                                        + p.recentJumpTicks.size() + " in " + config.teleportJumpWindowTicks / 20 + "s)");
+                    }
                 }
+                p.lastJumpTick = sample.tick();
             }
         }
         for (LookoutCheck check : checksFor(entityId)) {

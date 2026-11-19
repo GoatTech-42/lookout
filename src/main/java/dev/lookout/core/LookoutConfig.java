@@ -68,16 +68,23 @@ public class LookoutConfig {
     public int multiAuraRapidGapTicks = 8;
     public int multiAuraCount = 3;
 
-    /** report repeated unsignaled relocation jumps as their own finding */
-    public boolean teleportJumps = true;
+    /** report repeated unsignaled relocation jumps as their own finding.
+     *  opt-in until the 3.0 threshold is validated against measured real-client
+     *  per-tick deltas (QA 7.7.2) */
+    public boolean teleportJumps = false;
+    /** log observed per-tick horizontal deltas past the floor for threshold measurement */
+    public boolean teleportJumpStats = false;
+    public double teleportJumpStatsFloor = 1.0;
     /** windowed lateral checks stay quiet about unsignaled jumps for this long after
      *  a player first appears: at join the server can relocate a fresh player with no
-     *  S2C teleport event (lane-run FP). state-derived, never re-arms */
+     *  S2C teleport event (lane-run FP). state-derived; re-arms only on genuine
+     *  reacquisition (despawn + re-add = a fresh ObservedPlayer) */
     public int joinGraceTicks = 100;
-    /** single-tick horizontal jump past this counts as a relocation. measured basis:
-     *  legit per-tick horizontal movement tops out at boosted elytra ~2.0 (sprint 0.28,
-     *  packet bunching ~1.4); 3.0 clears all of it. horizontal only, so big falls
-     *  don't count */
+    /** single-tick horizontal jump past this counts as a relocation. EXPERIMENTAL:
+     *  the basis so far is sim-side (legit per-tick horizontal tops out at boosted
+     *  elytra ~2.0; sprint 0.28, bunching ~1.4); replace with measured real-client
+     *  deltas before turning teleportJumps on by default (QA 7.7.2). horizontal
+     *  only, so big falls don't count */
     public double unsignaledJumpBlocks = 3.0;
     /** this many relocation jumps inside the window reads as its own finding */
     public int teleportJumpCount = 3;

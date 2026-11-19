@@ -16,7 +16,8 @@ public class ObservedPlayer {
     public long lastTeleportTick = -1000;
     public long lastTotemPopTick = -1000;
 
-    // join/reacquisition state: set on the first observed sample, never re-armed
+    // join/reacquisition state: set on the first observed sample; a fresh
+    // ObservedPlayer (genuine despawn + re-add) is the only re-arm
     public long firstSampleTick = -1;
     /** unsignaled relocation jumps inside the appear grace gate lateral windows only */
     public long lastJoinRelocationTick = -1000;
