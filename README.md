@@ -1,49 +1,41 @@
-# meshac
+# lookout
 
-a private Fabric anticheat rebuild based on OpenVulcan 2.9.7.28, with meshac's commands, screens and case system kept around it.
+a client-side companion to meshac. it watches other players from what your own
+client can see and drops you a quiet chat note when someone keeps moving like a
+cheat. no server side, no punishments, no public reports: the notes show up only
+in your own chat.
 
-## current status
+built as a fork of meshac, so the detection engine under it is the same vulcan port.
+what's new here is the outside view: everything is computed from S2C entity traffic
+(positions, velocities, animations, effects, equipment) and the world your client
+has loaded.
 
-this is work in progress, not a published v1.
+## what it watches for
 
-- 1.21.11, 26.1.2, 26.2 and 26.3 compile and package with explicit version adapters.
-- 26.3 has booted with the shipping jar and joined a disposable local world with a vanilla test client. identity, respawn reference refresh, disconnect cleanup and server-side rejoin were observed with a separate test observer.
-- all 179 instantiated checks remain gated. the 180-class dependency inventory includes an empty JumpD placeholder; it is not an active detector.
-- containment stays LOG_ONLY. Veil stays off, including when an inherited config requests it.
-- Meadow, detection outcomes and the broad legitimate-play matrix are not qualified. a clean boot is not proof that this catches cheats or avoids false flags.
+- flight / hover: airborne with no support past what a jump explains
+- jesus: running across water
+- step: gaining more than 0.6 without jumping
+- speed: sustained ground speed past sprint + visible effects
+- autototem: instant restocks, three in a row
 
-read [PARITY.md](PARITY.md) for the evidence and remaining gaps. [docs/README.md](docs/README.md) is the documentation map.
+each alert is hedged on purpose ("flight-like movement"), rate-limited per player,
+and means "worth a look", never a verdict. see docs/lookout-false-positives.md for
+the full notes per check, including the deliberate misses.
 
-## layout
+## install
 
-| path | purpose |
-| --- | --- |
-| `src/main/java/dev/meshac/` | shared port, packet routing, checks and product layer |
-| `src/mc*/java/` | exact native API and packet hooks for each target |
-| `src/main/resources/` | Fabric metadata, mixins and bundled settings |
-| `sim/` | bounded headless tests and the separately labeled lifecycle observer |
-| `scripts/` | dependency analysis and packaged-artifact checks |
-| `docs/build-evidence/` | retained RED/GREEN/build/isolated-runtime receipts |
-| `rig/` | historical rig scripts; read before use, not portable by default |
+drop the jar in your mods folder with fabric for 26.3. done. it works on any server
+because it never asks the server for anything.
 
-## build
+## config
 
-use JDK 25 to run Gradle. the default target is 26.3:
+`config/lookout.json` after first launch: per-check toggles, thresholds, and the
+alert cooldown. defaults are tuned to stay quiet for legit players.
 
-```sh
-./gradlew build
-python3 scripts/verify_built_jar.py 26.3 25
-python3 sim/lifecycle/check_entrypoint.py 26.3
-```
+## credits
 
-1.21.11 uses the separate remap route and Java 21 bytecode. see [CONTRIBUTING.md](CONTRIBUTING.md) for exact target commands and test limits. Gradle's test task has no tests; the headless suites run separately.
+detection engine: Vulcan AntiCheat 2.9.7.28 by frap and the Vulcan developers,
+ported to fabric for meshac (see CREDITS.md). the client-side observation layer
+and checks are by GoatTech.
 
-## branches and recovery
-
-`main` is the rebuild line after consolidation. `legacy/pre-openvulcan` preserves the old main code until v1 is finished and published. the pre-cleanup branch tips are archived as tags, with their exact hashes in [docs/REPOSITORY.md](docs/REPOSITORY.md). unique old work is preserved, not mixed into the new detection logic without review.
-
-## credits and use
-
-Vulcan AntiCheat 2.9.7.28 is by frap and the Vulcan developers. OpenVulcan supplied the deobfuscated source used for this port. meshac's branding and surrounding systems are by GoatTech. see [CREDITS.md](CREDITS.md).
-
-private internal work only. the legacy LICENSE file is retained as historical project material, not a claim that it grants rights to distribute the imported Vulcan code. no public release or redistribution is authorized by this repository state.
+private internal build. not for redistribution.
