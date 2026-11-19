@@ -47,7 +47,16 @@ public abstract class ClientPacketListenerMixin {
     @Inject(method = "handleDamageEvent", at = @At("TAIL"))
     private void lookout$damage(ClientboundDamageEventPacket packet, CallbackInfo ci) {
         if (LookoutClient.ENGINE == null) return;
-        String typeKey = packet.sourceType().unwrapKey().map(k -> k.identifier().toString()).orElse("");
+        java.util.Optional<? extends net.minecraft.resources.ResourceKey<net.minecraft.world.damagesource.DamageType>> key =
+                packet.sourceType().unwrapKey();
+        // shim risk R4: a renamed unwrap path compiles and yields an empty Optional,
+        // starving every damage-type-gated check forever. never let that be silent.
+        if (key.isEmpty()) {
+            org.slf4j.LoggerFactory.getLogger("lookout").warn("[lookout] damage-type key unwrap empty on damage event"
+                    + " (entity {}) - type-gated checks starved; verify the shim's damage-source path",
+                    packet.entityId());
+        }
+        String typeKey = key.map(k -> k.identifier().toString()).orElse("");
         LookoutClient.ENGINE.onDamage(packet.entityId(), packet.sourceCauseId(), packet.sourceDirectId(), typeKey);
     }
 
