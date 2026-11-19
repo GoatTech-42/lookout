@@ -14,6 +14,10 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	// bundled jar-in-jar: the mod declares mixinextras >=0.5.5 and it is in no
+	// nested jar set (26.1.2 binding check H). MIT licence (jar carries
+	// LICENSE_MixinExtras), so redistribution inside our jar is permitted.
+	include "io.github.llamalad7:mixinextras-fabric:0.5.5"
 }
 
 processResources {

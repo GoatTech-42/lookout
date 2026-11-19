@@ -10,4 +10,9 @@ Start with the current rebuild evidence, not historical detection claims.
 - `build-evidence/boot26.3/`: bare shipping-jar startup failures, repairs and successful boot.
 - `build-evidence/lifecycle26.3/`: separate-observer local client lifecycle evidence.
 
+Dependencies: mixinextras (>=0.5.5) is bundled inside the shipped jar
+(META-INF/jars, MIT licence), so no separate install is needed; the 26.1.2
+binding check found it declared but unbundled. tests/check_deps.py keeps the
+declared set, the jar's needs and the bundle in step.
+
 Other design and rig documents may describe the older meshac implementation or unrun plans. Their presence does not qualify this rebuild. Never turn a previous check result into a new-version claim without a matching artifact, configuration and run.
