@@ -31,6 +31,15 @@ public class LookoutEngine {
 
     private final java.util.function.LongSupplier wallClock;
 
+    // first-capture trace (shim risk review R1-R7): every probed handler logs one
+    // entry line so a capture can tell "the shim never delivered the event" from
+    // "the event arrived and the check abstained". gated on MESHAC_TRACE.
+    private static final boolean TRACE = System.getenv("MESHAC_TRACE") != null;
+
+    private static void trace(String msg) {
+        if (TRACE) System.out.println("[lookout-trace] " + msg);
+    }
+
     public LookoutEngine(LookoutConfig config, AlertSink sink) {
         this(config, sink, () -> System.nanoTime() / 1_000_000L); // monotonic, never the adjustable wall clock
     }
@@ -235,12 +244,14 @@ public class LookoutEngine {
     }
 
     public void onVelocity(int entityId) {
+        trace("onVelocity id=" + entityId);
         if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p != null && p.prev != null) p.lastVelocityTick = p.prev.tick();
     }
 
     public void onTeleport(int entityId) {
+        trace("onTeleport id=" + entityId);
         if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p != null && p.prev != null) {
@@ -250,6 +261,7 @@ public class LookoutEngine {
     }
 
     public void onSwing(int entityId) {
+        trace("onSwing id=" + entityId);
         if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p == null || p.prev == null) return;
@@ -263,6 +275,7 @@ public class LookoutEngine {
      * ids), so the type check is what separates real melee hits from them.
      */
     public void onDamage(int victimId, int causeId, int directId, String typeKey) {
+        trace("onDamage victim=" + victimId + " cause=" + causeId + " direct=" + directId + " typeKey=" + typeKey);
         if (!config.enabled) return;
         if (!"minecraft:player_attack".equals(typeKey)) return;
         if (causeId <= 0 || causeId != directId) return;
@@ -281,6 +294,7 @@ public class LookoutEngine {
      * bystanders are never blamed for someone else's shot. Projectile ids are deduped.
      */
     public void onProjectileSpawn(double x, double y, double z, double speed, int projectileId, int ownerId) {
+        trace("onProjectileSpawn speed=" + speed + " projectile=" + projectileId + " owner=" + ownerId);
         if (!config.enabled) return;
         if (seenProjectileIds.size() > 1024) seenProjectileIds.clear();
         if (ownerId <= 0 || !seenProjectileIds.add(projectileId)) return;
@@ -293,6 +307,7 @@ public class LookoutEngine {
     }
 
     public void onTotemPop(int entityId) {
+        trace("onTotemPop id=" + entityId);
         if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p == null || p.prev == null) return;
@@ -302,6 +317,7 @@ public class LookoutEngine {
     }
 
     public void onTotemEquip(int entityId) {
+        trace("onTotemEquip id=" + entityId);
         if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p == null || p.prev == null) return;
