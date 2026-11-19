@@ -284,9 +284,27 @@ public class LookoutGuardSim {
         pair("killaura: creative or spectator attacker facing away is exempt", "killaura",
                 e -> facingRun(e, 0f, 0, -2.5, 12, true),
                 e -> facingRun(e, 0f, 0, -2.5, 12, false));
+        // red team F1: a victim nearly straight overhead has no bearing
+        // (atan2(0,0)); vertical fights must not read as off-facing. red side:
+        // same geometry offset half a block sideways, bearing defined and
+        // 180 degrees off, must alert.
+        pair("killaura: victim directly overhead has no bearing, no facing judgment", "killaura",
+                e -> facingOverhead(e, 0.0, 12),
+                e -> facingOverhead(e, 0.6, 12));
         pair("killaura: off, on, off, on facing hits drain the buffer (net zero)", "killaura",
                 e -> alternatingFacing(e, 40, 2),
                 e -> alternatingFacing(e, 60, 3));
+    }
+
+    /** victim straight above the attacker (offset blocks sideways), attacker facing +z away from it */
+    static void facingOverhead(LookoutEngine e, double sideOffset, int hits) {
+        for (long t = 0; t < hits + 2; t++) {
+            WALL[0] += 50;
+            e.tick(1, "steve", smp(t, 0, 0, 0f), FLAT);
+            e.tick(2, "sam", new ObservedSample(t, sideOffset, 66, 0, true, true, false, false, false, false,
+                    false, false, false, 0, 0, false, false, 0f, 0f, false), FLAT);
+            if (t >= 1) e.onDamage(2, 1, 1, PA);
+        }
     }
 
     /** attacker yaw 0 faces +z. victim alternates between ahead (+z) and behind (-z); every period-th hit is the facing one. */

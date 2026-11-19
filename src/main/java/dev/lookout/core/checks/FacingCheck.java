@@ -46,7 +46,11 @@ public class FacingCheck extends LookoutCheck {
         if (a == null || v == null || a.gamemodeExempt()) return;
         double dist = distance3d(a, v);
         if (dist > cfg.killauraRange) return; // too far to read angles; reach owns long hits
-        double bearing = Math.toDegrees(Math.atan2(-(v.x() - a.x()), v.z() - a.z()));
+        double dx = v.x() - a.x(), dz = v.z() - a.z();
+        // a victim nearly straight over or under the attacker has no bearing to
+        // compare against (atan2(0,0)); vertical fights are legit, so skip
+        if (dx * dx + dz * dz < 0.25) return;
+        double bearing = Math.toDegrees(Math.atan2(-dx, dz));
         double off = yawToBearingDiff(a.yaw(), bearing);
         if (off > cfg.killauraFacingDegrees) {
             buffer += 1.0;
