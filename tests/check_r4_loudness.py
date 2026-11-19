@@ -10,7 +10,12 @@ import sys
 MIXIN = "src/main/java/dev/lookout/mixin/ClientPacketListenerMixin.java"
 src = open(MIXIN).read()
 errors = []
-handler = src.split("onClientboundDamageEvent", 1)[-1]
+MARKER = "private void lookout$damage"
+if MARKER not in src:
+    print("R4 LOUDNESS GATE FAIL")
+    print("  - handler method", MARKER, "not found; refusing to scan the whole file")
+    sys.exit(1)
+handler = src.split(MARKER, 1)[-1]
 
 def block_after(marker, text):
     i = text.find(marker)
