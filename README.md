@@ -30,8 +30,8 @@ on a real client or server yet. treat every alert as a hint, not a signal.
 - speed: sustained ground speed past sprint + visible effects
 - autototem: instant restocks, three in a row
 
-each alert is hedged on purpose ("flight-like movement"), rate-limited per player,
-and means "worth a look", never a verdict. see docs/lookout-false-positives.md for
+each alert is hedged on purpose ("flight-like movement"), rate-limited per player
+and check, and means "worth a look", never a verdict. see docs/lookout-false-positives.md for
 the notes per check, including the deliberate misses.
 
 ## install

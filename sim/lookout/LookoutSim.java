@@ -27,10 +27,13 @@ public class LookoutSim {
             if (bx >= 200 && bx < 220) return by <= 63 + (bx - 200) / 2;
             if (by > 63) return false;
             if (by == 63 && bx >= 100 && bx < 120) return false; // open water surface
+            if (by == 63 && bx >= 0 && bx < 4 && (int) Math.floor(z) >= 0 && (int) Math.floor(z) < 4)
+                return bx >= 1 && (int) Math.floor(z) >= 1; // diagonal-corner pool: only cell (1,1) solid
             return true;
         }
         public boolean isLiquidAt(double x, double y, double z) {
-            int bx = (int) Math.floor(x), by = (int) Math.floor(y);
+            int bx = (int) Math.floor(x), by = (int) Math.floor(y), bz = (int) Math.floor(z);
+            if (by == 63 && bx >= 0 && bx < 4 && bz >= 0 && bz < 4) return !(bx >= 1 && bz >= 1);
             return by == 63 && bx >= 100 && bx < 120; // frosted-ice region is NOT liquid
         }
         public boolean isClimbableAt(double x, double y, double z) { return false; }
@@ -135,9 +138,14 @@ public class LookoutSim {
             long t = 0;
             for (int i = 0; i < 30; i++) { e.tick(1, "alex", mk(t++, 400 + i * 0.28, 64, 0, true), PROBE); }
         });
-        legit("water edge: one corner over land", e -> {
+        legit("water edge: diagonal corner over solid", e -> {
+            // center and all four cardinal probes are over open water; only the (+x,+z)
+            // diagonal corner of the footprint touches the solid cell. must stay quiet.
             long t = 0;
-            for (int i = 0; i < 30; i++) { e.tick(1, "alex", mk(t++, 120.2 + i * 0.2, 64, 0, true), PROBE); }
+            for (int i = 0; i < 30; i++) {
+                double x = (i % 2 == 0) ? 0.80 : 0.85; // oscillate so there is real speed
+                e.tick(1, "alex", mk(t++, x, 64, 0.80, true), PROBE);
+            }
         });
         legit("low glide over water", e -> {
             long t = 0;
@@ -221,10 +229,6 @@ public class LookoutSim {
                         false, false, false, 0, 0, false, true), PROBE);
             }
         });
-        legit("disabled engine hears cheat traffic", e -> {
-            // handled separately below
-        });
-
         // disabled engine: total silence even under cheat traffic
         {
             alerts = new ArrayList<>();

@@ -8,8 +8,9 @@ import dev.lookout.core.WorldProbe;
 
 /**
  * Jesus: running across the surface of water without sinking in.
- * FP notes: the whole footprint must be over open water: center and all four edges are
- * probed, so walking the shoreline where one corner is over a solid block stays quiet.
+ * FP notes: the whole footprint must be over open water: center, all four edges and all
+ * four diagonal corners are probed, so a player whose corner clips a solid block at the
+ * shoreline stays quiet.
  * Frost walker freezes the surface, and ice reads solid, so it self-exempts. Boats and
  * other vehicles, elytra glide, swimming pose, in-water, recent knockback (10 ticks) and
  * recent teleports (5 ticks) all exempt. Needs ten straight fast surface ticks, so packet
@@ -27,7 +28,9 @@ public class JesusCheck extends LookoutCheck {
         double[][] points = {
                 {s.x(), s.z()},
                 {s.x() + EDGE, s.z()}, {s.x() - EDGE, s.z()},
-                {s.x(), s.z() + EDGE}, {s.x(), s.z() - EDGE}};
+                {s.x(), s.z() + EDGE}, {s.x(), s.z() - EDGE},
+                {s.x() + EDGE, s.z() + EDGE}, {s.x() + EDGE, s.z() - EDGE},
+                {s.x() - EDGE, s.z() + EDGE}, {s.x() - EDGE, s.z() - EDGE}};
         for (double[] pt : points) {
             if (!w.isLiquidAt(pt[0], y, pt[1])) return false;
             if (w.isSolidAt(pt[0], y, pt[1])) return false;

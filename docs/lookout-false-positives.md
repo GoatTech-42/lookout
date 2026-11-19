@@ -5,29 +5,33 @@ server sends our client. that data is interpolated (positions smooth over 3 tick
 quantized, and sometimes delayed, so every check errs toward silence. an alert means
 "worth a look", never "confirmed cheating".
 
-engine-wide: a master enabled flag gates every event path and every tick, and one
-shared per-player cooldown sits in front of every alert, so bursts of suspicious
-packets produce one note, not a wall.
+engine-wide: a master enabled flag gates every event path and every tick, and a
+per-player, per-check cooldown sits in front of every alert, so a burst of suspicious
+packets from one check produces one note, not a wall (different checks keep their own
+clocks).
 
 ## flight
 
 - legit jump arcs, including jump boost, end inside the grace window.
 - the long-airtime rule only engages while the player is not falling at speed
-  (dy above -1.0), so a real drop from any height passes it. the sim covers a
-  300-block fall as a negative fixture.
+  (dy above -1.0), so a real drop from any height passes it, while a slow-fall fly
+  that sinks gently instead of accelerating still flags. the sim covers a 300-block
+  fall as a negative fixture and a 0.5/tick descent as a positive.
 - knockback, riptide and explosions arrive as velocity packets and exempt 20 ticks.
 - elytra glide, swimming pose, water, ladders/vines, levitation and slow falling
   all exempt.
 - a lag spike arrives as a teleport/position-sync and resets the air clock.
 - unloaded chunks read as support, so watching someone at the edge of render
   distance cannot flag.
-- known hole: slow, gravity-mimicking fly that keeps falling slightly will not
-  flag. deliberate; catching it from outside is guesswork.
+- known hole: fly that mimics a real fall at terminal-velocity-like speed (a block
+  per tick or faster) passes the long-airtime rule. deliberate; telling that from a
+  legit drop from outside is guesswork.
 
 ## jesus
 
-- support is probed across the whole player footprint (five sample points), so
-  standing with one corner over solid ground at the water's edge does not flag.
+- support is probed across the whole player footprint (center, four edges and four
+  diagonal corners), so standing with any corner over solid ground at the water's
+  edge does not flag.
 - gliding (elytra), recent velocity and recent teleports exempt, the same as
   flight. a low elytra glide skimming the surface stays quiet.
 - frost walker freezes the surface into frosted ice, which the probe reads as
@@ -63,3 +67,7 @@ packets produce one note, not a wall.
 - each pop is consumed by the first restock that follows it, so two pops cannot
   share one restock, and duplicate equipment notifications for the same restock
   count once.
+- unqualified FP risk: packet-timing compression. the sim sees pop and restock
+  events at exact ticks; on a real connection, packets can arrive bunched, which
+  compresses the observed pop-to-restock gap and could make a legit fast restock
+  look instant. not yet measured against real traffic.

@@ -14,8 +14,10 @@ import dev.lookout.core.WorldProbe;
  * ticks). Support means solid, liquid or climbable within a half block of the feet, or
  * stairs below. Lag spikes arrive as teleports and reset the clock. The long-airtime
  * rule only engages when the player is NOT falling at speed (a real fall from any
- * height passes it), so ordinary drops never flag. Unloaded chunks read as support.
- * Known hole, deliberate: gravity-mimicking fly that keeps falling slowly stays quiet.
+ * height passes it), so ordinary drops never flag, while a slow-fall fly (sinking
+ * gently instead of accelerating) still reads as not-falling and flags. Unloaded
+ * chunks read as support. Known hole, deliberate: fly that mimics a real fall at
+ * terminal-velocity-like speed (a block per tick or faster) passes the rule.
  */
 public class FlightCheck extends LookoutCheck {
 
