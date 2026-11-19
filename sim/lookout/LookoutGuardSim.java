@@ -86,13 +86,19 @@ public class LookoutGuardSim {
     /** hits hits-times, one every spacing ticks; dist(hitIndex) gives the distance per hit. */
     static void reachRun(LookoutEngine e, java.util.function.IntToDoubleFunction dist, int hits, int spacing,
                          boolean attackerExempt, boolean victimTracked, boolean victimStopsEarly, boolean projectileIds) {
+        reachRun(e, dist, hits, spacing, 1, attackerExempt, victimTracked, victimStopsEarly, projectileIds);
+    }
+
+    static void reachRun(LookoutEngine e, java.util.function.IntToDoubleFunction dist, int hits, int spacing,
+                         long firstHitTick, boolean attackerExempt, boolean victimTracked, boolean victimStopsEarly,
+                         boolean projectileIds) {
         int done = 0;
         double d = dist.applyAsDouble(0);
         for (long t = 0; done < hits; t++) {
             WALL[0] += 50;
             e.tick(1, "steve", smp(t, 500, 0, -90f, attackerExempt, 0), FLAT);
             if (victimTracked && !(victimStopsEarly && t >= 5)) e.tick(2, "sam", smp(t, 500 + d, 0, 0f), FLAT);
-            if (t >= 1 && t % spacing == 0) {
+            if (t >= firstHitTick && (t - firstHitTick) % spacing == 0) {
                 d = dist.applyAsDouble(done);
                 e.onDamage(2, 1, projectileIds ? 99 : 1, PA);
                 done++;
@@ -119,9 +125,12 @@ public class LookoutGuardSim {
         pair("reach: untracked victim gives no evidence", "reach",
                 e -> reachRun(e, i -> 6.0, 20, 1, false, false, false, false),
                 e -> reachRun(e, i -> 6.0, 20, 1, false, true, false, false));
-        pair("reach: stale victim observation (over 40 ticks old) gives no evidence", "reach",
-                e -> reachRun(e, i -> 6.0, 12, 10, false, true, true, false),
-                e -> reachRun(e, i -> 6.0, 12, 10, false, true, false, false));
+        // the victim stops being observed at tick 5 and every hit lands at tick 50+,
+        // so its freshest observation is 45+ ticks old at hit time: past the 40-tick
+        // drop in onDamage, no hit counts. red side keeps the victim observed.
+        pair("reach: victim observations older than 40 ticks give no evidence", "reach",
+                e -> reachRun(e, i -> 6.0, 12, 10, 50, false, true, true, false),
+                e -> reachRun(e, i -> 6.0, 12, 10, 50, false, true, false, false));
         pair("reach: projectile-shaped damage (cause != direct id) is not a melee hit", "reach",
                 e -> reachRun(e, i -> 6.0, 20, 1, false, true, false, true),
                 e -> reachRun(e, i -> 6.0, 20, 1, false, true, false, false));
