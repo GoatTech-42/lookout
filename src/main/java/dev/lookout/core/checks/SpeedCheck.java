@@ -15,8 +15,11 @@ import dev.lookout.core.WorldProbe;
  * an exit (off ice, out of water) is skipped, not averaged. The cap scales with the
  * strongest speed effect visible in the window. Stale windows (samples older than the
  * window span, e.g. after a stall) are skipped. Knockback and teleports reset.
- * Deliberate miss: subtle speed (5-15%) stays under the cap; from outside the client
- * cannot separate it from legit bhop reliably, and meshac owns that fight server-side.
+ * Deliberate miss: anything under the cap (0.44 b/t, ~57% over sprint's ~0.28) stays
+ * silent. The gap is that wide because legit bhop momentum sits between sprint and
+ * the cap, and from outside the client cannot separate a small cheat bonus from it;
+ * meshac owns the sub-cap fight server-side. A lone spike (rubber-band, unsignaled
+ * relocation) is trimmed, not averaged in.
  */
 public class SpeedCheck extends LookoutCheck {
 
@@ -41,6 +44,7 @@ public class SpeedCheck extends LookoutCheck {
             return;
         }
         double dist = 0;
+        double maxDelta = 0;
         int maxSpeedLevel = 0;
         int airFlickers = 0;
         for (int i = size - n; i < size; i++) {
@@ -60,13 +64,20 @@ public class SpeedCheck extends LookoutCheck {
                 return;
             }
             maxSpeedLevel = Math.max(maxSpeedLevel, cur.speedLevel());
-            if (i > 0) dist += Math.hypot(cur.x() - last[i - 1].x(), cur.z() - last[i - 1].z());
+            if (i > 0) {
+                double d = Math.hypot(cur.x() - last[i - 1].x(), cur.z() - last[i - 1].z());
+                dist += d;
+                if (d > maxDelta) maxDelta = d;
+            }
         }
         if (airFlickers > cfg.speedAirFlickerTicks) {
             decay(0.25);
             return;
         }
-        double avg = dist / n;
+        // red team P3: a single unsignaled relocation under the teleport bar (2.9
+        // blocks in one tick) used to poison the whole window. drop the largest
+        // per-tick delta: a lone spike is absorbed, sustained speed is untouched
+        double avg = (dist - maxDelta) / (n - 1);
         double cap = cfg.speedMax * (1.0 + 0.2 * maxSpeedLevel);
         if (avg > cap) {
             buffer += 1.0;

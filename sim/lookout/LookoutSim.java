@@ -1289,6 +1289,14 @@ public class LookoutSim {
             for (int i = 0; i < 40; i++) { y += 0.3; x += 0.3;
                 e.tick(1, "steve", mk(t++, x, y, 0, i % 2 == 0), PROBE); }
         });
+        // red team P3: a single 2.9-block relocation (under the 3.0 teleport bar,
+        // past join grace) used to poison the speed window; trimmed now
+        legit("one 2.9 unsignaled relocation past join grace", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 120; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+            x += 2.9; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE);
+            for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+        });
         // red team P1: one airborne flag per 11 ticks used to skip the window
         cheat("0.7 ground speed behind airborne flicker", "speed", e -> {
             long t = 0; double x = 500;
