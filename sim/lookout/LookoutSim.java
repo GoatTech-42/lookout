@@ -315,7 +315,7 @@ public class LookoutSim {
                     t++;
                 }
                 e.onSwing(1);
-                e.onDamage(2, 1, 1); // alex really hit sam, facing him, in range
+                e.onDamage(2, 1, 1, "minecraft:player_attack"); // alex really hit sam, facing him, in range
             }
         });
         legitKR("fifty-degree flick hits", e -> {
@@ -327,7 +327,31 @@ public class LookoutSim {
                     t++;
                 }
                 e.onSwing(1);
-                e.onDamage(2, 1, 1);
+                e.onDamage(2, 1, 1, "minecraft:player_attack");
+            }
+        });
+        legitKR("thorns damage is not a hit", e -> {
+            // a thorns wearer damaging their attacker reuses the single-entity shape:
+            // equal cause and direct ids. only the damage type tells it from melee.
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, 10f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onDamage(2, 1, 1, "minecraft:thorns"); // typed thorns: must not count as a hit
+            }
+        });
+        legitKR("mob_attack typed damage is not a player hit", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, 10f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onDamage(2, 1, 1, "minecraft:mob_attack");
             }
         });
         legitKR("fall damage is not a hit", e -> {
@@ -336,7 +360,7 @@ public class LookoutSim {
                 e.tick(1, "alex", mk(t, 500, 64, 0, true), PROBE);
                 e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
                 t++;
-                e.onDamage(2, -1, -1); // world damage: no attacker ids
+                e.onDamage(2, -1, -1, "minecraft:fall"); // world damage: no attacker ids
             }
         });
         legit("full-draw bow cadence", e -> {
@@ -432,6 +456,32 @@ public class LookoutSim {
             for (int i = 0; i < 45; i++) { x += 1.9; e.tick(1, "alex", mkGlide(t++, x, 100, 0), PROBE); }
         });
 
+        // reconnect: clear() must forget seen projectile ids, or the next connection's
+        // reused entity ids get their arrows silently dropped
+        {
+            alerts = new ArrayList<>();
+            LookoutEngine e = new LookoutEngine(new LookoutConfig(), SINK);
+            long t = 0;
+            for (int j = 0; j < 3; j++) {
+                for (int i = 0; i < 2; i++) e.tick(1, "steve", mkUsing(t++, 500, 64, 0, true), PROBE);
+                e.tick(1, "steve", mk(t++, 500, 64, 0, true), PROBE);
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 7000 + j, 1);
+            }
+            if (alerts.stream().noneMatch(a -> a.startsWith("fastbow ")))
+                throw new AssertionError("FAIL reconnect fixture: first fastbow burst never alerted");
+            e.clear();
+            t = 0;
+            for (int j = 0; j < 3; j++) {
+                for (int i = 0; i < 2; i++) e.tick(1, "steve", mkUsing(t++, 500, 64, 0, true), PROBE);
+                e.tick(1, "steve", mk(t++, 500, 64, 0, true), PROBE);
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 7000 + j, 1); // same ids, fresh connection
+            }
+            long fastbowAlerts = alerts.stream().filter(a -> a.startsWith("fastbow ")).count();
+            if (fastbowAlerts != 2)
+                throw new AssertionError("FAIL reconnect fixture: expected fastbow to fire again after clear(), got " + alerts);
+            System.out.println("legit ok: projectile ids re-counted after reconnect");
+        }
+
         // disabled engine: total silence even under cheat traffic
         {
             alerts = new ArrayList<>();
@@ -518,7 +568,7 @@ public class LookoutSim {
                     t++;
                 }
                 e.onSwing(1);
-                e.onDamage(2, 1, 1); // steve really damaged sam while looking elsewhere
+                e.onDamage(2, 1, 1, "minecraft:player_attack"); // steve really damaged sam while looking elsewhere
             }
         });
         cheat("instant full-power arrows", "fastbow", e -> {
@@ -543,7 +593,7 @@ public class LookoutSim {
                     t++;
                 }
                 e.onSwing(1);
-                e.onDamage(2, 1, 1); // steve really damaged sam from 5.2 blocks
+                e.onDamage(2, 1, 1, "minecraft:player_attack"); // steve really damaged sam from 5.2 blocks
             }
         });
         cheat("level elytra at 3.0", "elytra", e -> {

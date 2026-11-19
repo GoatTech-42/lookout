@@ -100,12 +100,13 @@ public class LookoutEngine {
     }
 
     /**
-     * A damage packet says causeId hurt victimId. Only melee counts here: when cause
-     * and direct ids differ the damage came through a projectile or another carrier,
-     * which facing and reach do not judge.
+     * A damage packet says causeId hurt victimId. Only player-attack damage counts:
+     * thorns and other types reuse the single-entity shape (equal cause and direct
+     * ids), so the type check is what separates real melee hits from them.
      */
-    public void onDamage(int victimId, int causeId, int directId) {
+    public void onDamage(int victimId, int causeId, int directId, String typeKey) {
         if (!config.enabled) return;
+        if (!"minecraft:player_attack".equals(typeKey)) return;
         if (causeId <= 0 || causeId != directId) return;
         ObservedPlayer attacker = players.get(causeId);
         ObservedPlayer victim = players.get(victimId);
@@ -167,5 +168,6 @@ public class LookoutEngine {
         players.clear();
         checks.clear();
         lastAlertAt.clear();
+        seenProjectileIds.clear(); // ids can be reused on the next connection
     }
 }

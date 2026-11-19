@@ -39,9 +39,9 @@ public abstract class ClientPacketListenerMixin {
 
     @Inject(method = "handleDamageEvent", at = @At("TAIL"))
     private void lookout$damage(ClientboundDamageEventPacket packet, CallbackInfo ci) {
-        if (LookoutClient.ENGINE != null) {
-            LookoutClient.ENGINE.onDamage(packet.entityId(), packet.sourceCauseId(), packet.sourceDirectId());
-        }
+        if (LookoutClient.ENGINE == null) return;
+        String typeKey = packet.sourceType().unwrapKey().map(k -> k.identifier().toString()).orElse("");
+        LookoutClient.ENGINE.onDamage(packet.entityId(), packet.sourceCauseId(), packet.sourceDirectId(), typeKey);
     }
 
     @Inject(method = "handleAnimate", at = @At("TAIL"))

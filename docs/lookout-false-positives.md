@@ -76,15 +76,17 @@ clocks).
 
 - evidence comes from damage packets: they name the hurt player and the player who
   caused it. no damage packet, no judgment, so mob fights, mining and bystanders
-  never enter the picture. only melee counts (cause and direct ids match).
+  never enter the picture. only player-attack damage counts; thorns reuses the same
+  packet shape (equal cause and direct ids) and is filtered out by the damage type.
 - the angle tolerance is wide and positions are lag-lerped; single odd hits decay,
   and the buffer also fades over time so spaced-out incidents never add up.
 - still opt-in: the judgment is heuristic and the alert stays hedged.
 
 ## rough reach (off by default, opt-in)
 
-- same damage-packet evidence: only real hits on a tracked player are judged, at
-  both ends' smoothed positions.
+- same damage-packet evidence: only player-attack-typed hits on a tracked player
+  are judged (thorns and every other type are skipped), at both ends' smoothed
+  positions.
 - the distance bar sits well past vanilla's roughly-3-block melee reach plus a
   lag-lerp margin, single long hits decay, and the buffer fades over time.
 - still the roughest check in lookout; the bar is heuristic. treat its notes with
