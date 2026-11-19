@@ -16,3 +16,13 @@ binding check found it declared but unbundled. tests/check_deps.py keeps the
 declared set, the jar's needs and the bundle in step.
 
 Other design and rig documents may describe the older meshac implementation or unrun plans. Their presence does not qualify this rebuild. Never turn a previous check result into a new-version claim without a matching artifact, configuration and run.
+
+## test caveats (QA 9.0, 2026-11-19)
+
+- tests/check_deps.py unions every jar under build/libs when checking bundled
+  deps. run it on a CLEAN build and inspect the selected ship jar; a stale jar
+  with a bundle can mask a dropped include (the gradle-rule half of the gate
+  still catches it, but the jar half is only as honest as the build dir).
+- tests/check_r4_loudness.py is a lexical gate, not a runtime one: it proves
+  the warn exists in the handler before the fallback, not that it fires in a
+  running client. runtime proof is the 26.1.2 first-capture smoke (stimulus 4).
