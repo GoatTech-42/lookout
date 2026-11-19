@@ -34,3 +34,12 @@ parser/verification hardening: bot/choreo.py guards G1-G9 (entity-name match, st
   MUT_ONLY=M-arm-stage-optional,M-arm-verify-after-attacks,M-arm-cumulative-counts,M-arm-shortcount-ok python3 tests/mut_choreo.py
   MUT_ONLY=M-arm-no-receipt-loop,M-bot2-ka-dist-drift,M-bot2-no-prearm-guard,M-bot2-no-count-guard python3 tests/mut_choreo.py
   MUT_ONLY=M-bot2-wiring-killaura-late,M-bot2-open-exit python3 tests/mut_choreo.py documented limits, unguarded: "freshest" is freshest complete line in the read buffer; the log file is pinned per query but a newly rotated log is followed only from the next query. test/mutant paths default to the repo layout (tests/../bot) and are overridable via CHOREO/BOT2 env.
+
+## sha mapping (QA verdict binding)
+
+QA ACCEPT 9.0 (2026-11-19) covers the lane-run tree at ffcd03c. replayed onto
+lookout main, byte-equal per-file (git rev-parse HEAD:<path> matched on all six
+files; .gitignore intentionally not ported):
+  bcf2f3f -> 630c09f   88dd3dc -> d5202ca   a337f8a -> e0a8920   ffcd03c -> e3721d3
+scope: source + fake-plumbing verification only; no runtime/client validation;
+G4 UNQUALIFIED in bot-only mode.
