@@ -53,7 +53,8 @@ clocks).
 - known FP risk: two legit 0.6 ledges inside 3 ticks without stairs/slabs is rare
   but possible; the buffer needs it to repeat before alerting.
 - a ground-flag flicker does not skip the window: two of three grounded flags
-  with no real airtime still counts.
+  with no real airtime still counts. the flicker control climbs at 0.3/tick, so
+  it proves tolerance at that speed only.
 - jumps never read, because a jump leaves the ground.
 
 ## speed
@@ -67,7 +68,9 @@ clocks).
   movement after a stall cannot average in old deltas.
 - up to 2 airborne-flag samples per window are tolerated and their hop deltas
   still count; a window full of hops reads as bhop and skips. bounded tolerance:
-  fast movement with three false-air samples per 12 stays silent.
+  fast movement with three false-air samples per 12 stays silent. the flicker
+  control moves at 0.43/tick, so it proves tolerance at that speed only, not
+  high-speed jump physics.
 - a lone spike (a per-tick delta over one block, e.g. an unsignaled relocation
   under the teleport bar) is trimmed from the window, at most once per 60 ticks;
   a repeated spike is evidence, not noise, and alerts.
@@ -130,10 +133,14 @@ clocks).
   ground exempts outright: sliding on ice while eating is legit and the difference
   is not readable from outside. that exemption is also a known hole.
 - vehicles, elytra, water, climbables, knockback and teleports exempt.
-- use-flag breaks up to 5 ticks hold state instead of restarting the grace, and
-  a lone airborne flag is not evaluated. bounded tolerances: a run of fast
-  use-ticks padded with short releases (19 fast + 6 released) stays silent, and
-  a 6+ tick break re-arms the grace.
+- use-flag breaks up to 5 ticks hold state instead of restarting the grace. the
+  airborne reset reads the flight check's shared, support-derived air count (real
+  airtime with no ground support), not a count of airborne flags: a lone flicker
+  over solid ground is not evaluated, genuine airtime (2+ ticks) exempts and
+  resets. bounded tolerances: a run of fast use-ticks padded with short releases
+  (19 fast + 6 released) stays silent, and a 6+ tick break re-arms the grace.
+  the flicker controls move slowly by design, so they prove low-speed silence
+  only, not high-speed jump/eating physics.
 - unqualified FP risk: momentum sources the sim does not model (slopes, slime,
   water exits, wind charges) could push a legit using-player over the line.
 
