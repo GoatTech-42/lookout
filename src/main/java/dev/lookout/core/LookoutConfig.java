@@ -51,7 +51,6 @@ public class LookoutConfig {
     public int noslowSustainTicks = 15;
     /** 3D distance past which a facing-aligned swing reads as rough reach */
     public double reachBlocks = 4.6;
-    public double reachFacingDegrees = 60;
     public double reachBufferMax = 4.0;
     /** level-glide speed in blocks/tick past elytra + fireworks that reads as overspeed */
     public double elytraMaxLevel = 2.2;
