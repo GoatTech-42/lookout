@@ -42,13 +42,8 @@ public class LookoutEngine {
         });
     }
 
-    public void tick(int entityId, String name, ObservedSample sample, WorldProbe probe) {
-        if (!config.enabled) return;
-        ObservedPlayer p = players.computeIfAbsent(entityId, ObservedPlayer::new);
-        if (name != null) p.name = name;
-        ObservedSample prev = p.prev;
-        p.add(sample);
-        AlertSink gated = (id, playerName, checkId, message) -> {
+    private AlertSink gatedSink() {
+        return (id, playerName, checkId, message) -> {
             String key = id + ":" + checkId;
             long now = System.currentTimeMillis();
             Long last = lastAlertAt.get(key);
@@ -56,17 +51,28 @@ public class LookoutEngine {
             lastAlertAt.put(key, now);
             sink.alert(id, playerName, checkId, message);
         };
+    }
+
+    public void tick(int entityId, String name, ObservedSample sample, WorldProbe probe) {
+        if (!config.enabled) return;
+        ObservedPlayer p = players.computeIfAbsent(entityId, ObservedPlayer::new);
+        if (name != null) p.name = name;
+        ObservedSample prev = p.prev;
+        p.add(sample);
+        AlertSink gated = gatedSink();
         for (LookoutCheck check : checksFor(entityId)) {
             check.onSample(p, sample, prev, probe, config, gated);
         }
     }
 
     public void onVelocity(int entityId) {
+        if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p != null && p.prev != null) p.lastVelocityTick = p.prev.tick();
     }
 
     public void onTeleport(int entityId) {
+        if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p != null && p.prev != null) {
             p.lastTeleportTick = p.prev.tick();
@@ -75,22 +81,28 @@ public class LookoutEngine {
     }
 
     public void onSwing(int entityId) {
+        if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p == null || p.prev == null) return;
-        for (LookoutCheck check : checksFor(entityId)) check.onSwing(p, p.prev.tick(), config, sink);
+        AlertSink gated = gatedSink();
+        for (LookoutCheck check : checksFor(entityId)) check.onSwing(p, p.prev.tick(), config, gated);
     }
 
     public void onTotemPop(int entityId) {
+        if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p == null || p.prev == null) return;
         p.lastTotemPopTick = p.prev.tick();
-        for (LookoutCheck check : checksFor(entityId)) check.onTotemPop(p, p.prev.tick(), config, sink);
+        AlertSink gated = gatedSink();
+        for (LookoutCheck check : checksFor(entityId)) check.onTotemPop(p, p.prev.tick(), config, gated);
     }
 
     public void onTotemEquip(int entityId) {
+        if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p == null || p.prev == null) return;
-        for (LookoutCheck check : checksFor(entityId)) check.onTotemEquip(p, p.prev.tick(), config, sink);
+        AlertSink gated = gatedSink();
+        for (LookoutCheck check : checksFor(entityId)) check.onTotemEquip(p, p.prev.tick(), config, gated);
     }
 
     /** Drop players we have not seen in a while (left render range, changed world). */

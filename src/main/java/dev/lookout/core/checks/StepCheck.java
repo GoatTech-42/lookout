@@ -9,14 +9,21 @@ import dev.lookout.core.WorldProbe;
 /**
  * Step: gaining more height than vanilla stepping allows (0.6) over a short window
  * without ever leaving the ground. Uses a 3-tick ground-to-ground gain so the
- * client-side position smoothing (3-tick lerp) cannot hide it.
- * FP notes: stairs, slabs and climbables exempt the whole window. Knockback and
- * teleports reset it. Horses and boats are vehicles (exempt). A jump always leaves
- * the ground, so it never reads here.
+ * client-side position smoothing cannot hide it.
+ * FP notes: every cell of the window (start, middle, end) is probed for stairs,
+ * slabs and climbables, at foot level and below. Knockback and teleports reset it.
+ * Horses and boats are vehicles (exempt). A jump always leaves the ground, so it
+ * never reads here. Known FP risk, needs the buffer to repeat: two legit 0.6 ledges
+ * inside 3 ticks with no stair/slab block anywhere in the window.
  */
 public class StepCheck extends LookoutCheck {
 
     @Override public String id() { return "step"; }
+
+    private boolean stairsNear(ObservedSample s, WorldProbe w) {
+        return w.isStairLikeAt(s.x(), s.y() - 0.51, s.z()) || w.isStairLikeAt(s.x(), s.y(), s.z())
+                || w.isClimbableAt(s.x(), s.y(), s.z());
+    }
 
     @Override
     public void onSample(ObservedPlayer p, ObservedSample s, ObservedSample prev, WorldProbe w,
@@ -36,11 +43,12 @@ public class StepCheck extends LookoutCheck {
             decay(0.25);
             return;
         }
-        // stairs and slabs in or under the window explain big legit gains
-        boolean stairs = w.isStairLikeAt(c.x(), c.y() - 0.51, c.z()) || w.isStairLikeAt(c.x(), c.y(), c.z())
-                || w.isStairLikeAt(a.x(), a.y(), a.z()) || w.isClimbableAt(c.x(), c.y(), c.z());
+        if (stairsNear(a, w) || stairsNear(b, w) || stairsNear(c, w)) {
+            decay(0.5);
+            return;
+        }
         double gain = c.y() - a.y();
-        if (!stairs && gain > cfg.stepGain) {
+        if (gain > cfg.stepGain) {
             buffer += 2.0;
             if (buffer > cfg.stepBufferMax) {
                 fail(p, s, sink, "stepped up " + String.format("%.2f", gain) + " blocks without jumping");
