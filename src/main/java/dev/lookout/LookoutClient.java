@@ -25,6 +25,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,10 @@ public class LookoutClient implements ClientModInitializer {
                 jump == null ? 0 : jump.getAmplifier() + 1,
                 speed == null ? 0 : speed.getAmplifier() + 1,
                 other.getItemBySlot(EquipmentSlot.FEET).hasFoil(),
-                exempt || other.isSpectator());
+                exempt || other.isSpectator(),
+                other.getYRot(),
+                other.getXRot(),
+                other.isUsingItem() && other.getUseItem().is(Items.BOW));
     }
 
     private static LookoutConfig loadConfig() {

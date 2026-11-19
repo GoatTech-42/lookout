@@ -16,7 +16,10 @@ public record ObservedSample(
         int jumpBoostLevel,
         int speedLevel,
         boolean glintingBoots,
-        boolean gamemodeExempt) {
+        boolean gamemodeExempt,
+        float yaw,
+        float pitch,
+        boolean usingBow) {
 
     public double horizontalSpeed(ObservedSample prev) {
         return Math.hypot(x - prev.x, z - prev.z);

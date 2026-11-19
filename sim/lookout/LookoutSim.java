@@ -49,8 +49,23 @@ public class LookoutSim {
     };
 
     static ObservedSample mk(long t, double x, double y, double z, boolean ground) {
+        return mk(t, x, y, z, ground, 0f, 0f);
+    }
+
+    static ObservedSample mk(long t, double x, double y, double z, boolean ground, float yaw, float pitch) {
         return new ObservedSample(t, x, y, z, ground, true, false, false, false, false,
-                false, false, false, 0, 0, false, false);
+                false, false, false, 0, 0, false, false, yaw, pitch, false);
+    }
+
+    /** using-item sample (eating / blocking / drawing); yaw/pitch zero, on ground */
+    static ObservedSample mkUsing(long t, double x, double y, double z, boolean bow) {
+        return new ObservedSample(t, x, y, z, true, true, false, false, true, false,
+                false, false, false, 0, 0, false, false, 0f, 0f, bow);
+    }
+
+    static ObservedSample mkGlide(long t, double x, double y, double z) {
+        return new ObservedSample(t, x, y, z, false, false, true, false, false, false,
+                false, false, false, 0, 0, false, false, 0f, 0f, false);
     }
 
     static LookoutEngine fresh() {
@@ -78,7 +93,7 @@ public class LookoutSim {
             lerped = lerped + (y - lerped) / 3.0;
             x += 0.31;
             e.tick(id, name, new ObservedSample(t++, x, lerped, 0, false, true, false, false, false, false,
-                    false, false, false, jumpBoost, 0, false, false), PROBE);
+                    false, false, false, jumpBoost, 0, false, false, 0f, 0f, false), PROBE);
         }
         return t;
     }
@@ -124,14 +139,14 @@ public class LookoutSim {
             long t = 0;
             for (int i = 0; i < 30; i++) {
                 e.tick(1, "alex", new ObservedSample(t++, 100.5 + i * 0.2, 63.4, 0, false, false, false, true, false, false,
-                        true, false, false, 0, 0, false, false), PROBE);
+                        true, false, false, 0, 0, false, false, 0f, 0f, false), PROBE);
             }
         });
         legit("boat on water", e -> {
             long t = 0;
             for (int i = 0; i < 30; i++) {
                 e.tick(1, "alex", new ObservedSample(t++, 100.5 + i * 0.3, 63.9, 0, false, false, false, false, false, true,
-                        false, false, false, 0, 0, false, false), PROBE);
+                        false, false, false, 0, 0, false, false, 0f, 0f, false), PROBE);
             }
         });
         legit("frost walker (solid ice, no liquid)", e -> {
@@ -151,7 +166,7 @@ public class LookoutSim {
             long t = 0;
             for (int i = 0; i < 30; i++) {
                 e.tick(1, "alex", new ObservedSample(t++, 100.5 + i * 0.5, 64.2, 0, false, false, true, false, false, false,
-                        false, false, false, 0, 0, false, false), PROBE);
+                        false, false, false, 0, 0, false, false, 0f, 0f, false), PROBE);
             }
         });
         legit("ice slide", e -> {
@@ -226,9 +241,121 @@ public class LookoutSim {
             long t = 0;
             for (int i = 0; i < 60; i++) {
                 e.tick(1, "alex", new ObservedSample(t++, i * 0.5, 80, 0, false, false, false, false, false, false,
-                        false, false, false, 0, 0, false, true), PROBE);
+                        false, false, false, 0, 0, false, true, 0f, 0f, false), PROBE);
             }
         });
+
+        // ---- stage 2 (combat) legit fixtures: zero alerts expected ----
+        // combat fixtures use two players: id 1 acts, id 2 stands nearby as the target.
+        legit("facing-tracked swings", e -> {
+            long t = 0;
+            for (int i = 0; i < 20; i++) {
+                e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f + (i % 3 - 1) * 3f, 0f), PROBE); // faces +x target
+                e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                t++;
+            }
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+            }
+        });
+        legit("fifty-degree flick swings", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f + ((j % 2 == 0) ? 50f : -50f), 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+            }
+        });
+        legit("full-draw bow cadence", e -> {
+            long t = 0;
+            for (int j = 0; j < 3; j++) {
+                for (int i = 0; i < 24; i++) e.tick(1, "alex", mkUsing(t++, 500, 64, 0, true), PROBE);
+                e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE); // release
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.0); // full power after a full draw
+                for (int i = 0; i < 6; i++) e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
+            }
+        });
+        legit("weak arrow spam", e -> {
+            long t = 0;
+            for (int j = 0; j < 8; j++) {
+                for (int i = 0; i < 4; i++) e.tick(1, "alex", mkUsing(t++, 500, 64, 0, true), PROBE);
+                e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
+                e.onProjectileSpawn(500.5, 65.4, 0, 1.0); // spam-click arrows are slow
+            }
+        });
+        legit("crossbow instant fire", e -> {
+            long t = 0;
+            for (int j = 0; j < 4; j++) {
+                for (int i = 0; i < 10; i++) e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE); // loading: not a bow draw
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.2); // crossbows fire fast arrows instantly
+            }
+        });
+        legit("eating walk", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 5; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            for (int i = 0; i < 35; i++) { x += 0.05; e.tick(1, "alex", mkUsing(t++, x, 64, 0, false), PROBE); }
+        });
+        legit("sprint then eat, coasting in the grace", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            for (int i = 0; i < 8; i++) { x += 0.15; e.tick(1, "alex", mkUsing(t++, x, 64, 0, false), PROBE); }
+            for (int i = 0; i < 20; i++) { x += 0.05; e.tick(1, "alex", mkUsing(t++, x, 64, 0, false), PROBE); }
+        });
+        legit("eating while sliding on ice", e -> {
+            long t = 0; double x = 300;
+            for (int i = 0; i < 6; i++) { x += 0.45; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            for (int i = 0; i < 20; i++) { x += 0.3; e.tick(1, "alex", mkUsing(t++, Math.min(x, 319.5), 64, 0, false), PROBE); }
+        });
+        legit("swings at 2.8 blocks, facing", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.8, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+            }
+        });
+        legit("long swings facing away (mob fight)", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, 60f, 0f), PROBE); // facing away from sam
+                    e.tick(2, "sam", mk(t, 505.2, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+            }
+        });
+        legit("swings with nobody nearby", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
+                e.onSwing(1);
+            }
+        });
+        legit("elytra cruise", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 45; i++) { x += 1.5; e.tick(1, "alex", mkGlide(t++, x, 100, 0), PROBE); }
+        });
+        legit("elytra dive burst", e -> {
+            long t = 0; double x = 500; double y = 200;
+            for (int i = 0; i < 25; i++) { x += 2.8; y -= 0.6; e.tick(1, "alex", mkGlide(t++, x, y, 0), PROBE); }
+        });
+        legit("firework-boosted level glide", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 45; i++) { x += 1.9; e.tick(1, "alex", mkGlide(t++, x, 100, 0), PROBE); }
+        });
+
         // disabled engine: total silence even under cheat traffic
         {
             alerts = new ArrayList<>();
@@ -303,6 +430,47 @@ public class LookoutSim {
                 e.tick(1, "steve", mk(t++, 0, 64, 0, true), PROBE);
                 e.onTotemEquip(1);
             }
+        });
+
+
+        cheat("swings facing away (killaura)", "killaura", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "steve", mk(t, 500, 64, 0, true, 10f, 0f), PROBE); // ~100 off the target bearing
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+            }
+        });
+        cheat("instant full-power arrows", "fastbow", e -> {
+            long t = 0;
+            for (int j = 0; j < 4; j++) {
+                for (int i = 0; i < 2; i++) e.tick(1, "steve", mkUsing(t++, 500, 64, 0, true), PROBE);
+                e.tick(1, "steve", mk(t++, 500, 64, 0, true), PROBE);
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.0); // full power off a 2-tick draw
+            }
+        });
+        cheat("eating at sprint speed", "noslow", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 5; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+            for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "steve", mkUsing(t++, x, 64, 0, false), PROBE); }
+        });
+        cheat("swings at 5.2 blocks, facing", "reach", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "steve", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 505.2, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+            }
+        });
+        cheat("level elytra at 3.0", "elytra", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 45; i++) { x += 3.0; e.tick(1, "steve", mkGlide(t++, x, 100, 0), PROBE); }
         });
 
         System.out.println("LookoutSim: PASS");

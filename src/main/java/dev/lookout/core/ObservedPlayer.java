@@ -16,6 +16,12 @@ public class ObservedPlayer {
     public long lastTeleportTick = -1000;
     public long lastTotemPopTick = -1000;
 
+    // filled by the engine right before the swing/projectile events fire
+    public double lastSwingNearestDist = -1;
+    public double lastSwingBearing;
+    public double lastProjectileSpeed;
+    public long lastProjectileTick = -1000;
+
     public ObservedPlayer(int entityId) {
         this.entityId = entityId;
     }

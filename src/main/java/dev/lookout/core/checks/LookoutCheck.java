@@ -21,6 +21,8 @@ public abstract class LookoutCheck {
 
     public void onTotemEquip(ObservedPlayer p, long tick, LookoutConfig cfg, AlertSink sink) {}
 
+    public void onProjectile(ObservedPlayer p, long tick, LookoutConfig cfg, AlertSink sink) {}
+
     protected void fail(ObservedPlayer p, ObservedSample s, AlertSink sink, String message) {
         sink.alert(p.entityId, p.name, id(), message);
         buffer *= 0.5;

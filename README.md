@@ -29,6 +29,11 @@ on a real client or server yet. treat every alert as a hint, not a signal.
 - step: gaining more than 0.6 without jumping
 - speed: sustained ground speed past sprint + visible effects
 - autototem: instant restocks, three in a row
+- killaura facing: swinging while looking nowhere near the closest player in range
+- fastbow: near-full-power arrows off almost no draw
+- noslow: moving at full speed while eating, drinking, drawing or blocking
+- rough reach: repeated swings lined up on someone too far away to hit
+- elytra overspeed: gliding level far past elytra + firework physics
 
 each alert is hedged on purpose ("flight-like movement"), rate-limited per player
 and check, and means "worth a look", never a verdict. see docs/lookout-false-positives.md for

@@ -71,3 +71,42 @@ clocks).
   events at exact ticks; on a real connection, packets can arrive bunched, which
   compresses the observed pop-to-restock gap and could make a legit fast restock
   look instant. not yet measured against real traffic.
+
+## killaura facing
+
+- only judges when another player is within plausible combat range, so swinging at
+  air, mobs or nothing never counts.
+- the angle tolerance is wide and lag-lerped positions widen it further; single odd
+  swings decay, it needs a run of off-target swings.
+- known FP risk: lookout cannot see mobs. someone fighting a mob while a player
+  stands nearby can read as off-target swings. the alert stays hedged for this reason.
+
+## fastbow
+
+- arrow power comes from the spawn velocity in the add-entity packet; the shooter is
+  the nearest player seen drawing a bow, so two archers side by side can
+  cross-attribute. needs three fast full-power shots, each after an observed bow draw.
+- weak spam-click arrows are slow and never count; crossbows do not use the bow
+  draw animation and never count; full draws of ~20 ticks never count.
+
+## noslow
+
+- a grace covers the momentum carried into the use (sprint, then eat), and slippery
+  ground exempts outright: sliding on ice while eating is legit and the difference
+  is not readable from outside. that exemption is also a known hole.
+- vehicles, elytra, water, climbables, knockback and teleports exempt.
+- needs a sustained run of fast using-ticks, so the first coasting ticks never flag.
+
+## rough reach
+
+- roughest check in lookout. it only counts swings lined up on the nearest player,
+  well past vanilla reach plus a lag-lerp margin, and it needs a run of them.
+- known FP risk: mobs are invisible, so fighting a mob next to a player can read as
+  long swings at that player. treat its notes with the most skepticism.
+
+## elytra overspeed
+
+- only level-or-climbing glides count; dives trade height for speed legitimately and
+  exempt, and pullouts decay inside the sustain window.
+- firework boosts top out under the cap, so boosted level flight stays quiet.
+- the cap approximates vanilla elytra physics from outside; borderline notes are weak.
