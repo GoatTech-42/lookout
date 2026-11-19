@@ -46,7 +46,10 @@ public class LookoutSim {
             int bx = (int) Math.floor(x);
             return bx >= 300 && bx < 320 && Math.floor(y) == 63;
         }
-        public boolean isSoulGroundAt(double x, double y, double z) { return false; }
+        public boolean isSoulGroundAt(double x, double y, double z) {
+            int bx = (int) Math.floor(x);
+            return bx >= 600 && bx < 620 && Math.floor(y) == 63;
+        }
     };
 
     static ObservedSample mk(long t, double x, double y, double z, boolean ground) {
@@ -78,6 +81,14 @@ public class LookoutSim {
         alerts = new ArrayList<>();
         WALL[0] = 0;
         return new LookoutEngine(cfg, SINK, () -> WALL[0]);
+    }
+
+    static void tickAll(LookoutEngine e, long t) {
+        e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+        e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+        e.tick(3, "ivy", mk(t, 501, 64, 1.5, true), PROBE);
+        e.tick(4, "max", mk(t, 501, 64, -1.5, true), PROBE);
+        e.tick(5, "ria", mk(t, 503, 64, 0.5, true), PROBE);
     }
 
     /** engine with the opt-in stage-3 checks (timer, multi-aura) turned on */
@@ -496,18 +507,70 @@ public class LookoutSim {
                         false, false, false, 0, 2, false, false, 0f, 0f, false), PROBE);
             }
         });
-        legitT3("laggy local client", e -> {
-            // our own client runs at 10 tps: everyone's wall-clock speed is unreadable
+        legitT3("high wall-clock speed under a laggy local client (gate)", e -> {
+            // 12 m/s real-time, would fire without the 19 tps floor: our client at
+            // 10 tps makes the wall-clock math unreadable, so the gate stays quiet.
+            // the mutation check below proves this exact window goes red at minTps 0.
             long t = 0; double x = 500;
-            for (int i = 0; i < 40; i++) { x += 0.28; WALL[0] += 100; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            for (int i = 0; i < 45; i++) { x += 0.55; WALL[0] += 100; e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 5, false, false, 0f, 0f, false), PROBE); }
         });
-        legitT3("local client freeze mid-window", e -> {
+        legitT3("local client freeze mid-window (gap rejection)", e -> {
+            // a 2s stall breaks the sample run; the window restarts after it and
+            // never reaches full length with the burst inside
             long t = 0; double x = 500;
-            for (int i = 0; i < 45; i++) {
-                x += 0.28;
-                WALL[0] += (i == 20) ? 2000 : 50; // one big stall
-                e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
+            for (int i = 0; i < 50; i++) {
+                x += 0.55;
+                WALL[0] += (i == 20) ? 2000 : 50;
+                e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 5, false, false, 0f, 0f, false), PROBE);
             }
+        });
+        legitT3("sample gap rejects the window", e -> {
+            // 10 ticks of unobserved movement (out of render or a hitch): the window
+            // must not straddle the hole, even at 12 m/s
+            long t = 0; double x = 500;
+            for (int i = 0; i < 30; i++) { x += 0.55; WALL[0] += 50; e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 5, false, false, 0f, 0f, false), PROBE); }
+            t += 10; WALL[0] += 500; // player left render; position froze while unobserved
+            for (int i = 0; i < 30; i++) { x += 0.55; WALL[0] += 50; e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 5, false, false, 0f, 0f, false), PROBE); }
+        });
+        legitT3("speed 5 sprint past the bare cap", e -> {
+            // 11 m/s real-time: over the bare 10 m/s line, but the strongest effect
+            // in the window scales the cap to fit. SpeedCheck stays quiet on it too.
+            long t = 0; double x = 500;
+            for (int i = 0; i < 60; i++) {
+                x += 0.55; WALL[0] += 50;
+                e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 5, false, false, 0f, 0f, false), PROBE);
+            }
+        });
+        legitT3("soul speed on soul ground", e -> {
+            long t = 0; double x = 600;
+            for (int i = 0; i < 50; i++) {
+                x += 0.6; WALL[0] += 50;
+                e.tick(1, "alex", new ObservedSample(t++, Math.min(x, 619.5), 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 0, true, false, 0f, 0f, false), PROBE);
+            }
+        });
+        legitT3("speed effect expires mid-window", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 25; i++) {
+                x += 0.55; WALL[0] += 50;
+                e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 5, false, false, 0f, 0f, false), PROBE);
+            }
+            for (int i = 0; i < 25; i++) { x += 0.39; WALL[0] += 50; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        });
+        legitT3("soul ground to normal ground transition", e -> {
+            long t = 0; double x = 600;
+            for (int i = 0; i < 20; i++) {
+                x += 0.6; WALL[0] += 50;
+                e.tick(1, "alex", new ObservedSample(t++, Math.min(x, 619.5), 64, 0, true, true, false, false, false, false,
+                        false, false, false, 0, 0, true, false, 0f, 0f, false), PROBE);
+            }
+            for (int i = 0; i < 50; i++) { x += 0.28; WALL[0] += 50; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
         });
         legitT3("single-target duel", e -> {
             long t = 0;
@@ -527,14 +590,59 @@ public class LookoutSim {
             long t = 0;
             for (int j = 0; j < 4; j++) {
                 for (int i = 0; i < 15; i++) {
-                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
-                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
-                    e.tick(3, "ivy", mk(t, 501, 64, 1.5, true), PROBE);
+                    tickAll(e, t);
                     t++;
                 }
                 e.onDamage(2, 1, 1, "minecraft:player_attack");
                 e.onDamage(3, 1, 1, "minecraft:player_attack");
             }
+        });
+        legitT3("one 4-victim sweep burst", e -> {
+            // a single big sweep: four victims on one tick. must count as ONE burst,
+            // not a streak
+            long t = 0;
+            for (int i = 0; i < 10; i++) { tickAll(e, t); t++; }
+            e.onDamage(2, 1, 1, "minecraft:player_attack");
+            e.onDamage(3, 1, 1, "minecraft:player_attack");
+            e.onDamage(4, 1, 1, "minecraft:player_attack");
+            e.onDamage(5, 1, 1, "minecraft:player_attack");
+            for (int i = 0; i < 10; i++) { tickAll(e, t); t++; }
+        });
+        legitT3("repeated hits inside one burst", e -> {
+            // the same burst re-notified (duplicate + a third victim a tick later):
+            // still one burst
+            long t = 0;
+            for (int i = 0; i < 10; i++) { tickAll(e, t); t++; }
+            e.onDamage(2, 1, 1, "minecraft:player_attack");
+            e.onDamage(3, 1, 1, "minecraft:player_attack");
+            tickAll(e, t); t++;
+            e.onDamage(2, 1, 1, "minecraft:player_attack"); // same victim again
+            e.onDamage(4, 1, 1, "minecraft:player_attack"); // one more victim
+            for (int i = 0; i < 10; i++) { tickAll(e, t); t++; }
+        });
+        legitT3("charged sweeps with growing victim counts", e -> {
+            // 2, then 3, then 4 victims, 20 ticks apart: bigger sweeps are still
+            // just sweeps
+            long t = 0;
+            int[] counts = {2, 3, 4};
+            for (int c : counts) {
+                for (int i = 0; i < 20; i++) { tickAll(e, t); t++; }
+                for (int v = 2; v < 2 + c; v++) e.onDamage(v, 1, 1, "minecraft:player_attack");
+            }
+        });
+        legitT3("rapid bursts broken by a long gap", e -> {
+            // bursts at +0,+3, then a 40-tick gap, then +0,+3: the gap resets the
+            // cadence count, so the second pair never alerts
+            long t = 0;
+            for (int half = 0; half < 2; half++) {
+                for (int i = 0; i < (half == 0 ? 0 : 40); i++) { tickAll(e, t); t++; }
+                for (int j = 0; j < 2; j++) {
+                    for (int i = 0; i < 3; i++) { tickAll(e, t); t++; }
+                    e.onDamage(2, 1, 1, "minecraft:player_attack");
+                    e.onDamage(3, 1, 1, "minecraft:player_attack");
+                }
+            }
+            for (int i = 0; i < 10; i++) { tickAll(e, t); t++; }
         });
         legitT3("one double hit", e -> {
             long t = 0;
@@ -572,6 +680,23 @@ public class LookoutSim {
             if (fastbowAlerts != 2)
                 throw new AssertionError("FAIL reconnect fixture: expected fastbow to fire again after clear(), got " + alerts);
             System.out.println("legit ok: projectile ids re-counted after reconnect");
+        }
+
+        // gate mutation proof: the laggy-client timer negative MUST go red without
+        // the 19 tps floor, or the negative proves nothing
+        {
+            alerts = new ArrayList<>();
+            WALL[0] = 0;
+            LookoutConfig cfg = new LookoutConfig();
+            cfg.speed = false; // isolate timer, same as the gated negative
+            cfg.timer = true;
+            cfg.timerMinLocalTps = 0; // mutation: gate off
+            LookoutEngine e = new LookoutEngine(cfg, SINK, () -> WALL[0]);
+            long t = 0; double x = 500;
+            for (int i = 0; i < 45; i++) { x += 1.1; WALL[0] += 100; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+            if (alerts.stream().noneMatch(a -> a.startsWith("timer ")))
+                throw new AssertionError("FAIL gate mutation: laggy window did not go red with the gate off (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected: " + alerts);
         }
 
         // disabled engine: total silence even under cheat traffic
@@ -698,7 +823,7 @@ public class LookoutSim {
             long t = 0; double x = 500;
             for (int i = 0; i < 60; i++) { x += 0.6; WALL[0] += 50; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
         });
-        cheatT3("multi-aura bursts", "multiaura", e -> {
+        cheatT3("rapid multi-victim bursts", "multiaura", e -> {
             long t = 0;
             for (int j = 0; j < 4; j++) {
                 for (int i = 0; i < 3; i++) {

@@ -128,22 +128,35 @@ clocks).
 
 - honest scope: from another client there is no separate timer signal in positions,
   because per-tick and per-second math use the same samples. this check only says
-  that real-time ground speed stays past what sprint, effects and ice explain. it
-  overlaps with the speed check on purpose; its edge is that wall-clock math is
+  that real-time ground speed stays past what sprint, effects and terrain explain.
+  it overlaps with the speed check on purpose; its edge is that wall-clock math is
   robust to packet bunching and server lag spikes.
+- the cap scales with the strongest speed effect seen in the window, and ice or
+  soul-speed ground disqualifies samples, same as the speed check. effect-expiry
+  and terrain transitions are covered by sim negatives.
+- the cadence gate measures our own client's sampling rate, using a monotonic
+  clock (nanoTime), never the adjustable system clock. the window must be one
+  unbroken run of consecutive samples: wall-clock pauses over half a second and
+  tick gaps (player left render) reset it, and the local rate must sit between 19
+  and 21 tps. a slow local client makes wall-clock math unreadable; a fast one
+  means catch-up processing after a stall. both go quiet instead of guessing.
+- a laggy-client negative runs over the bare cap and stays silent behind the gate,
+  and the sim re-runs that exact window with the gate floored to 0 and asserts it
+  goes red, so the negative is not vacuous.
 - low multipliers are invisible to it. that is a known, stated miss.
-- only counts while our own client ticks near full rate; a laggy local client makes
-  everyone's wall-clock speed unreadable, so the check goes quiet instead of
-  guessing. local lag and freezes are covered by sim negatives.
-- only grounded, unexempt ticks count, same as speed.
 
 ## multi-aura (off by default, opt-in)
 
 - typed evidence only: player-attack damage packets, so attacker and victims are
   all real. no packet, no judgment.
-- a vanilla sweep attack can hit two players in one tick and looks identical per
-  event. what separates aura is cadence: sweeps need a charged cooldown and slow
-  movement, so legit multi-victim hits come seconds apart. only rapid repeats
-  count, one double-hit never flags, and the buffer fades over time.
-- sim negatives cover a single-target duel, sweep doubles at a legit cadence and a
-  lone double hit.
+- a vanilla sweep attack can hit two or more players in one tick and looks
+  identical per event, so one burst counts ONCE no matter how many victims it
+  carries: hits inside the aggregation window extend the current burst instead of
+  stacking the count. duplicates and late-arriving extra victims in the same burst
+  never inflate it.
+- what separates aura is cadence across distinct bursts: sweeps need a charged
+  cooldown and slow movement, so legit bursts come seconds apart. a burst after a
+  long gap resets the streak to 1; only rapid back-to-back bursts alert.
+- sim negatives cover a single-target duel, sweep doubles at a legit cadence, a
+  lone 4-victim burst, re-notified hits inside one burst, charged sweeps with
+  growing victim counts, and rapid pairs broken by a long gap.

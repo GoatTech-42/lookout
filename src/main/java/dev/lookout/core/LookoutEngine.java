@@ -32,7 +32,7 @@ public class LookoutEngine {
     private final java.util.function.LongSupplier wallClock;
 
     public LookoutEngine(LookoutConfig config, AlertSink sink) {
-        this(config, sink, System::currentTimeMillis);
+        this(config, sink, () -> System.nanoTime() / 1_000_000L); // monotonic, never the adjustable wall clock
     }
 
     public LookoutEngine(LookoutConfig config, AlertSink sink, java.util.function.LongSupplier wallClock) {

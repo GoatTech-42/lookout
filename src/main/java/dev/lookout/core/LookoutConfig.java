@@ -61,6 +61,8 @@ public class LookoutConfig {
     public int timerWindowTicks = 40;
     /** our own client must tick at least this fast, or wall-clock math is meaningless */
     public double timerMinLocalTps = 19.0;
+    /** faster than this means catch-up processing after a stall, not real pacing */
+    public double timerMaxLocalTps = 21.0;
     /** distinct victims inside this window that read as a multi-target hit */
     public int multiAuraWindowTicks = 2;
     /** repeated multi-hits must come faster than this (legit sweep cadence is slower) */
