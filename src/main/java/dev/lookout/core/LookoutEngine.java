@@ -34,7 +34,7 @@ public class LookoutEngine {
     // first-capture trace (shim risk review R1-R7): every probed handler logs one
     // entry line so a capture can tell "the shim never delivered the event" from
     // "the event arrived and the check abstained". gated on MESHAC_TRACE.
-    private static final boolean TRACE = System.getenv("MESHAC_TRACE") != null;
+    private static final boolean TRACE = !System.getenv().getOrDefault("MESHAC_TRACE", "").isEmpty();
 
     private static void trace(String msg) {
         if (TRACE) System.out.println("[lookout-trace] " + msg);

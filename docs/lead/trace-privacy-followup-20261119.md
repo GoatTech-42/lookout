@@ -9,9 +9,10 @@ new jar, or rig run. G4 remains UNQUALIFIED in bot-only mode.
   it logs entity ID and check ID only. With MESHAC_TRACE present, it logs the
   player name and message. Capture tracing therefore still creates named logs;
   use it only for the controlled capture and scrub names before sharing logs.
-  Presence is the current switch: even an empty MESHAC_TRACE value enables
-  both trace helpers and named alert logging. Unset it entirely to turn tracing
-  off. Empty-equals-off is not implemented or claimed by this packet.
+  The initial packet (through d58a0d5) used presence as the switch, so even an
+  empty value enabled capture. The empty-trace follow-up changes both consumers:
+  unset or empty is off; any nonempty value, including "0", is on. Named logs
+  remain sensitive whenever enabled.
 - F-A: the reviewed variant path does not exist in this tree. There is exactly
   one ChatAlerter, in src/main. build.gradle and build-remap.gradle add version
   compatibility sources; neither replaces that class. No duplicate was added.

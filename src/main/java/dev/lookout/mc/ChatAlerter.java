@@ -12,7 +12,7 @@ public class ChatAlerter implements AlertSink {
     private static final Logger LOGGER = LoggerFactory.getLogger("lookout");
 
     // Keep player names out of persistent logs unless capture tracing is on.
-    private static final boolean TRACE = System.getenv("MESHAC_TRACE") != null;
+    private static final boolean TRACE = !System.getenv().getOrDefault("MESHAC_TRACE", "").isEmpty();
 
     @Override
     public void alert(int entityId, String playerName, String checkId, String message) {

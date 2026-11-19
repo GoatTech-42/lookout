@@ -70,7 +70,7 @@ for sig, fields in HANDLERS.items():
 
 helper = body_of(src, 'private static void trace(String msg)')
 check('trace-env-gated',
-      contains(tokens(src), tokens('private static final boolean TRACE = System.getenv("MESHAC_TRACE") != null;'))
+      contains(tokens(src), tokens('private static final boolean TRACE = !System.getenv().getOrDefault("MESHAC_TRACE", "").isEmpty();'))
       and helper == tokens('if (TRACE) System.out.println("[lookout-trace] " + msg);'))
 
 alerters = sorted(glob.glob('src/*/java/dev/lookout/mc/ChatAlerter.java'))
@@ -91,7 +91,7 @@ for path in alerters:
     named_call = first_statement(prefix[log_start:]) if log_start >= 0 else []
     branch = tokens('if (TRACE) {') + named_call + tokens('} else { LOGGER.info("[lookout] alert entity={} check={}", entityId, checkId); }')
     check('R9-private-default-' + variant,
-          contains(tokens(text), tokens('private static final boolean TRACE = System.getenv("MESHAC_TRACE") != null;'))
+          contains(tokens(text), tokens('private static final boolean TRACE = !System.getenv().getOrDefault("MESHAC_TRACE", "").isEmpty();'))
           and contains(prefix, branch) and prefix.count('LOGGER') == 2)
 
 for path in sorted(glob.glob('src/main/resources/*mixins*.json')):
