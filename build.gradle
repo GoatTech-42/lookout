@@ -39,6 +39,30 @@ if (!(variant in ["26.1.2", "26.2", "26.3"])) {
 }
 sourceSets.main.java.srcDir "src/mc${variant}/java"
 
+// 26.1.2 carries its own lookout capture layer in src/mc26.1.2 (dev.lookout.mixin
+// .ClientPacketListenerMixin and dev.lookout.mc.ChatAlerter). The src/main copies are
+// written against 26.3. For this route only, drop the main copies from the compile so
+// the per-version ones are the only definitions. Other variants keep using src/main.
+if (variant == "26.1.2") {
+    tasks.withType(JavaCompile).configureEach { t ->
+        t.source = t.source.filter { f ->
+            def p = f.path.replace('\\', '/')
+            !(p.endsWith('src/main/java/dev/lookout/mixin/ClientPacketListenerMixin.java')
+                    || p.endsWith('src/main/java/dev/lookout/mc/ChatAlerter.java'))
+        }
+    }
+    // The sources jar must carry the per-version copies actually compiled, not the 26.3 ones.
+    tasks.named('sourcesJar') { t ->
+        t.eachFile { fd ->
+            def p = fd.file.path.replace('\\', '/')
+            if (p.endsWith('src/main/java/dev/lookout/mixin/ClientPacketListenerMixin.java')
+                    || p.endsWith('src/main/java/dev/lookout/mc/ChatAlerter.java')) {
+                fd.exclude()
+            }
+        }
+    }
+}
+
 base { archivesName = "meshac-${project.minecraft_version}" }
 
 if (project.java_min.toString() != "25") throw new GradleException("java_min does not match this build route")
