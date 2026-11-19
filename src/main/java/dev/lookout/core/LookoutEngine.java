@@ -75,6 +75,20 @@ public class LookoutEngine {
         };
     }
 
+    // Relative move packets cap at 8 blocks per packet, so an unsignaled relocation
+    // arrives as one sync jump or a couple of ~7-block relative moves; the client lerp
+    // can also slice a big jump into ~4-5 block samples. 4.0 stays clear of legit
+    // per-tick movement (bunching ~1.4, boosted elytra ~2) and of knockback, which
+    // arrives with a velocity packet and gates separately.
+    private static final double UNSIGNALED_TELEPORT_BLOCKS = 4.0;
+
+    private static double distance3d(ObservedSample a, ObservedSample b) {
+        double dx = a.x() - b.x();
+        double dy = a.y() - b.y();
+        double dz = a.z() - b.z();
+        return Math.sqrt(dx * dx + dy * dy + dz * dz);
+    }
+
     public void tick(int entityId, String name, ObservedSample sample, WorldProbe probe) {
         if (!config.enabled) return;
         ObservedPlayer p = players.computeIfAbsent(entityId, ObservedPlayer::new);
@@ -82,6 +96,14 @@ public class LookoutEngine {
         p.lastWallMillis = wallClock.getAsLong();
         ObservedSample prev = p.prev;
         p.add(sample);
+        // Lane-run finding: at join the server can relocate a player with no S2C teleport
+        // event, and the client lerps the jump over a few ticks. Without this gate the
+        // windowed checks read it as huge speed. Treat any unsignaled single-sample jump
+        // past 8 blocks as a teleport: same reset as onTeleport.
+        if (prev != null && distance3d(prev, sample) > UNSIGNALED_TELEPORT_BLOCKS) {
+            p.lastTeleportTick = prev.tick();
+            p.airTicks = 0;
+        }
         AlertSink gated = gatedSink();
         for (LookoutCheck check : checksFor(entityId)) {
             check.onSample(p, sample, prev, probe, config, gated);

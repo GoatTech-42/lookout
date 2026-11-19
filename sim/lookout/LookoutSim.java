@@ -273,6 +273,17 @@ public class LookoutSim {
             e.tick(1, "alex", mk(t++, x + 30, 70, 0, false), PROBE);
             for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x + 30, 70, 0, true), PROBE); }
         });
+        legit("observed player join: big first deltas without teleport packet", e -> {
+            long t = 0; double x = 0;
+            for (int i = 0; i < 6; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+            // lane-run finding: at join the server relocates the player with no S2C
+            // teleport event and the client lerps the jump over ~3 ticks
+            e.tick(1, "alex", mk(t++, x + 4.7, 64, 0, true), PROBE);
+            e.tick(1, "alex", mk(t++, x + 9.4, 64, 0, true), PROBE);
+            e.tick(1, "alex", mk(t++, x + 14.1, 64, 0, true), PROBE);
+            x += 14.1;
+            for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        });
         legit("packet bunching on flat ground", e -> {
             long t = 0; double x = 0;
             for (int r = 0; r < 5; r++) {
@@ -764,9 +775,12 @@ public class LookoutSim {
             for (int i = 0; i < 30; i++) e.tick(1, "steve", mk(t++, 100.5 + i * 0.4, 64, 0, false), PROBE);
         });
         cheat("one-block step spam", "step", e -> {
-            long t = 0; double y = 64;
+            // continuous lateral movement: the old j*10+50 jumps were incidental 10-block
+            // unsignaled teleports, which the join-relocation gate (lane-run FP fix) now
+            // treats as teleports and exempts. Real step spam moves continuously.
+            long t = 0; double y = 64; double x = 0;
             for (int j = 0; j < 4; j++) {
-                for (int i = 0; i < 3; i++) { y += 0.34; e.tick(1, "steve", mk(t++, j * 10 + 50, y, 0, true), PROBE); }
+                for (int i = 0; i < 3; i++) { y += 0.34; x += 0.3; e.tick(1, "steve", mk(t++, x, y, 0, true), PROBE); }
             }
         });
         cheat("1.6x ground speed", "speed", e -> {
