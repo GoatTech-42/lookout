@@ -1169,6 +1169,13 @@ public class LookoutSim {
             for (int i = 0; i < 45; i++) { x += 3.0; e.tick(1, "steve", mkGlide(t++, x, 100, 0), PROBE); }
         });
 
+        // red team F4: a pullout sheds dive momentum, so a fast but decaying level
+        // glide is legit physics, not overspeed (pair: constant 3.0 above alerts)
+        legitTJ("elytra pullout shedding dive momentum", e -> {
+            long t = 0; double x = 500; double v = 3.0;
+            for (int i = 0; i < 31; i++) { x += v; e.tick(1, "steve", mkGlide(t++, x, 100, 0), PROBE); v *= 0.99; }
+        });
+
 
         cheatT3("2x wall-clock speed (timer)", "timer", e -> {
             long t = 0; double x = 500;

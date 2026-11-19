@@ -17,6 +17,7 @@ import dev.lookout.core.WorldProbe;
 public class ElytraCheck extends LookoutCheck {
 
     private int streak;
+    private double prevSpeed = -1;
 
     @Override public String id() { return "elytra"; }
 
@@ -27,9 +28,14 @@ public class ElytraCheck extends LookoutCheck {
         boolean exempt = !s.gliding() || s.gamemodeExempt() || s.inVehicle()
                 || p.ticksSince(p.lastVelocityTick, s.tick()) < 20
                 || p.ticksSince(p.lastTeleportTick, s.tick()) < 5;
-        if (exempt) { streak = 0; return; }
+        if (exempt) { streak = 0; prevSpeed = -1; return; }
         boolean descending = s.y() - prev.y() < -0.2; // dives buy speed with height
-        if (!descending && s.horizontalSpeed(prev) > cfg.elytraMaxLevel) {
+        double speed = s.horizontalSpeed(prev);
+        // an unpowered level glide bleeds speed, so a glide still shedding dive
+        // momentum is legit even above the cap; holding speed level is not
+        boolean decaying = prevSpeed > 0 && speed < prevSpeed - 0.001;
+        prevSpeed = speed;
+        if (!descending && !decaying && speed > cfg.elytraMaxLevel) {
             streak++;
             if (streak >= cfg.elytraSustainTicks) {
                 fail(p, s, sink, "gliding too fast without diving ("
