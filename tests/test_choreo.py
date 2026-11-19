@@ -173,8 +173,8 @@ check("T-bot2-prearm-guard",
       b2.count("guard_begin(") >= 4 and "args = ['verify-arm', SERVERDIR" in b2,
       f"guard_begin occurrences: {b2.count('guard_begin(')}")
 check("T-bot2-count-guard",
-      b2.count("guard_end(") >= 4 and "sent[v] != n" in b2,
-      f"guard_end occurrences: {b2.count('guard_end(')}; a silently shortened arm must fail")
+      b2.count("guard_end(") >= 4 and "ArmGuard(" in b2 and "guard.hit(victim)" in b2,
+      f"guard_end occurrences: {b2.count('guard_end(')}; bot2 must use the shared ArmGuard counter")
 
 # --- G9: post-arm server-side damage receipt ------------------------------
 fs = FakeServer([line("VictimA", "14.0f")])
@@ -202,7 +202,8 @@ check("T-bot2-fail-closed",
       "ARM GUARD FAIL: NO VICTIMS SEEN" in b2 and "sys.exit(1)" in b2,
       "no victims or an unstaged arm must fail closed, never exit 0")
 check("T-bot2-guard-end-receipts",
-      "for v in expect_damaged:" in b2.split("def guard_end")[1] and "'receipt'" in b2,
+      "guard.end(arm, before, expect_sent, expect_damaged, receipt)" in b2
+      and "for v in expect_damaged:" in open(CHOREO).read().split("def end")[1],
       "guard_end must route every attacked victim through the choreo receipt check")
 
 # --- run_arm: stage -> verify -> attacks, positions evolving across arms --
@@ -265,6 +266,54 @@ try:
     check("T-arm-band-abort-before-attacks", False, "attacked outside the band")
 except SystemExit:
     check("T-arm-band-abort-before-attacks", rig.events == [("stage", 2.5), ("verify", 2.5)], str(rig.events))
+
+# --- ArmGuard whole-sequence: per-arm DELTAS through the real plumbing ----
+class FakeIO:
+    def __init__(self):
+        self.health = {'VictimA': 20.0, 'VictimB': 20.0}
+    def receipt(self, arm, v, before_health):
+        return self.health[v] < before_health
+
+def drive_arm(g, io, arm, hits, expect):
+    before = g.begin(arm, dict(io.health))
+    for v, n in hits.items():
+        for _ in range(n):
+            g.hit(v)
+            io.health[v] -= 1.0
+    g.end(arm, before, expect, tuple(hits), io.receipt)
+
+# QA 8.2 red-before: on a337f8a semantics (cumulative compare) this aborts
+# at reach with sent=12 != 6. With delta snapshots the full sequence passes.
+io = FakeIO()
+g = choreo.ArmGuard()
+try:
+    drive_arm(g, io, 'killaura', {'VictimA': 6}, {'VictimA': 6})
+    drive_arm(g, io, 'reach', {'VictimA': 6}, {'VictimA': 6})
+    drive_arm(g, io, 'multiaura', {'VictimA': 4, 'VictimB': 4}, {'VictimA': 4, 'VictimB': 4})
+    check("T-guard-sequence-deltas", g.sent == {'VictimA': 16, 'VictimB': 4}, str(g.sent))
+except SystemExit:
+    check("T-guard-sequence-deltas", False, "aborted mid-sequence (cumulative compare?)")
+
+io = FakeIO()
+g = choreo.ArmGuard()
+try:
+    drive_arm(g, io, 'killaura', {'VictimA': 5}, {'VictimA': 6})
+    check("T-guard-short-count-aborts", False, "5 sent accepted as 6")
+except SystemExit:
+    check("T-guard-short-count-aborts", True)
+
+io = FakeIO()
+g = choreo.ArmGuard()
+def flat_receipt(arm, v, before_health):
+    return False  # server felt nothing
+try:
+    before = g.begin('killaura', dict(io.health))
+    for _ in range(6):
+        g.hit('VictimA')
+    g.end('killaura', before, {'VictimA': 6}, ('VictimA',), flat_receipt)
+    check("T-guard-no-receipt-aborts", False, "zero-delta arm accepted")
+except SystemExit:
+    check("T-guard-no-receipt-aborts", True)
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)

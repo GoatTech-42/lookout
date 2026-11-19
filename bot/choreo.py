@@ -162,6 +162,43 @@ def verify_arm(serverdir, va, vb, attacker, max_reach, min_reach=0.0, gap=2.0):
     return da, db, pa, pb
 
 
+class ArmGuard:
+    """Per-arm attack-count + damage-receipt guard, shared by bot2 and tests.
+
+    The counters are cumulative across the whole run, so end() compares
+    DELTAS from the pre-arm snapshot, never totals (QA 8.2: killaura passed
+    at 6, then reach aborted on 12 != 6 and multiaura on 16 != 4)."""
+    def __init__(self, log=print):
+        self.sent = {'VictimA': 0, 'VictimB': 0}
+        self.log = log
+
+    def hit(self, victim):
+        self.sent[victim] += 1
+
+    def begin(self, arm, health):
+        """Pre-arm snapshot: victim Health map plus the counter values."""
+        return {'health': dict(health), 'sent': dict(self.sent)}
+
+    def end(self, arm, before, expect_sent, expect_damaged, receipt):
+        """Post-arm: exact per-arm DELTA sent counts, and receipt(arm, victim,
+        pre-arm health) must be truthy per attacked victim. SystemExit on any
+        failure - an arm that fell short never exits normally."""
+        ok = True
+        for v, n in expect_sent.items():
+            got = self.sent[v] - before['sent'].get(v, 0)
+            if got != n:
+                self.log(f"ARM GUARD FAIL {arm} {v}: sent {got} attacks this arm, spec wants {n}")
+                ok = False
+        for v in expect_damaged:
+            if not receipt(arm, v, before['health'][v]):
+                self.log(f"ARM GUARD FAIL {arm} {v}: no server-side damage received")
+                ok = False
+        if not ok:
+            raise SystemExit(1)
+        self.log(f"arm guard ok: {arm} - G4 note: sent counts + health delta only; "
+                 f"per-hit server receipt counts UNVERIFIED at 4-tick cadence")
+
+
 def run_arm(name, stage, pre_arm, attacks, post_arm):
     """Fail-closed arm sequence: STAGE the intended geometry first,
     server-verify the band SECOND, then attack. stage() returns False when

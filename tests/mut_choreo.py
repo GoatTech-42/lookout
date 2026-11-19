@@ -81,10 +81,18 @@ MUTANTS = {
     "M-arm-verify-after-attacks": ("choreo",
         "    before = pre_arm()\n    attacks()",
         "    attacks()\n    before = pre_arm()"),
-    # bot2: receipt loop skipped in guard_end
-    "M-bot2-no-receipt-loop": ("bot2",
-        "    for v in expect_damaged:",
-        "    for v in ():"),
+    # ArmGuard: receipt check skipped
+    "M-arm-no-receipt-loop": ("choreo",
+        "            if not receipt(arm, v, before['health'][v]):",
+        "            if False:"),
+    # ArmGuard: cumulative totals compared instead of per-arm deltas (QA 8.2)
+    "M-arm-cumulative-counts": ("choreo",
+        "            got = self.sent[v] - before['sent'].get(v, 0)",
+        "            got = self.sent[v]"),
+    # ArmGuard: short arms accepted
+    "M-arm-shortcount-ok": ("choreo",
+        "            if got != n:",
+        "            if False:"),
 }
 
 EXPECT = {
@@ -102,7 +110,9 @@ EXPECT = {
     "M-bot2-no-prearm-guard": {"T-bot2-prearm-guard"},
     "M-bot2-no-count-guard": {"T-bot2-count-guard"},
     "M-bot2-wiring-killaura-late": {"T-bot2-wiring-killaura"},
-    "M-bot2-no-receipt-loop": {"T-bot2-guard-end-receipts"},
+    "M-arm-no-receipt-loop": {"T-guard-no-receipt-aborts"},
+    "M-arm-cumulative-counts": {"T-guard-sequence-deltas"},
+    "M-arm-shortcount-ok": {"T-guard-short-count-aborts"},
     "M-bot2-open-exit": {"T-bot2-fail-closed"},
     "M-arm-stage-optional": {"T-arm-stage-fail-closed"},
     "M-arm-verify-after-attacks": {"T-arm-sequence-evolving", "T-arm-band-abort-before-attacks"},

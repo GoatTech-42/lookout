@@ -201,8 +201,8 @@ MULTI_DIST = 2.5
 CHOREO = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'choreo.py')
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import choreo
+guard = choreo.ArmGuard(log=log)
 SERVERDIR = os.environ.get('SERVERDIR', 'server')
-sent = {'VictimA': 0, 'VictimB': 0}
 
 def _choreo(*args):
     try:
@@ -227,25 +227,16 @@ def guard_begin(arm, max_reach, min_reach=0.0):
     log('pre-arm guard', arm, 'rc', r.returncode)
     if r.returncode != 0:
         log('ARM GUARD FAIL pre-arm', arm, r.stdout.strip()[-200:]); sys.exit(1)
-    return {v: choreo_health(v) for v in ('VictimA', 'VictimB')}
+    return guard.begin(arm, {v: choreo_health(v) for v in ('VictimA', 'VictimB')})
 
 def guard_end(arm, before, expect_sent, expect_damaged):
-    """Post-arm: exact sent counts (a silently shortened arm fails) plus a
-    server-side damage receipt per attacked victim (G3/G4, automatic)."""
-    ok = True
-    for v, n in expect_sent.items():
-        if sent[v] != n:
-            log('ARM GUARD FAIL', arm, v, ': sent', sent[v], 'attacks, spec wants', n); ok = False
-    for v in expect_damaged:
-        r = _choreo('receipt', SERVERDIR, v, str(before[v]), arm)
+    """Post-arm via choreo.ArmGuard: per-arm DELTA sent counts plus the
+    choreo receipt check per attacked victim (G3/G4, automatic)."""
+    def receipt(a, v, health_before):
+        r = _choreo('receipt', SERVERDIR, v, str(health_before), a)
         log(r.stdout.strip())
-        if r.returncode != 0:
-            ok = False
-    if not ok:
-        sys.exit(1)
-    log('arm guard ok:', arm,
-        '- G4 note: sent counts + health delta only; per-hit server receipt',
-        'counts UNVERIFIED at 4-tick cadence')
+        return r.returncode == 0
+    guard.end(arm, before, expect_sent, expect_damaged, receipt)
 
 
 selfpos = [0.0, 0.0, 0.0]
@@ -260,7 +251,7 @@ def tick_send(x, y, z, onground, yaw=None, pitch=0.0):
 def attack(eid, victim=None):
     c.send(0x2E)  # punch (swing)
     c.send(0x01, enc_varint(eid))  # attack
-    if victim: sent[victim] += 1
+    if victim: guard.hit(victim)
 
 def walk_to(tx, ty, tz, yaw=None):
     while not disconnected.is_set():
