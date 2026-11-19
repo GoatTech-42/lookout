@@ -25,7 +25,9 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.UseEffects;
 import net.minecraft.world.level.GameType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +76,12 @@ public class LookoutClient implements ClientModInitializer {
                 exempt = mode == GameType.CREATIVE || mode == GameType.SPECTATOR;
             }
         }
+        // noslow reads usingItem as "using an item that slows movement". Vanilla
+        // 26.3 items can opt out of the slowdown via the use_effects component
+        // (spears: canSprint, speedMultiplier 1.0); a full-pace sprint while
+        // charging one is legitimate, not noslow. server-built items with the
+        // same component get the same treatment.
+        boolean usingItem = other.isUsingItem() && useSlowsMovement(other);
         return new ObservedSample(
                 tickCounter,
                 other.getX(), other.getY(), other.getZ(),
@@ -81,7 +89,7 @@ public class LookoutClient implements ClientModInitializer {
                 other.isSprinting(),
                 other.isFallFlying(),
                 other.getPose() == Pose.SWIMMING,
-                other.isUsingItem(),
+                usingItem,
                 other.getVehicle() != null,
                 other.isInWater(),
                 other.hasEffect(MobEffects.LEVITATION),
@@ -93,6 +101,11 @@ public class LookoutClient implements ClientModInitializer {
                 other.getYRot(),
                 other.getXRot(),
                 other.isUsingItem() && other.getUseItem().is(Items.BOW));
+    }
+
+    private static boolean useSlowsMovement(RemotePlayer other) {
+        UseEffects effects = other.getUseItem().get(DataComponents.USE_EFFECTS);
+        return effects == null || effects.speedMultiplier() < 1.0f;
     }
 
     private static LookoutConfig loadConfig() {
