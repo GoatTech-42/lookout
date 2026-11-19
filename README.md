@@ -67,7 +67,8 @@ python3 sim/lookout/run_lookout_sim.py
 everything so far is validated at the source level with synthetic fixtures. before
 trusting any of it in play, run a real smoke pass:
 
-1. build the 26.3 jar and drop it in a fabric 26.3 mods folder.
+1. drop the 26.3 jar (the one handed to you, or `./gradlew build`) in a fabric
+   26.3 mods folder.
 2. join a disposable local world with a second account (the "target").
 3. legit pass first: 10 minutes of normal play on the target (sprinting, jumping,
    climbing stairs, swimming, riding a boat, eating, drawing a bow, trading hits,
