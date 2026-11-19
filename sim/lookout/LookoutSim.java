@@ -198,6 +198,32 @@ public class LookoutSim {
         }
     }
 
+    /** QA 9.0 gap probe: 120 established ticks (PAST the 100-tick join grace),
+     *  then 3 relocations of `dist` blocks, each optionally signaled by an S2C
+     *  teleport the tick before. Unsignaled, the 3 jumps fill the counter. */
+    static void scnSignaledRelocations(LookoutEngine e, double dist, boolean signaled) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 120; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        for (int j = 0; j < 3; j++) {
+            if (signaled) e.onTeleport(1);
+            x += dist;
+            e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
+            for (int i = 0; i < 20; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        }
+    }
+
+    /** same past-grace discipline for the rapid repeated-teleport trace */
+    static void scnRepeatedTeleports(LookoutEngine e, boolean signaled) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 120; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        for (int j = 0; j < 5; j++) {
+            if (signaled) e.onTeleport(1);
+            x += 8;
+            e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
+            for (int i = 0; i < 3; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        }
+    }
+
     static void tickAll(LookoutEngine e, long t) {
         e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
         e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
@@ -418,32 +444,37 @@ public class LookoutSim {
         // legit relocation sources: pearls, chorus fruit, portals and dimension
         // changes all arrive with an S2C teleport (signaled), so they never count;
         // respawns reappear as a fresh entity; knockback arrives with velocity;
-        // bed/vehicle dismounts move under 3 blocks
-        legitTJ("signaled relocation lands without counting (pearl/chorus-like)", e -> {
-            long t = 0; double x = 0;
-            for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
-            e.onTeleport(1);
-            e.tick(1, "alex", mk(t++, x + 8, 64, 0, true), PROBE);
-            x += 8;
-            for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
-        });
-        legitTJ("dimension-change relocation (signaled sync) silent", e -> {
-            long t = 0; double x = 0;
-            for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
-            e.onTeleport(1); // respawn + position sync: the glue sees a teleport
-            e.tick(1, "alex", mk(t++, x + 1000, 64, 0, true), PROBE);
-            x += 1000;
-            for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
-        });
-        legitTJ("repeated signaled teleports never build the counter", e -> {
-            long t = 0; double x = 0;
-            for (int j = 0; j < 5; j++) {
-                e.onTeleport(1);
-                x += 8;
-                e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
-                for (int i = 0; i < 3; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
-            }
-        });
+        // bed/vehicle dismounts move under 3 blocks.
+        // QA 9.0 gap: these traces establish 120 ticks BEFORE the relocation, so
+        // they sit past the 100-tick join grace and the silence isolates the
+        // signal; each is paired below with the same trace minus the teleport
+        // packet, which must count.
+        legitTJ("signaled relocation lands without counting (pearl/chorus-like, past grace)",
+                e -> scnSignaledRelocations(e, 8, true));
+        legitTJ("dimension-change relocation (signaled sync, past grace) silent",
+                e -> scnSignaledRelocations(e, 1000, true));
+        legitTJ("repeated signaled teleports never build the counter (past grace)",
+                e -> scnRepeatedTeleports(e, true));
+        {
+            // paired mutations: the same past-grace traces with the S2C teleport
+            // removed. Speed also fires on these (real lateral jumps), so the
+            // pairs assert only the teleport finding.
+            LookoutEngine e = freshTJ();
+            scnSignaledRelocations(e, 8, false);
+            if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
+                throw new AssertionError("FAIL paired mutation: unsignaled pearl-like jumps past grace did not count (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected (pearl-like jumps without the teleport packet): " + alerts);
+            e = freshTJ();
+            scnSignaledRelocations(e, 1000, false);
+            if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
+                throw new AssertionError("FAIL paired mutation: unsignaled dimension-like jumps past grace did not count (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected (dimension-like jumps without the teleport packet): " + alerts);
+            e = freshTJ();
+            scnRepeatedTeleports(e, false);
+            if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
+                throw new AssertionError("FAIL paired mutation: repeated unsignaled teleports past grace did not count (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected (repeated teleports without the packet): " + alerts);
+        }
         legit("packet bunching on flat ground", e -> {
             long t = 0; double x = 0;
             for (int r = 0; r < 5; r++) {
