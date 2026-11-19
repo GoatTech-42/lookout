@@ -49,6 +49,10 @@ public class LookoutConfig {
     /** grace after the use starts (momentum, ice slides) before noslow math engages */
     public int noslowGraceTicks = 10;
     public int noslowSustainTicks = 15;
+    /** a use-flag break this short (ticks) does not restart the noslow grace */
+    public int noslowReleaseGapTicks = 5;
+    /** airborne-flag samples tolerated inside one speed window (bhop has more) */
+    public int speedAirFlickerTicks = 2;
     /** 3D distance past which a facing-aligned swing reads as rough reach */
     public double reachBlocks = 4.6;
     public double reachBufferMax = 4.0;

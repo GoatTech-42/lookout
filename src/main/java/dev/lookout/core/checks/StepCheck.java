@@ -38,8 +38,11 @@ public class StepCheck extends LookoutCheck {
         ObservedSample[] last = p.samples.toArray(new ObservedSample[0]);
         int n = last.length;
         ObservedSample a = last[n - 3], b = last[n - 2], c = last[n - 1];
-        boolean allGrounded = a.onGround() && b.onGround() && c.onGround() && p.airTicks == 0;
-        if (!allGrounded) {
+        // red team S2: an onGround=false flicker every other tick used to skip the
+        // check entirely. two of three grounded flags with no real airtime is
+        // still a grounded window; a genuinely airborne tick (airTicks > 0) is not
+        int grounded = (a.onGround() ? 1 : 0) + (b.onGround() ? 1 : 0) + (c.onGround() ? 1 : 0);
+        if (grounded < 2 || p.airTicks > 0) {
             decay(0.25);
             return;
         }

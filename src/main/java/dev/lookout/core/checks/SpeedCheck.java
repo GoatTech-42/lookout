@@ -42,13 +42,18 @@ public class SpeedCheck extends LookoutCheck {
         }
         double dist = 0;
         int maxSpeedLevel = 0;
+        int airFlickers = 0;
         for (int i = size - n; i < size; i++) {
             ObservedSample cur = last[i];
-            if (!cur.onGround() || cur.inVehicle() || cur.gliding() || cur.inWater()
+            if (cur.inVehicle() || cur.gliding() || cur.inWater()
                     || cur.swimmingPose() || cur.gamemodeExempt()) {
                 decay(0.25);
                 return;
             }
+            // red team P1: one airborne flag per window used to skip the check
+            // forever. a lone flicker is tolerated (the hop's delta is real
+            // movement and still counts); a window full of hops is bhop, skipped
+            if (!cur.onGround()) airFlickers++;
             if (w.isSlipperyAt(cur.x(), cur.y() - 0.5, cur.z())
                     || (cur.glintingBoots() && w.isSoulGroundAt(cur.x(), cur.y() - 0.5, cur.z()))) {
                 decay(0.5);
@@ -56,6 +61,10 @@ public class SpeedCheck extends LookoutCheck {
             }
             maxSpeedLevel = Math.max(maxSpeedLevel, cur.speedLevel());
             if (i > 0) dist += Math.hypot(cur.x() - last[i - 1].x(), cur.z() - last[i - 1].z());
+        }
+        if (airFlickers > cfg.speedAirFlickerTicks) {
+            decay(0.25);
+            return;
         }
         double avg = dist / n;
         double cap = cfg.speedMax * (1.0 + 0.2 * maxSpeedLevel);

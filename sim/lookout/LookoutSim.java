@@ -72,6 +72,12 @@ public class LookoutSim {
                 false, false, false, 0, 0, false, false, 0f, 0f, bow);
     }
 
+    /** using-item sample with a chosen ground flag (flicker fixtures) */
+    static ObservedSample mkUsingG(long t, double x, double y, double z, boolean ground) {
+        return new ObservedSample(t, x, y, z, ground, true, false, false, true, false,
+                false, false, false, 0, 0, false, false, 0f, 0f, false);
+    }
+
     static ObservedSample mkGlide(long t, double x, double y, double z) {
         return new ObservedSample(t, x, y, z, false, false, true, false, false, false,
                 false, false, false, 0, 0, false, false, 0f, 0f, false);
@@ -1246,6 +1252,53 @@ public class LookoutSim {
             long t = 0; double x = 500;
             for (int i = 0; i < 5; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
             for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "steve", mkUsing(t++, x, 64, 0, false), PROBE); }
+        });
+        // red team N1: a one-tick release every 20 ticks used to restart the
+        // noslow grace forever; short gaps now hold state
+        cheat("eating at sprint speed, one-tick release every 20", "noslow", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 5; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+            for (int i = 0; i < 90; i++) { x += 0.28;
+                e.tick(1, "steve", i % 20 == 19 ? mk(t++, x, 64, 0, true) : mkUsingG(t++, x, 64, 0, true), PROBE); }
+        });
+        legit("slow eating with one-tick releases", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 90; i++) { x += 0.04;
+                e.tick(1, "steve", i % 20 == 19 ? mk(t++, x, 64, 0, true) : mkUsingG(t++, x, 64, 0, true), PROBE); }
+        });
+        // red team N2: one airborne flag every 14 ticks used to reset the streak
+        cheat("eating at sprint speed, airborne flag every 14", "noslow", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 5; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
+            for (int i = 0; i < 90; i++) { x += 0.28;
+                e.tick(1, "steve", mkUsingG(t++, x, 64, 0, i % 14 != 13), PROBE); }
+        });
+        legit("slow eating with airborne flicker", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 90; i++) { x += 0.04;
+                e.tick(1, "steve", mkUsingG(t++, x, 64, 0, i % 14 != 13), PROBE); }
+        });
+        // red team S2: an onGround flicker every other tick used to skip step
+        cheat("step gains behind ground-flag flicker", "step", e -> {
+            long t = 0; double x = 500; double y = 64;
+            for (int i = 0; i < 40; i++) { y += 0.35; x += 0.3;
+                e.tick(1, "steve", mk(t++, x, y, 0, i % 2 == 0), PROBE); }
+        });
+        legit("0.6 climbs with ground-flag flicker", e -> {
+            long t = 0; double x = 500; double y = 64;
+            for (int i = 0; i < 40; i++) { y += 0.3; x += 0.3;
+                e.tick(1, "steve", mk(t++, x, y, 0, i % 2 == 0), PROBE); }
+        });
+        // red team P1: one airborne flag per 11 ticks used to skip the window
+        cheat("0.7 ground speed behind airborne flicker", "speed", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 60; i++) { x += 0.7;
+                e.tick(1, "steve", mk(t++, x, 64, 0, i % 11 != 10), PROBE); }
+        });
+        legit("0.43 ground speed with airborne flicker", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 60; i++) { x += 0.43;
+                e.tick(1, "steve", mk(t++, x, 64, 0, i % 11 != 10), PROBE); }
         });
         cheatKR("hits landing from 5.2 blocks", "reach", e -> {
             long t = 0;

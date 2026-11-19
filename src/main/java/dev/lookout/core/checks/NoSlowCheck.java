@@ -20,6 +20,7 @@ import dev.lookout.core.WorldProbe;
 public class NoSlowCheck extends LookoutCheck {
 
     private long useStart = -1000;
+    private int releaseGap = 1000;
     private int streak;
 
     @Override public String id() { return "noslow"; }
@@ -28,10 +29,24 @@ public class NoSlowCheck extends LookoutCheck {
     public void onSample(ObservedPlayer p, ObservedSample s, ObservedSample prev, WorldProbe w,
                          LookoutConfig cfg, AlertSink sink) {
         if (prev == null) return;
-        if (!s.usingItem()) { useStart = -1000; streak = 0; return; }
-        if (!prev.usingItem()) { useStart = s.tick(); streak = 0; return; }
+        // red team N1: a one-tick release every grace period used to restart the
+        // grace forever. a gap up to noslowReleaseGapTicks holds state instead;
+        // only a real break re-arms it
+        if (s.usingItem()) {
+            if (releaseGap > cfg.noslowReleaseGapTicks) { useStart = s.tick(); streak = 0; }
+            releaseGap = 0;
+        } else {
+            releaseGap++;
+            if (releaseGap > cfg.noslowReleaseGapTicks) { useStart = -1000; streak = 0; }
+            return;
+        }
+        if (useStart == -1000) useStart = s.tick(); // first observed use-tick
+        // red team N2: one airborne flag every few ticks used to reset the streak
+        // forever. a genuinely airborne run (2+ ticks) still exempts and resets;
+        // a lone flicker is just not evaluated
+        if (!s.onGround() && p.airTicks > 1) { streak = 0; return; }
+        if (!s.onGround()) return;
         boolean exempt = s.gamemodeExempt() || s.inVehicle() || s.gliding() || s.inWater()
-                || !s.onGround() // hopping keeps momentum legitimately
                 || w.isClimbableAt(s.x(), s.y(), s.z())
                 || w.isSlipperyAt(s.x(), s.y() - 0.5, s.z())
                 || p.ticksSince(p.lastVelocityTick, s.tick()) < 20
