@@ -1072,14 +1072,44 @@ public class LookoutSim {
                 long t = 0; double x = 0;
                 for (int i = 0; i < 60; i++) { x += 0.45; e.tick(id, "bot" + id, mk(t++, x, 64, 0, true), PROBE); }
             }
-            if (alerts.size() != 3)
-                throw new AssertionError("FAIL global cap: expected exactly the 3-alert burst, got " + alerts.size() + " " + alerts);
+            // 3 burst alerts + exactly one paced suppression summary naming the
+            // dropped players and checks (a cap that swallows silently is a hole)
+            if (alerts.size() != 4)
+                throw new AssertionError("FAIL global cap: expected the 3-alert burst plus one summary, got " + alerts.size() + " " + alerts);
+            String summary = alerts.get(3);
+            if (!summary.contains("suppressed") || !summary.contains("bot4")
+                    || !summary.contains("speed"))
+                throw new AssertionError("FAIL suppression summary: missing count/players/checks: " + summary);
             WALL[0] += 3000;
             { long t = 0; double x = 0;
               for (int i = 0; i < 60; i++) { x += 0.45; e.tick(6, "bot6", mk(t++, x, 64, 0, true), PROBE); } }
-            if (alerts.size() != 4)
-                throw new AssertionError("FAIL global cap refill: expected one more alert after refill, got " + alerts.size());
-            System.out.println("alert path ok: global cap holds a flood to the burst, refill admits more");
+            // bot6's delivered alert flushes the rolled-up remainder (bot4/bot5)
+            if (alerts.size() != 6)
+                throw new AssertionError("FAIL global cap refill: expected bot6 alert plus rollup summary, got " + alerts.size() + " " + alerts);
+            if (!alerts.get(4).contains("bot6") || !alerts.get(4).contains("moving fast"))
+                throw new AssertionError("FAIL global cap refill: bot6 alert missing: " + alerts);
+            if (!alerts.get(5).contains("suppressed") || !alerts.get(5).contains("bot5"))
+                throw new AssertionError("FAIL suppression rollup: names missing: " + alerts.get(5));
+            System.out.println("alert path ok: global cap holds a flood to the burst, names the suppressed, refill admits more");
+        }
+        {
+            // clear() resets the bucket: a reconnect must not inherit a depleted
+            // allowance and go silent on the next fight
+            LookoutConfig cfg = new LookoutConfig();
+            cfg.alertGlobalBurst = 2; cfg.alertGlobalPerSecond = 0.1; cfg.timer = false;
+            LookoutEngine e = fresh(cfg);
+            WALL[0] = 100000;
+            for (int id = 1; id <= 4; id++) {
+                long t = 0; double x = 0;
+                for (int i = 0; i < 60; i++) { x += 0.45; e.tick(id, "bot" + id, mk(t++, x, 64, 0, true), PROBE); }
+            }
+            long alertsBefore = alerts.size();
+            e.clear();
+            { long t = 0; double x = 0;
+              for (int i = 0; i < 60; i++) { x += 0.45; e.tick(7, "bot7", mk(t++, x, 64, 0, true), PROBE); } }
+            if (alerts.size() <= alertsBefore)
+                throw new AssertionError("FAIL clear(): bucket stayed depleted across a reconnect");
+            System.out.println("alert path ok: clear() refills the global bucket");
         }
         {
             // entity id reuse: the new holder starts with no inherited cooldown

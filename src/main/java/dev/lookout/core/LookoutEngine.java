@@ -94,15 +94,45 @@ public class LookoutEngine {
         return true;
     }
 
+    // the cap paces the flood but never swallows it silently: dropped alerts are
+    // counted and a paced summary line names who and what got dropped
+    private int suppressed;
+    private final java.util.LinkedHashSet<String> suppressedPlayers = new java.util.LinkedHashSet<>();
+    private final java.util.LinkedHashSet<String> suppressedChecks = new java.util.LinkedHashSet<>();
+    private long lastSuppressionSummaryAt = -1;
+
+    private void noteSuppressed(String playerName, String checkId, long now) {
+        suppressed++;
+        if (suppressedPlayers.size() < 8) suppressedPlayers.add(playerName);
+        if (suppressedChecks.size() < 6) suppressedChecks.add(checkId);
+        flushSuppressed(now);
+    }
+
+    // paced so the summary itself cannot flood: the first drop reports at once,
+    // later batches roll up every 2s of wall time or on the next delivered alert
+    private void flushSuppressed(long now) {
+        if (suppressed == 0) return;
+        if (lastSuppressionSummaryAt >= 0 && now - lastSuppressionSummaryAt < 2000) return;
+        lastSuppressionSummaryAt = now;
+        sink.alert(-1, "rate cap", "rate-cap", suppressed + " more alert(s) suppressed (players: "
+                + String.join(", ", suppressedPlayers) + "; checks: "
+                + String.join(", ", suppressedChecks) + ")");
+        suppressed = 0;
+        suppressedPlayers.clear();
+        suppressedChecks.clear();
+    }
+
     private AlertSink gatedSink() {
         return (id, playerName, checkId, message) -> {
             String key = id + ":" + checkId;
             long now = System.currentTimeMillis();
             Long last = lastAlertAt.get(key);
             if (last != null && now - last < config.alertCooldownSeconds * 1000) return;
-            if (!globalCapAllows(wallClock.getAsLong())) return;
+            long wallNow = wallClock.getAsLong();
+            if (!globalCapAllows(wallNow)) { noteSuppressed(playerName, checkId, wallNow); return; }
             lastAlertAt.put(key, now);
             sink.alert(id, playerName, checkId, message);
+            flushSuppressed(wallNow);
         };
     }
 
@@ -290,5 +320,9 @@ public class LookoutEngine {
         checks.clear();
         lastAlertAt.clear();
         seenProjectileIds.clear(); // ids can be reused on the next connection
+        globalTokens = Double.NaN; // a reconnect starts with a full bucket
+        suppressed = 0;
+        suppressedPlayers.clear();
+        suppressedChecks.clear();
     }
 }
