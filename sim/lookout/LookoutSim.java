@@ -186,6 +186,18 @@ public class LookoutSim {
         }
     }
 
+    /** QA 9.0 caveat probe: 100 established ticks, optional knockback at tick 120,
+     *  then 3.5-block jumps at ticks 132/135/138 */
+    static void scnLateKnockback(LookoutEngine e, boolean withVelocity) {
+        long t = 0; double x = 0;
+        for (int i = 0; i < 120; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
+        if (withVelocity) e.onVelocity(1);
+        for (int i = 0; i < 40; i++) {
+            x += (t == 132 || t == 135 || t == 138) ? 3.5 : 0.28;
+            e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE);
+        }
+    }
+
     static void tickAll(LookoutEngine e, long t) {
         e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
         e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
@@ -407,7 +419,7 @@ public class LookoutSim {
         // changes all arrive with an S2C teleport (signaled), so they never count;
         // respawns reappear as a fresh entity; knockback arrives with velocity;
         // bed/vehicle dismounts move under 3 blocks
-        legit("signaled relocation lands without counting (pearl/chorus-like)", e -> {
+        legitTJ("signaled relocation lands without counting (pearl/chorus-like)", e -> {
             long t = 0; double x = 0;
             for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
             e.onTeleport(1);
@@ -415,7 +427,7 @@ public class LookoutSim {
             x += 8;
             for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
         });
-        legit("dimension-change relocation (signaled sync) silent", e -> {
+        legitTJ("dimension-change relocation (signaled sync) silent", e -> {
             long t = 0; double x = 0;
             for (int i = 0; i < 10; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
             e.onTeleport(1); // respawn + position sync: the glue sees a teleport
@@ -423,7 +435,7 @@ public class LookoutSim {
             x += 1000;
             for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
         });
-        legit("repeated signaled teleports never build the counter", e -> {
+        legitTJ("repeated signaled teleports never build the counter", e -> {
             long t = 0; double x = 0;
             for (int j = 0; j < 5; j++) {
                 e.onTeleport(1);
@@ -988,6 +1000,21 @@ public class LookoutSim {
             if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
                 throw new AssertionError("FAIL frozen pair: grace-off jumps did not fire the finding (got: " + alerts + ")");
             System.out.println("gate mutation red as expected (grace off, frozen pair): " + alerts);
+        }
+        {
+            // QA 9.0 caveat pair: the same after-grace jump triplet (132/135/138),
+            // with and without a knockback at tick 120 (finding forced on). The
+            // finding must stay silent behind the velocity window and fire without
+            // it. Speed fires in both runs (the jumps are real lateral movement),
+            // so the pair asserts only the finding.
+            scnLateKnockback(freshTJ(), true);
+            if (alerts.stream().anyMatch(a -> a.startsWith("teleport ")))
+                throw new AssertionError("FAIL after-grace knockback counted: " + alerts);
+            System.out.println("legit ok: after-grace jumps inside the velocity window never count (teleport finding on)");
+            scnLateKnockback(freshTJ(), false);
+            if (alerts.stream().noneMatch(a -> a.startsWith("teleport ")))
+                throw new AssertionError("FAIL paired mutation: same jumps without velocity did not fire (got: " + alerts + ")");
+            System.out.println("gate mutation red as expected (no velocity, after grace): " + alerts);
         }
         cheat("1.6x ground speed", "speed", e -> {
             long t = 0; double x = 0;
