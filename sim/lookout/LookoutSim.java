@@ -1083,13 +1083,14 @@ public class LookoutSim {
             WALL[0] += 3000;
             { long t = 0; double x = 0;
               for (int i = 0; i < 60; i++) { x += 0.45; e.tick(6, "bot6", mk(t++, x, 64, 0, true), PROBE); } }
-            // bot6's delivered alert flushes the rolled-up remainder (bot4/bot5)
+            // the first tick after the refill drains the rolled-up remainder
+            // (bot4/bot5), then bot6's alert is delivered
             if (alerts.size() != 6)
-                throw new AssertionError("FAIL global cap refill: expected bot6 alert plus rollup summary, got " + alerts.size() + " " + alerts);
-            if (!alerts.get(4).contains("bot6") || !alerts.get(4).contains("moving fast"))
+                throw new AssertionError("FAIL global cap refill: expected rollup plus bot6 alert, got " + alerts.size() + " " + alerts);
+            if (!alerts.get(4).contains("suppressed") || !alerts.get(4).contains("bot5"))
+                throw new AssertionError("FAIL suppression rollup: names missing: " + alerts.get(4));
+            if (!alerts.get(5).contains("bot6") || !alerts.get(5).contains("moving fast"))
                 throw new AssertionError("FAIL global cap refill: bot6 alert missing: " + alerts);
-            if (!alerts.get(5).contains("suppressed") || !alerts.get(5).contains("bot5"))
-                throw new AssertionError("FAIL suppression rollup: names missing: " + alerts.get(5));
             System.out.println("alert path ok: global cap holds a flood to the burst, names the suppressed, refill admits more");
         }
         {
@@ -1110,6 +1111,48 @@ public class LookoutSim {
             if (alerts.size() <= alertsBefore)
                 throw new AssertionError("FAIL clear(): bucket stayed depleted across a reconnect");
             System.out.println("alert path ok: clear() refills the global bucket");
+        }
+        {
+            // pending suppression names must drain on ordinary ticks: flood,
+            // then three quiet seconds with no alerts and no new suppressions
+            LookoutConfig cfg = new LookoutConfig();
+            cfg.alertGlobalBurst = 2; cfg.alertGlobalPerSecond = 0.1; cfg.timer = false;
+            LookoutEngine e = fresh(cfg);
+            WALL[0] = 100000;
+            for (int id = 1; id <= 4; id++) {
+                long t = 0; double x = 0;
+                for (int i = 0; i < 60; i++) { x += 0.45; e.tick(id, "bot" + id, mk(t++, x, 64, 0, true), PROBE); }
+            }
+            int afterFlood = alerts.size();
+            WALL[0] += 3000; // 0.1/s refill: no token frees, so no real alert can flush it
+            for (int i = 0; i < 20; i++) e.tick(9, "quiet", mk(500 + i, 700, 64, 0, true), PROBE);
+            if (alerts.size() <= afterFlood || !alerts.get(afterFlood).contains("suppressed"))
+                throw new AssertionError("FAIL quiet flush: rollup never drained on quiet ticks: " + alerts.subList(afterFlood, alerts.size()));
+            if (!alerts.get(afterFlood).contains("bot3"))
+                throw new AssertionError("FAIL quiet flush: rolled-up names missing: " + alerts.get(afterFlood));
+            System.out.println("alert path ok: suppression rollup drains on quiet ticks");
+        }
+        {
+            // clear() re-arms the first-drop summary: a reconnect flood must not
+            // skip the immediate line because pacing survived from before
+            LookoutConfig cfg = new LookoutConfig();
+            cfg.alertGlobalBurst = 1; cfg.alertGlobalPerSecond = 0.1; cfg.timer = false;
+            LookoutEngine e = fresh(cfg);
+            WALL[0] = 100000;
+            for (int id = 1; id <= 3; id++) {
+                long t = 0; double x = 0;
+                for (int i = 0; i < 60; i++) { x += 0.45; e.tick(id, "bot" + id, mk(t++, x, 64, 0, true), PROBE); }
+            }
+            long summariesBefore = alerts.stream().filter(a -> a.contains("suppressed")).count();
+            e.clear();
+            for (int id = 5; id <= 7; id++) {
+                long t = 0; double x = 0;
+                for (int i = 0; i < 60; i++) { x += 0.45; e.tick(id, "bot" + id, mk(t++, x, 64, 0, true), PROBE); }
+            }
+            long summariesAfter = alerts.stream().filter(a -> a.contains("suppressed")).count();
+            if (summariesAfter <= summariesBefore)
+                throw new AssertionError("FAIL clear(): post-reconnect flood skipped the first-drop summary");
+            System.out.println("alert path ok: clear() re-arms the first-drop summary");
         }
         {
             // entity id reuse: the new holder starts with no inherited cooldown

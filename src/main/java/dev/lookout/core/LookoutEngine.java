@@ -143,6 +143,7 @@ public class LookoutEngine {
 
     public void tick(int entityId, String name, ObservedSample sample, WorldProbe probe) {
         if (!config.enabled) return;
+        flushSuppressed(wallClock.getAsLong()); // a quiet stretch still drains the rollup
         ObservedPlayer p = players.computeIfAbsent(entityId, ObservedPlayer::new);
         if (name != null) p.name = sanitizeName(name);
         p.lastWallMillis = wallClock.getAsLong();
@@ -321,6 +322,7 @@ public class LookoutEngine {
         lastAlertAt.clear();
         seenProjectileIds.clear(); // ids can be reused on the next connection
         globalTokens = Double.NaN; // a reconnect starts with a full bucket
+        lastSuppressionSummaryAt = -1; // ...and with the first-drop summary armed
         suppressed = 0;
         suppressedPlayers.clear();
         suppressedChecks.clear();

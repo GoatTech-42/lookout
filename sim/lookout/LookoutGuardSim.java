@@ -288,19 +288,23 @@ public class LookoutGuardSim {
         // (atan2(0,0)); vertical fights must not read as off-facing. red side:
         // same geometry offset half a block sideways, bearing defined and
         // 180 degrees off, must alert.
+        // attacker yaw 180 on both halves: without the overhead guard the
+        // degenerate bearing (0) reads 180 degrees off and alerts, so this
+        // fixture kills the revert-the-guard mutant (yaw 0 was silent with or
+        // without it); matches QA's independent probe
         pair("killaura: victim directly overhead has no bearing, no facing judgment", "killaura",
-                e -> facingOverhead(e, 0.0, 12),
-                e -> facingOverhead(e, 0.6, 12));
+                e -> facingOverhead(e, 0.0, 180f, 12),
+                e -> facingOverhead(e, 0.6, 180f, 12));
         pair("killaura: off, on, off, on facing hits drain the buffer (net zero)", "killaura",
                 e -> alternatingFacing(e, 40, 2),
                 e -> alternatingFacing(e, 60, 3));
     }
 
     /** victim straight above the attacker (offset blocks sideways), attacker facing +z away from it */
-    static void facingOverhead(LookoutEngine e, double sideOffset, int hits) {
+    static void facingOverhead(LookoutEngine e, double sideOffset, float attackerYaw, int hits) {
         for (long t = 0; t < hits + 2; t++) {
             WALL[0] += 50;
-            e.tick(1, "steve", smp(t, 0, 0, 0f), FLAT);
+            e.tick(1, "steve", smp(t, 0, 0, attackerYaw), FLAT);
             e.tick(2, "sam", new ObservedSample(t, sideOffset, 66, 0, true, true, false, false, false, false,
                     false, false, false, 0, 0, false, false, 0f, 0f, false), FLAT);
             if (t >= 1) e.onDamage(2, 1, 1, PA);
