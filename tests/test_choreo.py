@@ -7,7 +7,8 @@ Run: python3 tests/test_choreo.py  (green against the real choreo.py)
 """
 import importlib.util, os, sys, tempfile, threading
 
-CHOREO = os.environ.get("CHOREO", os.path.expanduser("~/work/lane-run/bot/choreo.py"))
+HERE = os.path.dirname(os.path.abspath(__file__))
+CHOREO = os.environ.get("CHOREO", os.path.join(HERE, "..", "bot", "choreo.py"))
 spec = importlib.util.spec_from_file_location("choreo", CHOREO)
 choreo = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(choreo)
@@ -128,6 +129,82 @@ fs = FakeServer([line("VictimA", "[-47.5d, -60.0d, 8.5d]"),
                  line("VictimA", "[-47.5d, -60.0d, 8.5d]")])
 pos = choreo.verify_static(fs.dir, "VictimA", gap=0.1, tries=1, expect=(-47.5, -60.0, 8.5))
 check("green-static-at-place-accepted", pos == (-47.5, -60.0, 8.5), str(pos))
+
+# --- G7: verify-arm compares attacker distance against the reach band -----
+def arm_fs(atk_payload):
+    return FakeServer([line("VictimA", "[-47.5d, -60.0d, 8.5d]"),
+                       line("VictimA", "[-47.5d, -60.0d, 8.5d]"),
+                       line("VictimB", "[-46.0d, -60.0d, 9.2d]"),
+                       line("VictimB", "[-46.0d, -60.0d, 9.2d]"),
+                       line("ProvokeBot", atk_payload)])
+
+fs = arm_fs("[952.5d, -60.0d, 8.5d]")
+try:
+    choreo.verify_arm(fs.dir, "VictimA", "VictimB", "ProvokeBot", 3.0, gap=0.05)
+    check("G7-far-attacker-aborts", False, "1000-block probe exited normally")
+except SystemExit:
+    check("G7-far-attacker-aborts", True)
+
+fs = arm_fs("[-46.6d, -60.0d, 8.5d]")  # 0.9 from A: killaura band in the reach arm
+try:
+    choreo.verify_arm(fs.dir, "VictimA", "VictimB", "ProvokeBot", 6.7, min_reach=4.6, gap=0.05)
+    check("G7b-close-attacker-aborts", False, "killaura-band geometry accepted for the reach arm")
+except SystemExit:
+    check("G7b-close-attacker-aborts", True)
+
+fs = arm_fs("[-42.3d, -60.0d, 8.5d]")  # 5.2 from A: inside [4.6, 6.7]
+da, db, pa, pb = choreo.verify_arm(fs.dir, "VictimA", "VictimB", "ProvokeBot", 6.7, min_reach=4.6, gap=0.05)
+check("G7-green-within-band-accepted", abs(da - 5.2) < 0.05, f"da={da:.2f}")
+
+# --- G8: decoy chat/mod lines containing the answer text are rejected -----
+decoy = ("[00:00:00] [Server thread/INFO]: <EvilBot> System chat: "
+         "VictimA has the following entity data: [-1.0d, -1.0d, -1.0d]")
+fs = FakeServer([[line("VictimA", "[-47.5d, -60.0d, 8.5d]"), decoy]])
+pos = choreo.get_pos(fs.dir, "VictimA", timeout=3.0)
+check("G8-decoy-line-rejected", pos == (-47.5, -60.0, 8.5), str(pos))
+
+# --- bot2 arm alignment + automatic guards (source gates) ------------------
+BOT2 = os.environ.get("BOT2", os.path.join(HERE, "..", "bot", "bot2.py"))
+b2 = open(BOT2).read()
+check("T-bot2-ka-spec-dist",
+      "KA_DIST = 2.5" in b2 and "near(eidA, 2.0)" not in b2 and "near(eidL, 2.0)" not in b2,
+      "killaura placements must all use KA_DIST = 2.5 (spec P1)")
+check("T-bot2-prearm-guard",
+      b2.count("guard_begin(") >= 4 and "args = ['verify-arm', SERVERDIR" in b2,
+      f"guard_begin occurrences: {b2.count('guard_begin(')}")
+check("T-bot2-count-guard",
+      b2.count("guard_end(") >= 4 and "sent[v] != n" in b2,
+      f"guard_end occurrences: {b2.count('guard_end(')}; a silently shortened arm must fail")
+
+# --- G9: post-arm server-side damage receipt ------------------------------
+fs = FakeServer([line("VictimA", "14.0f")])
+after = choreo.check_damage_receipt(fs.dir, "VictimA", 20.0, "killaura", timeout=3.0)
+check("G9-damage-received-accepted", after == 14.0, str(after))
+fs = FakeServer([line("VictimA", "20.0f")])
+try:
+    choreo.check_damage_receipt(fs.dir, "VictimA", 20.0, "killaura", timeout=3.0)
+    check("G9-no-damage-aborts", False, "zero-delta provoke accepted")
+except SystemExit:
+    check("G9-no-damage-aborts", True)
+
+# --- whole-arm wiring: guard_begin -> attacks -> guard_end, per arm --------
+LOOP_MARK = {"killaura": "for i in range(6):", "reach": "for i in range(6):",
+           "multiaura": "for b in range(4):"}
+for arm in ("killaura", "reach", "multiaura"):
+    gb = b2.find(f"guard_begin('{arm}'")
+    ge = b2.find(f"guard_end('{arm}'")
+    if gb == -1 or ge == -1:
+        # presence is owned (and mutant-pinned) by the guard-count gates
+        check(f"T-bot2-wiring-{arm}", True, "presence owned by the guard-count gates")
+    else:
+        seg = b2[gb:ge]
+        loop_at = seg.find(LOOP_MARK[arm])
+        atk_at = seg.find("attack(eid")
+        check(f"T-bot2-wiring-{arm}", 0 <= loop_at < atk_at,
+              "order must be guard_begin -> arm loop -> attacks -> guard_end")
+check("T-bot2-guard-end-receipts",
+      "for v in expect_damaged:" in b2.split("def guard_end")[1] and "'receipt'" in b2,
+      "guard_end must route every attacked victim through the choreo receipt check")
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)

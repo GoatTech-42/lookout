@@ -1,39 +1,80 @@
 #!/usr/bin/env python3
-"""Mutants for the choreo parser guards. Each mutant must make EXACTLY its own
-guard's test(s) fail and nothing else. Run: python3 tests/mut_choreo.py"""
+"""Mutants for the choreo parser guards, arm guards, and bot2 arm wiring.
+Each mutant must make EXACTLY its own test(s) fail and nothing else.
+Run: python3 tests/mut_choreo.py"""
 import os, subprocess, sys, tempfile
 
-SRC = os.path.expanduser("~/work/lane-run/bot/choreo.py")
-TEST = os.path.expanduser("~/work/lane-run/tests/test_choreo.py")
+HERE = os.path.dirname(os.path.abspath(__file__))
+FILES = {
+    "choreo": (os.path.join(HERE, "..", "bot", "choreo.py"), "CHOREO"),
+    "bot2":   (os.path.join(HERE, "..", "bot", "bot2.py"), "BOT2"),
+}
+TEST = os.path.join(HERE, "test_choreo.py")
 
+# (file, pattern, replacement)
 MUTANTS = {
     # G1: accept any entity's answer, not just the queried one
-    "M-G1-ignore-entity-name": (
+    "M-G1-ignore-entity-name": ("choreo",
         "if m.group(1) == entity",
         "if True"),
     # G2: accept truncated payloads (no bracket / no trailing f required)
-    "M-G2-loose-payload": (
+    "M-G2-loose-payload": ("choreo",
         'POS_PAYLOAD = re.compile(r"^\\[(-?\\d+(?:\\.\\d+)?)d, (-?\\d+(?:\\.\\d+)?)d, (-?\\d+(?:\\.\\d+)?)d\\]$")\nNUM_PAYLOAD = re.compile(r"^(-?\\d+\\.\\d+)f$")',
         'POS_PAYLOAD = re.compile(r"^\\[(-?\\d+(?:\\.\\d+)?)d, (-?\\d+(?:\\.\\d+)?)d, (-?\\d+(?:\\.\\d+)?)d\\]?$")\nNUM_PAYLOAD = re.compile(r"^(-?\\d+\\.\\d*)f?$")'),
     # G3: a missing reply is silently tolerated instead of aborting
-    "M-G3-timeout-fallback": (
+    "M-G3-timeout-fallback": ("choreo",
         "        a = get_pos(serverdir, name, timeout)\n        time.sleep(gap)\n        b = get_pos(serverdir, name, timeout)",
         "        try:\n            a = get_pos(serverdir, name, timeout)\n        except TimeoutError:\n            a = (0.0, 0.0, 0.0)\n        time.sleep(gap)\n        try:\n            b = get_pos(serverdir, name, timeout)\n        except TimeoutError:\n            b = a"),
     # G4: oldest duplicate wins instead of freshest
-    "M-G4-first-match-wins": (
-        "for payload in reversed(answers(serverdir, mark, entity)):",
-        "for payload in answers(serverdir, mark, entity):"),
+    "M-G4-first-match-wins": ("choreo",
+        "for payload in reversed(answers(logpath, mark, entity)):",
+        "for payload in answers(logpath, mark, entity):"),
     # G5: skip the expected-coordinates check
-    "M-G5-no-coord-check": (
+    "M-G5-no-coord-check": ("choreo",
         "if expect is not None and math.dist(b, expect) > place_eps:",
         "if False:"),
     # G6: drift never aborts
-    "M-G6-always-static": (
+    "M-G6-always-static": ("choreo",
         "if drift > eps:",
         "if False:"),
+    # G7: attacker beyond max_reach never aborts
+    "M-G7-no-max-abort": ("choreo",
+        "    if da > max_reach:",
+        "    if False:"),
+    # G7b: attacker inside min_reach never aborts (reach arm gets killaura geometry)
+    "M-G7b-no-min-abort": ("choreo",
+        "    if da < min_reach:",
+        "    if False:"),
+    # G8: answer regex unanchored - a chat/mod decoy line is accepted
+    "M-G8-unanchored-ans": ("choreo",
+        'ANS_RE = re.compile(r"^\\[[0-9:]{8}\\] \\[[^\\]]+\\]: System chat: (\\w+) has the following entity data: (.*)$", re.M)',
+        'ANS_RE = re.compile(r"System chat: (\\w+) has the following entity data: (.*)$", re.M)'),
+    # G9: zero-delta receipt never aborts
+    "M-G9-no-receipt-abort": ("choreo",
+        "    if not after < before:",
+        "    if False:"),
+    # bot2: killaura loop drifts back to 2.0 off-spec
+    "M-bot2-ka-dist-drift": ("bot2",
+        "spot = near(eidA, KA_DIST)  # recompute from live ents: victims wander",
+        "spot = near(eidA, 2.0)  # recompute from live ents: victims wander"),
+    # bot2: killaura pre-arm guard removed
+    "M-bot2-no-prearm-guard": ("bot2",
+        "    before = guard_begin('killaura', 3.0)\n",
+        ""),
+    # bot2: killaura count guard removed
+    "M-bot2-no-count-guard": ("bot2",
+        "    guard_end('killaura', before, {'VictimA': 6}, ('VictimA',))\n",
+        ""),
+    # bot2: guard_begin moved after the arm's attacks (guard no longer pre-arm)
+    "M-bot2-wiring-killaura-late": ("bot2",
+        "    before = guard_begin('killaura', 3.0)\n    spot = near(eidA, KA_DIST)\n    if spot:\n        for i in range(6):",
+        "    spot = near(eidA, KA_DIST)\n    if spot:\n        for i in range(6):\n            pass\n    before = guard_begin('killaura', 3.0)"),
+    # bot2: receipt loop skipped in guard_end
+    "M-bot2-no-receipt-loop": ("bot2",
+        "    for v in expect_damaged:",
+        "    for v in ():"),
 }
 
-# map: mutant -> test names expected to fail (exactly these)
 EXPECT = {
     "M-G1-ignore-entity-name": {"G1-entity-name-matched"},
     "M-G2-loose-payload": {"G2-truncated-pos-missing-bracket", "G2-truncated-health-missing-f", "G2-truncated-health-truncated-no-f"},
@@ -41,26 +82,45 @@ EXPECT = {
     "M-G4-first-match-wins": {"G4-freshest-wins"},
     "M-G5-no-coord-check": {"G5-wrong-coords-aborts"},
     "M-G6-always-static": {"G6-drift-aborts"},
+    "M-G7-no-max-abort": {"G7-far-attacker-aborts"},
+    "M-G7b-no-min-abort": {"G7b-close-attacker-aborts"},
+    "M-G8-unanchored-ans": {"G8-decoy-line-rejected"},
+    "M-G9-no-receipt-abort": {"G9-no-damage-aborts"},
+    "M-bot2-ka-dist-drift": {"T-bot2-ka-spec-dist"},
+    "M-bot2-no-prearm-guard": {"T-bot2-prearm-guard"},
+    "M-bot2-no-count-guard": {"T-bot2-count-guard"},
+    "M-bot2-wiring-killaura-late": {"T-bot2-wiring-killaura"},
+    "M-bot2-no-receipt-loop": {"T-bot2-guard-end-receipts"},
 }
 
-src = open(SRC).read()
+ONLY = set(filter(None, os.environ.get("MUT_ONLY", "").split(",")))
+if ONLY:
+    MUTANTS = {k: v for k, v in MUTANTS.items() if k in ONLY}
+real = {k: open(p).read() for k, (p, _) in FILES.items()}
 overall = True
-for name, (a, b) in MUTANTS.items():
-    if a not in src:
+for name, (fk, a, b) in MUTANTS.items():
+    if a not in real[fk]:
         print(f"{name}: PATTERN-MISSING")
         overall = False
         continue
     d = tempfile.mkdtemp()
-    p = os.path.join(d, "choreo.py")
-    open(p, "w").write(src.replace(a, b, 1))
-    r = subprocess.run([sys.executable, TEST], env={**os.environ, "CHOREO": p},
-                       capture_output=True, text=True, timeout=120)
+    env = dict(os.environ)
+    for k, (p, envvar) in FILES.items():
+        if k == fk:
+            mp = os.path.join(d, os.path.basename(p))
+            open(mp, "w").write(real[k].replace(a, b, 1))
+            env[envvar] = mp
+        else:
+            env[envvar] = p
+    r = subprocess.run([sys.executable, TEST], env=env,
+                       capture_output=True, text=True, timeout=180)
     failed = {l.split()[1] for l in r.stdout.splitlines() if l.startswith("FAIL")}
     want = EXPECT[name]
     if failed == want:
         print(f"{name}: KILLED exactly by {sorted(failed)}")
     elif failed & want == want:
         print(f"{name}: KILLED but also broke {sorted(failed - want)}")
+        overall = False
     else:
         print(f"{name}: SURVIVED (failed={sorted(failed)})")
         overall = False

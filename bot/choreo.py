@@ -22,6 +22,19 @@ tests/test_choreo.py + tests/mut_choreo.py):
   G5 a static victim at the WRONG coordinates aborts (expect check) - static
      is necessary, not sufficient
   G6 non-static victims abort (drift check)
+  G7 verify-arm compares the attacker distance against the reach band and
+     ABORTS outside it (a 1000-block probe at max_reach 3.0 never passes)
+  G8 answer lines are anchored to the server-log line origin - a chat/mod
+     decoy containing the answer text is never accepted
+  G9 arm receipt: post-arm victim Health must have DROPPED server-side,
+     compared by check_damage_receipt - a provoke the server never felt aborts
+
+known limits (documented, not guarded):
+  - "freshest" (G4) is the freshest COMPLETE line in the buffer at read time;
+    a reply landing mid-read is only seen on the next poll.
+  - the log file is pinned once per query, so rotation between mark and reads
+    cannot swap files; a NEW run*-lane.log created during a query is followed
+    only from the next query on (rotation unqualified beyond that).
 
 Usage:
   python3 choreo.py prepare SERVERDIR VICTIMA VICTIMB   # freeze, stage, verify static
@@ -31,7 +44,7 @@ Console answers are read from SERVERDIR/run*-lane.log (newest).
 """
 import glob, math, os, re, sys, time
 
-ANS_RE = re.compile(r"System chat: (\w+) has the following entity data: (.*)$", re.M)
+ANS_RE = re.compile(r"^\[[0-9:]{8}\] \[[^\]]+\]: System chat: (\w+) has the following entity data: (.*)$", re.M)
 POS_PAYLOAD = re.compile(r"^\[(-?\d+(?:\.\d+)?)d, (-?\d+(?:\.\d+)?)d, (-?\d+(?:\.\d+)?)d\]$")
 NUM_PAYLOAD = re.compile(r"^(-?\d+\.\d+)f$")
 
@@ -48,10 +61,11 @@ def console(serverdir, cmd):
         f.write(cmd + "\n")
 
 
-def answers(serverdir, mark, entity):
-    """Complete-line entity-data answers for `entity` written after `mark`,
-    oldest first. A partial trailing line is dropped (it may be mid-write)."""
-    with open(latest_log(serverdir)) as f:
+def answers(logpath, mark, entity):
+    """Complete-line entity-data answers for `entity` written after `mark` in
+    the pinned log file, oldest first. A partial trailing line is dropped (it
+    may be mid-write)."""
+    with open(logpath) as f:
         f.seek(mark)
         buf = f.read()
     buf = buf[: buf.rfind("\n") + 1]
@@ -62,12 +76,13 @@ def query(serverdir, cmd, entity, kind, timeout=5.0):
     """Send a console command and return the freshest well-formed answer for
     `entity`: POS_PAYLOAD for kind 'pos', NUM_PAYLOAD otherwise. Raises
     TimeoutError when no strict answer arrives in time - the caller aborts."""
-    mark = os.path.getsize(latest_log(serverdir))
+    logpath = latest_log(serverdir)  # pinned: rotation between mark and reads
+    mark = os.path.getsize(logpath)  #        cannot swap files mid-query
     console(serverdir, cmd)
     rx = POS_PAYLOAD if kind == "pos" else NUM_PAYLOAD
     t0 = time.time()
     while time.time() - t0 < timeout:
-        for payload in reversed(answers(serverdir, mark, entity)):
+        for payload in reversed(answers(logpath, mark, entity)):
             m = rx.match(payload)
             if m:
                 return m
@@ -125,16 +140,35 @@ def prepare(serverdir, va, vb, platform=(190, 60, 190)):
     print(f"victims staged {sep:.2f} apart; frozen + static. attacker may start.")
 
 
-def verify_arm(serverdir, va, vb, attacker, max_reach):
-    """Pre-arm: both victims static AND attacker within max_reach of victim A
-    per SERVER-SIDE Pos (client tracking is not evidence)."""
-    pa = verify_static(serverdir, va, gap=2.0)
-    pb = verify_static(serverdir, vb, gap=2.0)
+def verify_arm(serverdir, va, vb, attacker, max_reach, min_reach=0.0, gap=2.0):
+    """Pre-arm: both victims static AND attacker inside the reach band
+    [min_reach, max_reach] of victim A per SERVER-SIDE Pos (client tracking
+    is not evidence). ABORTS outside the band: a probe 1000 blocks out, or a
+    killaura-band attacker in the reach arm, never exits normally."""
+    pa = verify_static(serverdir, va, gap=gap)
+    pb = verify_static(serverdir, vb, gap=gap)
     atk = get_pos(serverdir, attacker)
     da = math.dist(atk, pa)
     db = math.dist(atk, pb)
-    print(f"attacker {tuple(round(v,2) for v in atk)} -> A {da:.2f}, B {db:.2f} (reach {max_reach})")
+    print(f"attacker {tuple(round(v,2) for v in atk)} -> A {da:.2f}, B {db:.2f} (reach band {min_reach}..{max_reach})")
+    if da > max_reach:
+        raise SystemExit(f"attacker {da:.2f} from {va} exceeds max_reach {max_reach} - abort before arm")
+    if da < min_reach:
+        raise SystemExit(f"attacker {da:.2f} from {va} inside min_reach {min_reach} - killaura-band geometry in the wrong arm, abort")
     return da, db, pa, pb
+
+
+def check_damage_receipt(serverdir, name, before, arm, timeout=5.0):
+    """Post-arm server-side receipt: victim Health must be strictly below
+    `before`. Raises SystemExit otherwise - zero-delta means the provoke
+    never reached the server (G3 receipt, automatic)."""
+    after = get_health(serverdir, name, timeout)
+    print(f"guard {arm} {name} health {before} -> {after}")
+    if not after < before:
+        raise SystemExit(
+            f"ARM GUARD FAIL {arm} {name}: no server-side damage received "
+            f"({before} -> {after})")
+    return after
 
 
 if __name__ == "__main__":
@@ -142,8 +176,11 @@ if __name__ == "__main__":
     if cmd == "prepare":
         prepare(sys.argv[2], sys.argv[3], sys.argv[4])
     elif cmd == "verify-arm":
-        verify_arm(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], float(sys.argv[6]))
+        verify_arm(sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], float(sys.argv[6]),
+                   float(sys.argv[7]) if len(sys.argv) > 7 else 0.0)
     elif cmd == "health":
         print(get_health(sys.argv[2], sys.argv[3]))
+    elif cmd == "receipt":
+        check_damage_receipt(sys.argv[2], sys.argv[3], float(sys.argv[4]), sys.argv[5])
     else:
         raise SystemExit(__doc__)

@@ -7,7 +7,7 @@ RAM gate first, in its OWN step: `free -m` available must be >= 1600MB (700 foot
 1. server: resilient fifo bridge `(while :; do cat in.fifo; sleep 0.2; done) | exec ~/jdk/jdk-25.0.5.1+2/bin/java -Xmx700M -jar server.jar nogui` + fifo holder. Record pids manually.
 2. victims: `BOTNAME=VictimA STILL=1 ... victim_bot.py`, same for VictimB (spec names them sam/ivy in fixtures; VictimA/VictimB here).
 3. freeze + stage + static-verify: `python3 bot/choreo.py prepare server VictimA VictimB` - stone platform at (190,60,190), slowness 255 + gravity 0 + knockback_resistance 1, tp both, aborts unless both static within 0.05 over 3s AT the expected coordinates.
-4. attacker: `COMBAT_ONLY=1 DESCEND=1 ARM_PAUSE=12 HOLD_AFTER=20 ... bot2.py`. ARM_PAUSE leaves the console window between arms.
+4. attacker: `COMBAT_ONLY=1 DESCEND=1 ARM_PAUSE=12 HOLD_AFTER=20 ... bot2.py` (SERVERDIR env overrides the server dir). bot2 self-guards every arm: pre-arm `choreo.py verify-arm` band check (killaura 3.0, reach [4.6..6.7], multiaura 3.0; a probe outside the band aborts the run), post-arm exact sent counts (a silently shortened arm aborts) plus a choreo `receipt` Health-delta check per attacked victim (zero server-side damage aborts). ARM_PAUSE still leaves the console window between arms.
 5. per-arm verification below, then teardown: TERM exact owned PID/PGID only (attacker, victims, holder, server pgid), verify `ps` clean, `free -m` recovered.
 
 ## verdict mapping (arch black-box spec, folded)
@@ -28,4 +28,4 @@ per arm (choreo.py verify-arm / health provides the server-side records):
 
 bot-only session verdicts: G3/G4-side calibration only ("lane-run"). The watcher-note half of every arm's proof waits for the frontend lane's real-client boot under RAM coordination.
 
-parser/verification hardening: bot/choreo.py guards G1-G6 (entity-name match, strict payloads, missing-reply abort, freshest-wins, expected-coords, drift abort), pinned by tests/test_choreo.py (12/12) and tests/mut_choreo.py (6 mutants, each killed exactly by its guard).
+parser/verification hardening: bot/choreo.py guards G1-G9 (entity-name match, strict payloads, missing-reply abort, freshest-wins, expected-coords, drift abort, reach-band compare+abort, line-anchored answers, damage receipt) plus bot2 whole-arm wiring and count guards, pinned by tests/test_choreo.py (22/22) and tests/mut_choreo.py (15 mutants, each killed exactly; MUT_ONLY=name,name runs a subset). documented limits, unguarded: "freshest" is freshest complete line in the read buffer; the log file is pinned per query but a newly rotated log is followed only from the next query. test/mutant paths default to the repo layout (tests/../bot) and are overridable via CHOREO/BOT2 env.

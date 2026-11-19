@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # minimal 26.3 (protocol 777) offline bot: legit movement, then provoke phases.
-import socket, struct, zlib, threading, time, math, uuid as uuidlib, sys
+import socket, struct, zlib, threading, time, math, uuid as uuidlib, sys, subprocess, os
 
 HOST, PORT = '127.0.0.1', 25565
 NAME = 'ProvokeBot'
@@ -194,6 +194,55 @@ def _juuid(n):  # java UUID.nameUUIDFromBytes: namespace-less MD5
 VUUID = {_juuid(n): n for n in VICTIMS}
 ents = {}  # entityId -> [x,y,z]
 
+# spec distances (verification spec P1/P2/P4): killaura + multiaura at 2.5, reach at 5.2
+KA_DIST = 2.5
+REACH_DIST = 5.2
+MULTI_DIST = 2.5
+CHOREO = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'choreo.py')
+SERVERDIR = os.environ.get('SERVERDIR', 'server')
+sent = {'VictimA': 0, 'VictimB': 0}
+
+def _choreo(*args):
+    try:
+        return subprocess.run([sys.executable, CHOREO] + list(args),
+                              capture_output=True, text=True, timeout=60)
+    except Exception as e:
+        log('ARM GUARD FAIL: choreo call crashed:', e); sys.exit(1)
+
+def choreo_health(name):
+    r = _choreo('health', SERVERDIR, name)
+    try:
+        return float(r.stdout.strip())
+    except ValueError:
+        log('ARM GUARD FAIL: no health for', name, r.stdout.strip()[-120:]); sys.exit(1)
+
+def guard_begin(arm, max_reach, min_reach=0.0):
+    """Pre-arm: server-side geometry proof via choreo verify-arm; aborts the run
+    when the band check fails. Returns victim Health before the arm."""
+    args = ['verify-arm', SERVERDIR, 'VictimA', 'VictimB', NAME, str(max_reach)]
+    if min_reach: args.append(str(min_reach))
+    r = _choreo(*args)
+    log('pre-arm guard', arm, 'rc', r.returncode)
+    if r.returncode != 0:
+        log('ARM GUARD FAIL pre-arm', arm, r.stdout.strip()[-200:]); sys.exit(1)
+    return {v: choreo_health(v) for v in ('VictimA', 'VictimB')}
+
+def guard_end(arm, before, expect_sent, expect_damaged):
+    """Post-arm: exact sent counts (a silently shortened arm fails) plus a
+    server-side damage receipt per attacked victim (G3/G4, automatic)."""
+    ok = True
+    for v, n in expect_sent.items():
+        if sent[v] != n:
+            log('ARM GUARD FAIL', arm, v, ': sent', sent[v], 'attacks, spec wants', n); ok = False
+    for v in expect_damaged:
+        r = _choreo('receipt', SERVERDIR, v, str(before[v]), arm)
+        log(r.stdout.strip())
+        if r.returncode != 0:
+            ok = False
+    if not ok:
+        sys.exit(1)
+    log('arm guard ok:', arm)
+
 selfpos = [0.0, 0.0, 0.0]
 def tick_send(x, y, z, onground, yaw=None, pitch=0.0):
     selfpos[0], selfpos[1], selfpos[2] = x, y, z
@@ -203,9 +252,10 @@ def tick_send(x, y, z, onground, yaw=None, pitch=0.0):
     else:
         c.send(0x1F, struct.pack('>dddff', x, y, z, yaw, pitch) + bytes([0x01 if onground else 0x00]))
 
-def attack(eid):
+def attack(eid, victim=None):
     c.send(0x2E)  # punch (swing)
     c.send(0x01, enc_varint(eid))  # attack
+    if victim: sent[victim] += 1
 
 def walk_to(tx, ty, tz, yaw=None):
     while not disconnected.is_set():
@@ -258,7 +308,6 @@ def run_phase(name, seconds, fn):
         t += 1
         time.sleep(0.05)
 
-import os
 if not os.environ.get('COMBAT_ONLY'):
     _phases = True
 run_phase('legit-silence', 0 if os.environ.get('COMBAT_ONLY') else 75, lambda t: tick_send(cx0 - 8 + 8*math.cos(t*0.02), gy, cz0 + 8*math.sin(t*0.02), True))
@@ -292,51 +341,53 @@ if ents:
         tick_send(A()[0], ty, A()[2], True)
         time.sleep(1.0)
         log('descend done at', ty)
-    spot = near(eidA, 2.5)
+    before = guard_begin('killaura', 3.0)
+    spot = near(eidA, KA_DIST)
     if spot:
-        ax, ay, az, vx, vz = spot
-        away = bearing_yaw(ax, az, vx, vz) + 180.0
         for i in range(6):
-            spot = near(eidA, 2.0)  # recompute from live ents: victims wander
+            spot = near(eidA, KA_DIST)  # recompute from live ents: victims wander
             if not spot: break
             ax, ay, az, vx, vz = spot
             away = bearing_yaw(ax, az, vx, vz) + 100.0  # spec P1: ~100 deg off-facing
             walk_to(ax, ay, az, yaw=away) if i == 0 else tick_send(ax, ay, az, True, yaw=away)
-            attack(eidA)
-            log('killaura hit', i + 1, 'off-facing')
+            attack(eidA, 'VictimA')
+            log('killaura hit', i + 1, 'off-facing from', KA_DIST)
             time.sleep(0.2)  # 4 ticks apart per spec
+    guard_end('killaura', before, {'VictimA': 6}, ('VictimA',))
     _ap = float(os.environ.get('ARM_PAUSE', '0'))
     if _ap:
         log('ARM killaura DONE, pausing', _ap)
         time.sleep(_ap)
-    spot = None if os.environ.get('KA_ONLY') else near(eidA, 5.2)
+    spot = None if os.environ.get('KA_ONLY') else near(eidA, REACH_DIST)
     if spot:
-        ax, ay, az, vx, vz = spot
+        before = guard_begin('reach', REACH_DIST + 1.5, min_reach=4.6)
         for i in range(6):
-            spot = near(eidA, 5.2)
+            spot = near(eidA, REACH_DIST)
             if not spot: break
             ax, ay, az, vx, vz = spot
             toward = bearing_yaw(ax, az, vx, vz)
             walk_to(ax, ay, az, yaw=toward) if i == 0 else tick_send(ax, ay, az, True, yaw=toward)
-            attack(eidA)
-            log('reach hit', i+1, 'from 5.2')
+            attack(eidA, 'VictimA')
+            log('reach hit', i+1, 'from', REACH_DIST)
             time.sleep(0.2)  # 4 ticks apart per spec
+        guard_end('reach', before, {'VictimA': 6}, ('VictimA',))
     if _ap:
         log('ARM reach DONE, pausing', _ap)
         time.sleep(_ap)
     if eidB and not os.environ.get('KA_ONLY'):
-        spot = near(eidA, 2.0)
+        before = guard_begin('multiaura', 3.0)
+        spot = near(eidA, MULTI_DIST)
         if spot:
-            ax, ay, az, vx, vz = spot
             for b in range(4):
-                spot = near(eidA, 2.0)
+                spot = near(eidA, MULTI_DIST)
                 if not spot: break
                 ax, ay, az, vx, vz = spot
                 toward = bearing_yaw(ax, az, vx, vz)
                 walk_to(ax, ay, az, yaw=toward) if b == 0 else tick_send(ax, ay, az, True, yaw=toward)
-                attack(eidA); attack(eidB)
+                attack(eidA, 'VictimA'); attack(eidB, 'VictimB')
                 log('multiaura burst', b+1)
                 time.sleep(0.15)  # one burst every 3 ticks per spec
+        guard_end('multiaura', before, {'VictimA': 4, 'VictimB': 4}, ('VictimA', 'VictimB'))
 else:
     log('NO VICTIMS SEEN - combat arms not exercised')
 _hold = float(os.environ.get('HOLD_AFTER', '0'))
@@ -346,7 +397,7 @@ if _hold:
     while time.time() - t0 < _hold and not disconnected.is_set():
         if os.environ.get('KA_LOOP') and ents:
             eidL, posL = list(ents.items())[0]
-            spot = near(eidL, 2.0)
+            spot = near(eidL, KA_DIST)
             if spot:
                 ax, ay, az, vx, vz = spot
                 tick_send(ax, ay, az, True, yaw=bearing_yaw(ax, az, vx, vz) + 180.0)
