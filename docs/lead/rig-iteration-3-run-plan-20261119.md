@@ -12,8 +12,9 @@ gates, in order, each in its OWN step:
 launch (never reuse pids across restarts; never `source` pid files - keys
 contain dashes; record each PID/PGID at launch in shell vars):
 1. server: resilient fifo bridge `(while :; do cat in.fifo; sleep 0.2; done) |
-   exec ~/jdk/jdk-25.0.5.1+2/bin/java -Xmx700M -jar server.jar nogui` + fifo
-   holder. server needs the JDK 25 path.
+   exec "$JAVA25" -Xmx700M -jar server.jar nogui` + fifo
+   holder. set JAVA25 to the local JDK 25 executable before launch and verify
+   `"$JAVA25" -version`; the path is host-specific and must be substituted.
 2. victims: BOTNAME=VictimA STILL=1 victim_bot.py; same for VictimB.
 3. stage + verify: python3 bot/choreo.py prepare server VictimA VictimB
    (stone platform, slowness 255 + gravity 0 + kb-resist 1, static-verified

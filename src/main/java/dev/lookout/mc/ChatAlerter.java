@@ -11,13 +11,19 @@ public class ChatAlerter implements AlertSink {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("lookout");
 
+    // Keep player names out of persistent logs unless capture tracing is on.
+    private static final boolean TRACE = System.getenv("MESHAC_TRACE") != null;
+
     @Override
     public void alert(int entityId, String playerName, String checkId, String message) {
         String name = playerName == null || playerName.isBlank() ? "someone" : playerName;
         // shim risk R9: the log line is the evidence surface and must exist even
-        // when the chat route is unavailable (client.gui == null used to swallow
-        // the alert into a silent return - a chat-scored run then read as SILENT).
-        LOGGER.info("[lookout] {}: {}", name, message);
+        // when the chat route is unavailable.
+        if (TRACE) {
+            LOGGER.info("[lookout] {}: {}", name, message);
+        } else {
+            LOGGER.info("[lookout] alert entity={} check={}", entityId, checkId);
+        }
         Minecraft client = Minecraft.getInstance();
         if (client.gui == null) return;
         client.gui.chatListener().handleSystemMessage(
