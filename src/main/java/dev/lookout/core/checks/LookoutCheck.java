@@ -23,6 +23,10 @@ public abstract class LookoutCheck {
 
     public void onProjectile(ObservedPlayer p, long tick, LookoutConfig cfg, AlertSink sink) {}
 
+    /** A damage packet says this player (cause+direction ids match) hurt another tracked player. */
+    public void onHitEvidence(ObservedPlayer p, ObservedPlayer victim, long tick,
+                              LookoutConfig cfg, AlertSink sink) {}
+
     protected void fail(ObservedPlayer p, ObservedSample s, AlertSink sink, String message) {
         sink.alert(p.entityId, p.name, id(), message);
         buffer *= 0.5;

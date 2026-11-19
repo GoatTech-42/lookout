@@ -8,7 +8,9 @@ import dev.lookout.core.WorldProbe;
 
 /**
  * NoSlow: moving at full speed while eating, drinking, drawing a bow or blocking.
- * Vanilla slows item use to a crawl; keeping sprint pace through it is a cheat.
+ * Experimental, configurable heuristic: the cap is a rough line, not a sourced
+ * vanilla maximum. Vanilla slows item use heavily; keeping sprint pace through it
+ * is a cheat.
  * FP notes: a grace covers the momentum you carry into the use (sprint, then eat),
  * and slippery ground exempts outright (sliding on ice while eating is legit and
  * reading the difference from outside is guesswork). Vehicles, elytra, water,
@@ -29,13 +31,15 @@ public class NoSlowCheck extends LookoutCheck {
         if (!s.usingItem()) { useStart = -1000; streak = 0; return; }
         if (!prev.usingItem()) { useStart = s.tick(); streak = 0; return; }
         boolean exempt = s.gamemodeExempt() || s.inVehicle() || s.gliding() || s.inWater()
+                || !s.onGround() // hopping keeps momentum legitimately
                 || w.isClimbableAt(s.x(), s.y(), s.z())
                 || w.isSlipperyAt(s.x(), s.y() - 0.5, s.z())
                 || p.ticksSince(p.lastVelocityTick, s.tick()) < 20
                 || p.ticksSince(p.lastTeleportTick, s.tick()) < 5
                 || s.tick() - useStart < cfg.noslowGraceTicks;
         if (exempt) { streak = 0; return; }
-        if (s.horizontalSpeed(prev) > cfg.noslowMaxSpeed) {
+        double cap = cfg.noslowMaxSpeed * (1 + 0.2 * s.speedLevel()); // speed effect scales the crawl too
+        if (s.horizontalSpeed(prev) > cap) {
             streak++;
             if (streak >= cfg.noslowSustainTicks) {
                 fail(p, s, sink, "moving at full speed while using an item");

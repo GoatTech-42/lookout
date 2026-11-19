@@ -72,41 +72,52 @@ clocks).
   compresses the observed pop-to-restock gap and could make a legit fast restock
   look instant. not yet measured against real traffic.
 
-## killaura facing
+## killaura facing (off by default, opt-in)
 
-- only judges when another player is within plausible combat range, so swinging at
-  air, mobs or nothing never counts.
-- the angle tolerance is wide and lag-lerped positions widen it further; single odd
-  swings decay, it needs a run of off-target swings.
-- known FP risk: lookout cannot see mobs. someone fighting a mob while a player
-  stands nearby can read as off-target swings. the alert stays hedged for this reason.
+- evidence comes from damage packets: they name the hurt player and the player who
+  caused it. no damage packet, no judgment, so mob fights, mining and bystanders
+  never enter the picture. only melee counts (cause and direct ids match).
+- the angle tolerance is wide and positions are lag-lerped; single odd hits decay,
+  and the buffer also fades over time so spaced-out incidents never add up.
+- still opt-in: the judgment is heuristic and the alert stays hedged.
+
+## rough reach (off by default, opt-in)
+
+- same damage-packet evidence: only real hits on a tracked player are judged, at
+  both ends' smoothed positions.
+- the distance bar sits well past vanilla's roughly-3-block melee reach plus a
+  lag-lerp margin, single long hits decay, and the buffer fades over time.
+- still the roughest check in lookout; the bar is heuristic. treat its notes with
+  the most skepticism.
 
 ## fastbow
 
-- arrow power comes from the spawn velocity in the add-entity packet; the shooter is
-  the nearest player seen drawing a bow, so two archers side by side can
-  cross-attribute. needs three fast full-power shots, each after an observed bow draw.
-- weak spam-click arrows are slow and never count; crossbows do not use the bow
-  draw animation and never count; full draws of ~20 ticks never count.
+- the shooter comes from the add-entity packet's owner field, not from proximity,
+  so bystanders are never blamed. arrows with an unknown or untracked owner are
+  skipped: skeleton fire, other players' shots and your own arrows never count
+  against someone drawing a bow nearby.
+- crossbow arrows belong to their real owner too; since the check also needs an
+  observed bow draw before that release, crossbow fire never counts.
+- one draw fuels one counted release: a multi-arrow burst on a single draw counts
+  once, and duplicate spawn packets are deduped by entity id.
+- weak spam-click arrows are slow and never count; honest full draws never count.
+- the full-power speed line is a heuristic, not a sourced vanilla maximum.
 
-## noslow
+## noslow (experimental configurable heuristic)
 
+- the speed line is a rough, configurable line, not a sourced vanilla maximum.
+- only grounded ticks count (hopping keeps momentum legitimately), and the line
+  scales with the visible speed effect.
 - a grace covers the momentum carried into the use (sprint, then eat), and slippery
   ground exempts outright: sliding on ice while eating is legit and the difference
   is not readable from outside. that exemption is also a known hole.
 - vehicles, elytra, water, climbables, knockback and teleports exempt.
-- needs a sustained run of fast using-ticks, so the first coasting ticks never flag.
+- unqualified FP risk: momentum sources the sim does not model (slopes, slime,
+  water exits, wind charges) could push a legit using-player over the line.
 
-## rough reach
+## elytra overspeed (experimental configurable heuristic)
 
-- roughest check in lookout. it only counts swings lined up on the nearest player,
-  well past vanilla reach plus a lag-lerp margin, and it needs a run of them.
-- known FP risk: mobs are invisible, so fighting a mob next to a player can read as
-  long swings at that player. treat its notes with the most skepticism.
-
-## elytra overspeed
-
-- only level-or-climbing glides count; dives trade height for speed legitimately and
-  exempt, and pullouts decay inside the sustain window.
-- firework boosts top out under the cap, so boosted level flight stays quiet.
-- the cap approximates vanilla elytra physics from outside; borderline notes are weak.
+- only level-or-climbing glides count; dives trade height for speed legitimately
+  and exempt, and pullouts decay inside the sustain window.
+- the cap approximates unpowered and firework-boosted flight from outside; it is
+  not a sourced vanilla maximum, and borderline notes are weak.

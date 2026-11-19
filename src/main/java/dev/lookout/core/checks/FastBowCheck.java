@@ -7,18 +7,18 @@ import dev.lookout.core.ObservedSample;
 import dev.lookout.core.WorldProbe;
 
 /**
- * FastBow: near-full-power arrows released after almost no draw. Vanilla spam-clicking
- * makes weak, slow arrows; vanilla full power needs a ~20 tick draw. A fast arrow off a
- * two-tick draw is a machine.
- * FP notes: arrow power comes from the spawn velocity in the S2C add-entity packet, and
- * the shooter is attributed as the nearest player seen drawing a bow, so two archers
- * side by side can cross-attribute. It needs three fast full-power shots inside the
- * memory window, and every shot must follow an observed bow draw. Crossbows load with
- * the crossbow in hand (not the bow use-animation), so they never count.
+ * FastBow: near-full-power arrows released after almost no draw. Spam-clicking a bow
+ * makes weak, slow arrows; a full-power arrow off a two-tick draw is a machine.
+ * FP notes: arrow power comes from the spawn velocity in the S2C add-entity packet,
+ * and the shooter comes from that packet's owner field, so bystanders are never
+ * blamed; arrows with an unknown or untracked owner are skipped. One draw fuels one
+ * counted release, so a multi-arrow burst on a single draw counts once. It still
+ * needs three fast full-power shots inside the memory window.
  */
 public class FastBowCheck extends LookoutCheck {
 
     private long drawStart = -1000;
+    private long countedDraw = -1000;
     private int fastCount;
     private long lastFast = -1000;
 
@@ -33,8 +33,10 @@ public class FastBowCheck extends LookoutCheck {
     @Override
     public void onProjectile(ObservedPlayer p, long tick, LookoutConfig cfg, AlertSink sink) {
         if (tick - lastFast > cfg.fastbowMemoryTicks) fastCount = 0;
+        if (drawStart == countedDraw) return; // one draw fuels one counted release
         long draw = tick - drawStart;
         if (p.lastProjectileSpeed >= cfg.fastbowFullPowerSpeed && draw <= cfg.fastbowMaxDrawTicks) {
+            countedDraw = drawStart;
             fastCount++;
             lastFast = tick;
             if (fastCount >= cfg.fastbowCount) {

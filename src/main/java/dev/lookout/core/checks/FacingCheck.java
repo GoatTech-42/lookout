@@ -7,15 +7,14 @@ import dev.lookout.core.ObservedSample;
 import dev.lookout.core.WorldProbe;
 
 /**
- * KillAura facing: swinging while looking nowhere near the closest player in range.
- * A legit hit lines up with where the attacker looks; auras that keep a server-side
- * rotation (or no rotation) swing with their back to the target.
- * FP notes: only judges when another player is within plausible combat range, so
- * swinging at air, mobs or nothing never counts. The tolerance is wide (past any
- * legit flick) and positions are lag-lerped, so single odd swings decay away; it
- * needs a run of off-target swings. Mobs are invisible to lookout: someone fighting
- * a mob with a player standing nearby can read as off-target swings, which is why
- * the alert stays hedged.
+ * KillAura facing: a player keeps damaging someone they are not looking at.
+ * Evidence comes from damage packets, which name the hurt entity and the entity
+ * that caused it, so lookout never guesses a victim: no damage packet, no judgment.
+ * Off by default (opt-in in lookout.json).
+ * FP notes: only melee damage counts (cause and direct ids match). The angle
+ * tolerance is wide and positions are lag-lerped, so single odd hits decay; it
+ * needs a run of off-facing hits. The buffer also decays over time, so spaced-out
+ * incidents never add up.
  */
 public class FacingCheck extends LookoutCheck {
 
@@ -28,21 +27,34 @@ public class FacingCheck extends LookoutCheck {
         return Math.abs(diff);
     }
 
+    static double distance3d(ObservedSample a, ObservedSample b) {
+        return Math.sqrt((a.x() - b.x()) * (a.x() - b.x())
+                + (a.y() - b.y()) * (a.y() - b.y())
+                + (a.z() - b.z()) * (a.z() - b.z()));
+    }
+
     @Override
-    public void onSwing(ObservedPlayer p, long tick, LookoutConfig cfg, AlertSink sink) {
-        ObservedSample s = p.prev;
-        if (s == null) return;
-        double dist = p.lastSwingNearestDist;
-        if (dist < 0 || dist > cfg.killauraRange) { decay(0.5); return; } // nobody close enough to judge
-        double off = yawToBearingDiff(s.yaw(), p.lastSwingBearing);
+    public void onSample(ObservedPlayer p, ObservedSample s, ObservedSample prev, WorldProbe w,
+                         LookoutConfig cfg, AlertSink sink) {
+        decay(0.02); // old incidents fade even without swings
+    }
+
+    @Override
+    public void onHitEvidence(ObservedPlayer p, ObservedPlayer victim, long tick,
+                              LookoutConfig cfg, AlertSink sink) {
+        ObservedSample a = p.prev, v = victim.prev;
+        if (a == null || v == null || a.gamemodeExempt()) return;
+        double dist = distance3d(a, v);
+        if (dist > cfg.killauraRange) return; // too far to read angles; reach owns long hits
+        double bearing = Math.toDegrees(Math.atan2(-(v.x() - a.x()), v.z() - a.z()));
+        double off = yawToBearingDiff(a.yaw(), bearing);
         if (off > cfg.killauraFacingDegrees) {
             buffer += 1.0;
             if (buffer > cfg.killauraBufferMax) {
-                fail(p, s, sink, "swinging without facing the target (off by "
-                        + Math.round(off) + " degrees)");
+                fail(p, a, sink, "hits landing while facing away (off by " + Math.round(off) + " degrees)");
             }
         } else {
-            decay(0.5);
+            decay(1.0);
         }
     }
 }

@@ -7,13 +7,12 @@ import dev.lookout.core.ObservedSample;
 import dev.lookout.core.WorldProbe;
 
 /**
- * Elytra overspeed: gliding level (or climbing) far past what elytra physics allow.
- * Vanilla tops out near 1.5 blocks/tick unpowered and just under 2 with firework
- * boosts; dives go faster but trade height for it, so only fast AND not-descending
- * counts.
+ * Elytra overspeed: gliding level (or climbing) far past ordinary elytra flight.
+ * Experimental, configurable heuristic: the cap approximates unpowered and
+ * firework-boosted flight from the outside; it is not a sourced vanilla maximum.
+ * Dives go faster but trade height for it, so only fast AND not-descending counts.
  * FP notes: pullouts keep dive speed for a moment, so the streak must sustain past
- * that. Knockback and teleports exempt. The speed cap is an approximation of vanilla
- * elytra physics from the outside; treat borderline notes as weak.
+ * that. Knockback and teleports exempt. Treat borderline notes as weak.
  */
 public class ElytraCheck extends LookoutCheck {
 

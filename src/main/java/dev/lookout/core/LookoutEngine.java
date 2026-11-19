@@ -25,6 +25,7 @@ public class LookoutEngine {
     private final Map<Integer, ObservedPlayer> players = new ConcurrentHashMap<>();
     private final Map<Integer, List<LookoutCheck>> checks = new ConcurrentHashMap<>();
     private final Map<String, Long> lastAlertAt = new ConcurrentHashMap<>();
+    private final java.util.Set<Integer> seenProjectileIds = new java.util.LinkedHashSet<>();
 
     public LookoutEngine(LookoutConfig config, AlertSink sink) {
         this.config = config;
@@ -94,69 +95,42 @@ public class LookoutEngine {
         if (!config.enabled) return;
         ObservedPlayer p = players.get(entityId);
         if (p == null || p.prev == null) return;
-        ObservedPlayer nearest = nearestOther(entityId, p.prev.tick());
-        if (nearest != null) {
-            p.lastSwingNearestDist = distance(p.prev, nearest.prev);
-            p.lastSwingBearing = bearingDegrees(p.prev, nearest.prev);
-        } else {
-            p.lastSwingNearestDist = -1;
-        }
         AlertSink gated = gatedSink();
         for (LookoutCheck check : checksFor(entityId)) check.onSwing(p, p.prev.tick(), config, gated);
     }
 
     /**
-     * An arrow (or spectral arrow) just spawned. Attribute it to the nearest tracked
-     * player seen drawing a bow in the last 15 ticks; unclaimed arrows are ignored.
+     * A damage packet says causeId hurt victimId. Only melee counts here: when cause
+     * and direct ids differ the damage came through a projectile or another carrier,
+     * which facing and reach do not judge.
      */
-    public void onProjectileSpawn(double x, double y, double z, double speed) {
+    public void onDamage(int victimId, int causeId, int directId) {
         if (!config.enabled) return;
-        ObservedPlayer best = null;
-        double bestDist = 16; // squared, 4 blocks
-        for (ObservedPlayer p : players.values()) {
-            if (p.prev == null) continue;
-            if (!drewBowRecently(p, 15)) continue;
-            double dx = p.prev.x() - x, dy = p.prev.y() + 1.4 - y, dz = p.prev.z() - z;
-            double d = dx * dx + dy * dy + dz * dz;
-            if (d < bestDist) { bestDist = d; best = p; }
-        }
-        if (best == null) return;
-        best.lastProjectileSpeed = speed;
-        best.lastProjectileTick = best.prev.tick();
+        if (causeId <= 0 || causeId != directId) return;
+        ObservedPlayer attacker = players.get(causeId);
+        ObservedPlayer victim = players.get(victimId);
+        if (attacker == null || victim == null || attacker.prev == null || victim.prev == null) return;
+        if (Math.abs(attacker.prev.tick() - victim.prev.tick()) > 40) return; // stale observation
+        long tick = Math.max(attacker.prev.tick(), victim.prev.tick());
         AlertSink gated = gatedSink();
-        for (LookoutCheck check : checksFor(best.entityId)) check.onProjectile(best, best.prev.tick(), config, gated);
+        for (LookoutCheck check : checksFor(causeId)) check.onHitEvidence(attacker, victim, tick, config, gated);
     }
 
-    private boolean drewBowRecently(ObservedPlayer p, int withinTicks) {
-        for (ObservedSample s : p.samples) {
-            if (s.usingBow() && p.prev != null && p.prev.tick() - s.tick() <= withinTicks) return true;
-        }
-        return false;
-    }
-
-    private ObservedPlayer nearestOther(int entityId, long tick) {
-        ObservedPlayer self = players.get(entityId);
-        if (self == null || self.prev == null) return null;
-        ObservedPlayer best = null;
-        double bestDist = Double.MAX_VALUE;
-        for (ObservedPlayer p : players.values()) {
-            if (p.entityId == entityId || p.prev == null) continue;
-            if (tick - p.prev.tick() > 40) continue; // stale observation
-            double d = distance(self.prev, p.prev);
-            if (d < bestDist) { bestDist = d; best = p; }
-        }
-        return best;
-    }
-
-    private static double distance(ObservedSample a, ObservedSample b) {
-        return Math.sqrt((a.x() - b.x()) * (a.x() - b.x())
-                + (a.y() - b.y()) * (a.y() - b.y())
-                + (a.z() - b.z()) * (a.z() - b.z()));
-    }
-
-    /** MC yaw convention: 0 is south (+z), 90 is west (-x). */
-    private static double bearingDegrees(ObservedSample from, ObservedSample to) {
-        return Math.toDegrees(Math.atan2(-(to.x() - from.x()), to.z() - from.z()));
+    /**
+     * An arrow (or spectral arrow) just spawned. The owner comes from the add-entity
+     * packet's data field; arrows with an unknown or untracked owner are skipped, so
+     * bystanders are never blamed for someone else's shot. Projectile ids are deduped.
+     */
+    public void onProjectileSpawn(double x, double y, double z, double speed, int projectileId, int ownerId) {
+        if (!config.enabled) return;
+        if (seenProjectileIds.size() > 1024) seenProjectileIds.clear();
+        if (ownerId <= 0 || !seenProjectileIds.add(projectileId)) return;
+        ObservedPlayer owner = players.get(ownerId);
+        if (owner == null || owner.prev == null) return;
+        owner.lastProjectileSpeed = speed;
+        owner.lastProjectileTick = owner.prev.tick();
+        AlertSink gated = gatedSink();
+        for (LookoutCheck check : checksFor(ownerId)) check.onProjectile(owner, owner.prev.tick(), config, gated);
     }
 
     public void onTotemPop(int entityId) {

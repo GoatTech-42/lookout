@@ -7,33 +7,38 @@ import dev.lookout.core.ObservedSample;
 import dev.lookout.core.WorldProbe;
 
 /**
- * Rough reach: repeated swings lined up on a player who is too far away to hit.
- * Vanilla survival reach is about 3 blocks; the bar here is far past that plus the
- * lag-lerp margin.
- * FP notes: lookout cannot see mobs, so someone fighting a mob next to a player can
- * read as swinging at that player; the facing alignment requirement makes that rarer,
- * not impossible. Positions arrive smoothed over 3 ticks, so the distance bar carries
- * a wide margin and single long swings decay. This is the roughest check in lookout
- * and its notes deserve the most skepticism.
+ * Rough reach: a player keeps damaging someone too far away to hit. Evidence comes
+ * from damage packets, which name the hurt entity and the entity that caused it, so
+ * bystanders, mob fights and mining never enter the picture. Off by default (opt-in
+ * in lookout.json).
+ * FP notes: the distance bar sits well past vanilla's roughly-3-block melee reach
+ * plus a margin for lag-lerped positions, single long hits decay, and the buffer
+ * fades over time. Still the roughest check in lookout: the bar is heuristic, and
+ * both ends' positions arrive smoothed.
  */
 public class ReachCheck extends LookoutCheck {
 
     @Override public String id() { return "reach"; }
 
     @Override
-    public void onSwing(ObservedPlayer p, long tick, LookoutConfig cfg, AlertSink sink) {
-        ObservedSample s = p.prev;
-        if (s == null) return;
-        double dist = p.lastSwingNearestDist;
-        if (dist < 0 || dist > 16) { decay(0.5); return; } // nobody around, or too far to call
-        double off = FacingCheck.yawToBearingDiff(s.yaw(), p.lastSwingBearing);
-        if (dist > cfg.reachBlocks && off < cfg.reachFacingDegrees) {
+    public void onSample(ObservedPlayer p, ObservedSample s, ObservedSample prev, WorldProbe w,
+                         LookoutConfig cfg, AlertSink sink) {
+        decay(0.02);
+    }
+
+    @Override
+    public void onHitEvidence(ObservedPlayer p, ObservedPlayer victim, long tick,
+                              LookoutConfig cfg, AlertSink sink) {
+        ObservedSample a = p.prev, v = victim.prev;
+        if (a == null || v == null || a.gamemodeExempt()) return;
+        double dist = FacingCheck.distance3d(a, v);
+        if (dist > cfg.reachBlocks) {
             buffer += 1.0;
             if (buffer > cfg.reachBufferMax) {
-                fail(p, s, sink, "swinging at someone " + String.format("%.1f", dist) + " blocks away");
+                fail(p, a, sink, "hits landing from " + String.format("%.1f", dist) + " blocks away");
             }
         } else {
-            decay(0.5);
+            decay(1.0);
         }
     }
 }

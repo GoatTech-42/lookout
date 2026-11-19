@@ -6,6 +6,7 @@ import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
+import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
@@ -32,7 +33,15 @@ public abstract class ClientPacketListenerMixin {
         if (LookoutClient.ENGINE == null) return;
         if (packet.getType() != EntityTypes.ARROW && packet.getType() != EntityTypes.SPECTRAL_ARROW) return;
         double speed = packet.getMovement().length(); // blocks/tick
-        LookoutClient.ENGINE.onProjectileSpawn(packet.getX(), packet.getY(), packet.getZ(), speed);
+        LookoutClient.ENGINE.onProjectileSpawn(packet.getX(), packet.getY(), packet.getZ(), speed,
+                packet.getId(), packet.getData());
+    }
+
+    @Inject(method = "handleDamageEvent", at = @At("TAIL"))
+    private void lookout$damage(ClientboundDamageEventPacket packet, CallbackInfo ci) {
+        if (LookoutClient.ENGINE != null) {
+            LookoutClient.ENGINE.onDamage(packet.entityId(), packet.sourceCauseId(), packet.sourceDirectId());
+        }
     }
 
     @Inject(method = "handleAnimate", at = @At("TAIL"))

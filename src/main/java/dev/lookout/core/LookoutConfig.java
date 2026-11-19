@@ -9,10 +9,10 @@ public class LookoutConfig {
     public boolean step = true;
     public boolean speed = true;
     public boolean totem = true;
-    public boolean killaura = true;
+    public boolean killaura = false; // opt-in: roughest judgment in lookout
     public boolean fastbow = true;
     public boolean noslow = true;
-    public boolean reach = true;
+    public boolean reach = false; // opt-in: roughest judgment in lookout
     public boolean elytra = true;
 
     /** air ticks of grace before flight math engages (covers legit jumps + lag) */
@@ -34,9 +34,9 @@ public class LookoutConfig {
     /** swing angle off the target bearing that reads as killaura facing */
     public double killauraFacingDegrees = 55;
     public double killauraBufferMax = 4.0;
-    /** only judge facing when someone is actually within plausible combat range */
+    /** only judge facing for hits inside plausible combat range; reach owns longer hits */
     public double killauraRange = 4.6;
-    /** arrow speed in blocks/tick that reads as near-full draw (vanilla max ~3.0) */
+    /** arrow speed in blocks/tick that reads as near-full power (heuristic, not a sourced maximum) */
     public double fastbowFullPowerSpeed = 2.5;
     /** draw shorter than this with a near-full-power arrow reads as fastbow */
     public int fastbowMaxDrawTicks = 5;

@@ -78,6 +78,30 @@ public class LookoutSim {
         return new LookoutEngine(cfg, SINK);
     }
 
+    /** engine with the opt-in killaura-facing and reach checks turned on */
+    static LookoutEngine freshKR() {
+        LookoutConfig cfg = new LookoutConfig();
+        cfg.killaura = true;
+        cfg.reach = true;
+        return fresh(cfg);
+    }
+
+    static void legitKR(String name, java.util.function.Consumer<LookoutEngine> scenario) {
+        LookoutEngine e = freshKR();
+        scenario.accept(e);
+        if (!alerts.isEmpty()) throw new AssertionError("FAIL legit fixture [" + name + "] flagged: " + alerts);
+        System.out.println("legit ok: " + name + " (opt-in checks on)");
+    }
+
+    static void cheatKR(String name, String check, java.util.function.Consumer<LookoutEngine> scenario) {
+        LookoutEngine e = freshKR();
+        scenario.accept(e);
+        if (alerts.stream().noneMatch(a -> a.startsWith(check + " "))) {
+            throw new AssertionError("FAIL cheat fixture [" + name + "] produced no " + check + " alert (got: " + alerts + ")");
+        }
+        System.out.println("cheat caught: " + name + " -> " + alerts);
+    }
+
     /**
      * A legit jump arc the way the client really sees it: the server sends one position
      * packet per tick and the client lerps a third of the way toward the newest packet
@@ -247,13 +271,10 @@ public class LookoutSim {
 
         // ---- stage 2 (combat) legit fixtures: zero alerts expected ----
         // combat fixtures use two players: id 1 acts, id 2 stands nearby as the target.
-        legit("facing-tracked swings", e -> {
+        // killaura-facing and reach are opt-in; the KR fixtures run with them enabled.
+        legitKR("bystander at 2.5 blocks, facing it", e -> {
+            // mining or mob fighting next to a bystander: swings alone prove nothing
             long t = 0;
-            for (int i = 0; i < 20; i++) {
-                e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f + (i % 3 - 1) * 3f, 0f), PROBE); // faces +x target
-                e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
-                t++;
-            }
             for (int j = 0; j < 6; j++) {
                 for (int i = 0; i < 4; i++) {
                     e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
@@ -263,7 +284,41 @@ public class LookoutSim {
                 e.onSwing(1);
             }
         });
-        legit("fifty-degree flick swings", e -> {
+        legitKR("bystander at 5.2 blocks, aligned", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 505.2, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+            }
+        });
+        legitKR("mob fight facing away, no player damage", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, 60f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+            }
+        });
+        legitKR("aligned hits at 2.8 blocks", e -> {
+            long t = 0;
+            for (int j = 0; j < 6; j++) {
+                for (int i = 0; i < 4; i++) {
+                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
+                    e.tick(2, "sam", mk(t, 502.8, 64, 0, true), PROBE);
+                    t++;
+                }
+                e.onSwing(1);
+                e.onDamage(2, 1, 1); // alex really hit sam, facing him, in range
+            }
+        });
+        legitKR("fifty-degree flick hits", e -> {
             long t = 0;
             for (int j = 0; j < 6; j++) {
                 for (int i = 0; i < 4; i++) {
@@ -272,6 +327,16 @@ public class LookoutSim {
                     t++;
                 }
                 e.onSwing(1);
+                e.onDamage(2, 1, 1);
+            }
+        });
+        legitKR("fall damage is not a hit", e -> {
+            long t = 0;
+            for (int i = 0; i < 6; i++) {
+                e.tick(1, "alex", mk(t, 500, 64, 0, true), PROBE);
+                e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
+                t++;
+                e.onDamage(2, -1, -1); // world damage: no attacker ids
             }
         });
         legit("full-draw bow cadence", e -> {
@@ -279,7 +344,7 @@ public class LookoutSim {
             for (int j = 0; j < 3; j++) {
                 for (int i = 0; i < 24; i++) e.tick(1, "alex", mkUsing(t++, 500, 64, 0, true), PROBE);
                 e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE); // release
-                e.onProjectileSpawn(500.5, 65.4, 0, 3.0); // full power after a full draw
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 1000 + j * 10, 1); // full power after a full draw
                 for (int i = 0; i < 6; i++) e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
             }
         });
@@ -288,14 +353,14 @@ public class LookoutSim {
             for (int j = 0; j < 8; j++) {
                 for (int i = 0; i < 4; i++) e.tick(1, "alex", mkUsing(t++, 500, 64, 0, true), PROBE);
                 e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
-                e.onProjectileSpawn(500.5, 65.4, 0, 1.0); // spam-click arrows are slow
+                e.onProjectileSpawn(500.5, 65.4, 0, 1.0, 2000 + j * 10, 1); // spam-click arrows are slow
             }
         });
         legit("crossbow instant fire", e -> {
             long t = 0;
             for (int j = 0; j < 4; j++) {
                 for (int i = 0; i < 10; i++) e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE); // loading: not a bow draw
-                e.onProjectileSpawn(500.5, 65.4, 0, 3.2); // crossbows fire fast arrows instantly
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.2, 3000 + j * 10, 1); // crossbows fire fast arrows instantly
             }
         });
         legit("eating walk", e -> {
@@ -314,33 +379,44 @@ public class LookoutSim {
             for (int i = 0; i < 6; i++) { x += 0.45; e.tick(1, "alex", mk(t++, x, 64, 0, true), PROBE); }
             for (int i = 0; i < 20; i++) { x += 0.3; e.tick(1, "alex", mkUsing(t++, Math.min(x, 319.5), 64, 0, false), PROBE); }
         });
-        legit("swings at 2.8 blocks, facing", e -> {
+        legit("mixed shooters near a bow drawer", e -> {
+            // alex does honest full draws; full-speed arrows from a skeleton (untracked
+            // owner) and the local player (untracked) land right next to him
             long t = 0;
-            for (int j = 0; j < 6; j++) {
-                for (int i = 0; i < 4; i++) {
-                    e.tick(1, "alex", mk(t, 500, 64, 0, true, -90f, 0f), PROBE);
-                    e.tick(2, "sam", mk(t, 502.8, 64, 0, true), PROBE);
-                    t++;
-                }
-                e.onSwing(1);
+            for (int j = 0; j < 3; j++) {
+                for (int i = 0; i < 24; i++) e.tick(1, "alex", mkUsing(t++, 500, 64, 0, true), PROBE);
+                e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 5000 + j * 10, 1); // his own honest arrow
+                e.onProjectileSpawn(501, 65, 0.5, 3.1, 5001 + j * 10, 999); // skeleton
+                e.onProjectileSpawn(499.5, 65, 0, 3.2, 5002 + j * 10, 77); // local player
             }
         });
-        legit("long swings facing away (mob fight)", e -> {
+        legit("one draw, three full-speed spawns", e -> {
+            // one 2-tick draw delivering three fast arrows on the same tick (plus a
+            // re-sent spawn id) must count as ONE release, never three
             long t = 0;
-            for (int j = 0; j < 6; j++) {
-                for (int i = 0; i < 4; i++) {
-                    e.tick(1, "alex", mk(t, 500, 64, 0, true, 60f, 0f), PROBE); // facing away from sam
-                    e.tick(2, "sam", mk(t, 505.2, 64, 0, true), PROBE);
-                    t++;
-                }
-                e.onSwing(1);
+            for (int i = 0; i < 2; i++) e.tick(1, "alex", mkUsing(t++, 500, 64, 0, true), PROBE);
+            e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
+            e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 6000, 1);
+            e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 6001, 1);
+            e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 6002, 1);
+            e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 6000, 1); // duplicate packet
+            for (int i = 0; i < 10; i++) e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
+        });
+        legit("eating while hopping", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 30; i++) {
+                boolean ground = i % 2 == 0; // airborne ticks keep hop momentum
+                e.tick(1, "alex", new ObservedSample(t++, x += 0.28, 64 + (ground ? 0 : 0.4), 0, ground, true,
+                        false, false, true, false, false, false, false, 0, 0, false, false, 0f, 0f, false), PROBE);
             }
         });
-        legit("swings with nobody nearby", e -> {
-            long t = 0;
-            for (int j = 0; j < 6; j++) {
-                for (int i = 0; i < 4; i++) e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
-                e.onSwing(1);
+        legit("eating with speed 2", e -> {
+            long t = 0; double x = 500;
+            for (int i = 0; i < 30; i++) {
+                x += 0.11;
+                e.tick(1, "alex", new ObservedSample(t++, x, 64, 0, true, true,
+                        false, false, true, false, false, false, false, 0, 2, false, false, 0f, 0f, false), PROBE);
             }
         });
         legit("elytra cruise", e -> {
@@ -433,15 +509,16 @@ public class LookoutSim {
         });
 
 
-        cheat("swings facing away (killaura)", "killaura", e -> {
+        cheatKR("hits landing while facing away", "killaura", e -> {
             long t = 0;
             for (int j = 0; j < 6; j++) {
                 for (int i = 0; i < 4; i++) {
-                    e.tick(1, "steve", mk(t, 500, 64, 0, true, 10f, 0f), PROBE); // ~100 off the target bearing
+                    e.tick(1, "steve", mk(t, 500, 64, 0, true, 10f, 0f), PROBE); // ~100 off the bearing to sam
                     e.tick(2, "sam", mk(t, 502.5, 64, 0, true), PROBE);
                     t++;
                 }
                 e.onSwing(1);
+                e.onDamage(2, 1, 1); // steve really damaged sam while looking elsewhere
             }
         });
         cheat("instant full-power arrows", "fastbow", e -> {
@@ -449,7 +526,7 @@ public class LookoutSim {
             for (int j = 0; j < 4; j++) {
                 for (int i = 0; i < 2; i++) e.tick(1, "steve", mkUsing(t++, 500, 64, 0, true), PROBE);
                 e.tick(1, "steve", mk(t++, 500, 64, 0, true), PROBE);
-                e.onProjectileSpawn(500.5, 65.4, 0, 3.0); // full power off a 2-tick draw
+                e.onProjectileSpawn(500.5, 65.4, 0, 3.0, 4000 + j * 10, 1); // full power off a 2-tick draw
             }
         });
         cheat("eating at sprint speed", "noslow", e -> {
@@ -457,7 +534,7 @@ public class LookoutSim {
             for (int i = 0; i < 5; i++) { x += 0.28; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }
             for (int i = 0; i < 30; i++) { x += 0.28; e.tick(1, "steve", mkUsing(t++, x, 64, 0, false), PROBE); }
         });
-        cheat("swings at 5.2 blocks, facing", "reach", e -> {
+        cheatKR("hits landing from 5.2 blocks", "reach", e -> {
             long t = 0;
             for (int j = 0; j < 6; j++) {
                 for (int i = 0; i < 4; i++) {
@@ -466,6 +543,7 @@ public class LookoutSim {
                     t++;
                 }
                 e.onSwing(1);
+                e.onDamage(2, 1, 1); // steve really damaged sam from 5.2 blocks
             }
         });
         cheat("level elytra at 3.0", "elytra", e -> {
