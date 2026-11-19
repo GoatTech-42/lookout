@@ -64,12 +64,43 @@ public class LookoutEngine {
         });
     }
 
+    /** alert text goes through the local chat renderer, which interprets
+     *  section-sign formatting codes; a hostile server can put them in a
+     *  player name. strip the sign and its code char at ingestion. */
+    static String sanitizeName(String name) {
+        StringBuilder out = new StringBuilder(name.length());
+        for (int i = 0; i < name.length(); i++) {
+            char ch = name.charAt(i);
+            if (ch == '\u00A7') { i++; continue; }
+            out.append(ch);
+        }
+        return out.toString();
+    }
+
+    // global rate cap across entities: a token bucket on the injected wall
+    // clock. the burst allowance keeps one crowded fight (several players at
+    // once, multiaura evidence) readable while a bot flood cannot fill chat.
+    private double globalTokens = Double.NaN;
+    private long globalTokensAt;
+
+    private boolean globalCapAllows(long now) {
+        if (config.alertGlobalBurst <= 0) return true;
+        if (Double.isNaN(globalTokens)) { globalTokens = config.alertGlobalBurst; globalTokensAt = now; }
+        globalTokens = Math.min(config.alertGlobalBurst,
+                globalTokens + (now - globalTokensAt) / 1000.0 * config.alertGlobalPerSecond);
+        globalTokensAt = now;
+        if (globalTokens < 1.0) return false;
+        globalTokens -= 1.0;
+        return true;
+    }
+
     private AlertSink gatedSink() {
         return (id, playerName, checkId, message) -> {
             String key = id + ":" + checkId;
             long now = System.currentTimeMillis();
             Long last = lastAlertAt.get(key);
             if (last != null && now - last < config.alertCooldownSeconds * 1000) return;
+            if (!globalCapAllows(wallClock.getAsLong())) return;
             lastAlertAt.put(key, now);
             sink.alert(id, playerName, checkId, message);
         };
@@ -83,7 +114,7 @@ public class LookoutEngine {
     public void tick(int entityId, String name, ObservedSample sample, WorldProbe probe) {
         if (!config.enabled) return;
         ObservedPlayer p = players.computeIfAbsent(entityId, ObservedPlayer::new);
-        if (name != null) p.name = name;
+        if (name != null) p.name = sanitizeName(name);
         p.lastWallMillis = wallClock.getAsLong();
         ObservedSample prev = p.prev;
         p.add(sample);
@@ -237,8 +268,21 @@ public class LookoutEngine {
             if (p.prev == null || currentTick - p.prev.tick() > 200) {
                 it.remove();
                 checks.remove(e.getKey());
+                // entity ids get reused; a fresh holder must not inherit the
+                // previous holder's per-check cooldown
+                String prefix = e.getKey() + ":";
+                lastAlertAt.keySet().removeIf(k -> k.startsWith(prefix));
             }
         }
+    }
+
+    /** entity id went away (remove-entities packet): drop its state and any
+     *  per-check cooldown, so a reused id starts clean for its new holder */
+    public void onEntityRemoved(int entityId) {
+        players.remove(entityId);
+        checks.remove(entityId);
+        String prefix = entityId + ":";
+        lastAlertAt.keySet().removeIf(k -> k.startsWith(prefix));
     }
 
     public void clear() {

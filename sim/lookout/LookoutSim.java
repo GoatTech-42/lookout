@@ -1047,6 +1047,70 @@ public class LookoutSim {
                 throw new AssertionError("FAIL paired mutation: same jumps without velocity did not fire (got: " + alerts + ")");
             System.out.println("gate mutation red as expected (no velocity, after grace): " + alerts);
         }
+        // ---- alert-path hardening fixtures (red team, amp) ----
+        {
+            // section-sign codes in a server-supplied player name must never
+            // reach alert text (the chat renderer would interpret them)
+            LookoutEngine e = fresh();
+            long t = 0; double x = 0;
+            for (int i = 0; i < 60; i++) { x += 0.45; e.tick(1, "\u00A74bad\u00A7ractor", mk(t++, x, 64, 0, true), PROBE); }
+            if (alerts.isEmpty()) throw new AssertionError("FAIL: speed cheat under a formatted name did not alert");
+            if (alerts.toString().contains("\u00A7"))
+                throw new AssertionError("FAIL: section sign reached alert text: " + alerts);
+            if (!alerts.toString().contains("badactor"))
+                throw new AssertionError("FAIL: sanitized name missing from alert: " + alerts);
+            System.out.println("alert path ok: section-sign codes stripped from alert text");
+        }
+        {
+            // global rate cap: a flood of alerting entities gets capped at the
+            // burst, and the bucket refills over wall time
+            LookoutConfig cfg = new LookoutConfig();
+            cfg.alertGlobalBurst = 3; cfg.alertGlobalPerSecond = 1.0; cfg.timer = false;
+            LookoutEngine e = fresh(cfg);
+            WALL[0] = 100000;
+            for (int id = 1; id <= 5; id++) {
+                long t = 0; double x = 0;
+                for (int i = 0; i < 60; i++) { x += 0.45; e.tick(id, "bot" + id, mk(t++, x, 64, 0, true), PROBE); }
+            }
+            if (alerts.size() != 3)
+                throw new AssertionError("FAIL global cap: expected exactly the 3-alert burst, got " + alerts.size() + " " + alerts);
+            WALL[0] += 3000;
+            { long t = 0; double x = 0;
+              for (int i = 0; i < 60; i++) { x += 0.45; e.tick(6, "bot6", mk(t++, x, 64, 0, true), PROBE); } }
+            if (alerts.size() != 4)
+                throw new AssertionError("FAIL global cap refill: expected one more alert after refill, got " + alerts.size());
+            System.out.println("alert path ok: global cap holds a flood to the burst, refill admits more");
+        }
+        {
+            // entity id reuse: the new holder starts with no inherited cooldown
+            // (remove-entities event path)
+            LookoutEngine e = fresh(new LookoutConfig());
+            long t = 0; double x = 0;
+            for (int i = 0; i < 60; i++) { x += 0.45; e.tick(9, "first", mk(t++, x, 64, 0, true), PROBE); }
+            if (alerts.isEmpty()) throw new AssertionError("FAIL: first holder did not alert");
+            int n1 = alerts.size();
+            e.onEntityRemoved(9);
+            x = 0;
+            for (int i = 0; i < 60; i++) { x += 0.45; e.tick(9, "second", mk(t++, x, 64, 0, true), PROBE); }
+            if (alerts.size() == n1)
+                throw new AssertionError("FAIL id reuse (event): new holder inherited the cooldown");
+            System.out.println("alert path ok: reused entity id starts clean (remove event)");
+        }
+        {
+            // same, via the staleness sweep (silent despawn, no remove packet)
+            LookoutEngine e = fresh(new LookoutConfig());
+            long t = 0; double x = 0;
+            for (int i = 0; i < 60; i++) { x += 0.45; e.tick(9, "first", mk(t++, x, 64, 0, true), PROBE); }
+            if (alerts.isEmpty()) throw new AssertionError("FAIL: first holder did not alert");
+            int n1 = alerts.size();
+            for (int i = 0; i < 210; i++) e.tick(1, "alex", mk(t++, 500, 64, 0, true), PROBE);
+            e.sweep(t);
+            x = 0;
+            for (int i = 0; i < 60; i++) { x += 0.45; e.tick(9, "second", mk(t++, x, 64, 0, true), PROBE); }
+            if (alerts.size() == n1)
+                throw new AssertionError("FAIL id reuse (sweep): new holder inherited the cooldown");
+            System.out.println("alert path ok: reused entity id starts clean (staleness sweep)");
+        }
         cheat("1.6x ground speed", "speed", e -> {
             long t = 0; double x = 0;
             for (int i = 0; i < 60; i++) { x += 0.45; e.tick(1, "steve", mk(t++, x, 64, 0, true), PROBE); }

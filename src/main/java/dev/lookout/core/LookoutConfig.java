@@ -92,4 +92,8 @@ public class LookoutConfig {
 
     /** seconds before the same player+check can alert again */
     public long alertCooldownSeconds = 10;
+    /** global alert rate cap across all entities: token bucket size... */
+    public int alertGlobalBurst = 8; // <= 0 disables the global cap
+    /** ...and refill rate in tokens per second; the burst allowance keeps one crowded fight readable */
+    public double alertGlobalPerSecond = 5.0;
 }

@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.game.ClientboundAnimatePacket;
 import net.minecraft.network.protocol.game.ClientboundDamageEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
@@ -35,6 +36,12 @@ public abstract class ClientPacketListenerMixin {
         double speed = packet.getMovement().length(); // blocks/tick
         LookoutClient.ENGINE.onProjectileSpawn(packet.getX(), packet.getY(), packet.getZ(), speed,
                 packet.getId(), packet.getData());
+    }
+
+    @Inject(method = "handleRemoveEntities", at = @At("TAIL"))
+    private void lookout$removeEntities(ClientboundRemoveEntitiesPacket packet, CallbackInfo ci) {
+        if (LookoutClient.ENGINE == null) return;
+        for (int id : packet.entityIds()) LookoutClient.ENGINE.onEntityRemoved(id);
     }
 
     @Inject(method = "handleDamageEvent", at = @At("TAIL"))
