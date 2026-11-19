@@ -42,7 +42,7 @@ public class NoSlowCheck extends LookoutCheck {
         }
         if (useStart == -1000) useStart = s.tick(); // first observed use-tick
         // red team N2: one airborne flag every few ticks used to reset the streak
-        // forever. this reads the flight check's shared, support-derived airTicks
+        // forever. this reads the engine-owned, support-derived airTicks
         // (real airtime with no ground support), NOT a count of airborne flags:
         // a lone flicker over solid ground is just not evaluated, genuine
         // airtime (2+ ticks) exempts and resets

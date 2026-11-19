@@ -28,23 +28,15 @@ public class FlightCheck extends LookoutCheck {
     public void onSample(ObservedPlayer p, ObservedSample s, ObservedSample prev, WorldProbe w,
                          LookoutConfig cfg, AlertSink sink) {
         if (prev == null) return;
-        boolean exempt = s.gamemodeExempt() || s.inVehicle() || s.gliding() || s.inWater()
-                || s.levitation() || s.slowFalling() || s.swimmingPose()
-                || p.ticksSince(p.lastVelocityTick, s.tick()) < 20
-                || p.ticksSince(p.lastTeleportTick, s.tick()) < 5;
-        boolean supported = s.onGround()
-                || w.isSolidAt(s.x(), s.y() - 0.5, s.z())
-                || w.isLiquidAt(s.x(), s.y() - 0.5, s.z())
-                || w.isClimbableAt(s.x(), s.y(), s.z())
-                || w.isWebAt(s.x(), s.y(), s.z())
-                || w.isStairLikeAt(s.x(), s.y() - 0.51, s.z());
-        if (exempt || supported) {
-            p.airTicks = 0;
+        // airTicks is engine-owned: the engine zeroes it on exempt or supported
+        // ticks and increments it otherwise, whether or not this check is enabled
+        // (amp airTicks packet T1: noslow's verdict used to depend on this check's
+        // toggle). 0 here means this tick was exempt or supported.
+        if (p.airTicks == 0) {
             decay(0.75);
             return;
         }
 
-        p.airTicks++;
         double dy = s.y() - prev.y();
 
         // hovering dead level well past jump time

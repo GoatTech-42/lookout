@@ -210,6 +210,25 @@ public class LookoutEngine {
                 p.lastJumpTick = sample.tick();
             }
         }
+        // airTicks is engine-owned: maintained for every sample regardless of which
+        // checks are enabled, so no check's verdict can depend on another check's
+        // toggle (amp airTicks packet T1). exempt/support mirror the movement rules
+        // FlightCheck used; the join-grace relocation and teleport-event zeroing
+        // above stay as additional hard resets.
+        if (prev != null) {
+            boolean airExempt = sample.gamemodeExempt() || sample.inVehicle() || sample.gliding()
+                    || sample.inWater() || sample.levitation() || sample.slowFalling()
+                    || sample.swimmingPose()
+                    || p.ticksSince(p.lastVelocityTick, sample.tick()) < 20
+                    || p.ticksSince(p.lastTeleportTick, sample.tick()) < 5;
+            boolean airSupported = sample.onGround()
+                    || probe.isSolidAt(sample.x(), sample.y() - 0.5, sample.z())
+                    || probe.isLiquidAt(sample.x(), sample.y() - 0.5, sample.z())
+                    || probe.isClimbableAt(sample.x(), sample.y(), sample.z())
+                    || probe.isWebAt(sample.x(), sample.y(), sample.z())
+                    || probe.isStairLikeAt(sample.x(), sample.y() - 0.51, sample.z());
+            p.airTicks = (airExempt || airSupported) ? 0 : p.airTicks + 1;
+        }
         for (LookoutCheck check : checksFor(entityId)) {
             check.onSample(p, sample, prev, probe, config, gated);
         }

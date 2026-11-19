@@ -134,7 +134,7 @@ clocks).
   is not readable from outside. that exemption is also a known hole.
 - vehicles, elytra, water, climbables, knockback and teleports exempt.
 - use-flag breaks up to 5 ticks hold state instead of restarting the grace. the
-  airborne reset reads the flight check's shared, support-derived air count (real
+  airborne reset reads the engine-owned, support-derived air count (real
   airtime with no ground support), not a count of airborne flags: a lone flicker
   over solid ground is not evaluated, genuine airtime (2+ ticks) exempts and
   resets. bounded tolerances: a run of fast use-ticks padded with short releases
