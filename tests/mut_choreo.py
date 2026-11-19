@@ -59,16 +59,28 @@ MUTANTS = {
         "spot = near(eidA, 2.0)  # recompute from live ents: victims wander"),
     # bot2: killaura pre-arm guard removed
     "M-bot2-no-prearm-guard": ("bot2",
-        "    before = guard_begin('killaura', 3.0)\n",
+        "                   lambda: guard_begin('killaura', 3.0),\n",
         ""),
     # bot2: killaura count guard removed
     "M-bot2-no-count-guard": ("bot2",
-        "    guard_end('killaura', before, {'VictimA': 6}, ('VictimA',))\n",
-        ""),
-    # bot2: guard_begin moved after the arm's attacks (guard no longer pre-arm)
+        "lambda before: guard_end('killaura', before, {'VictimA': 6}, ('VictimA',)))",
+        "None)"),
+    # bot2: stage and guard args swapped (verify would run before staging)
     "M-bot2-wiring-killaura-late": ("bot2",
-        "    before = guard_begin('killaura', 3.0)\n    spot = near(eidA, KA_DIST)\n    if spot:\n        for i in range(6):",
-        "    spot = near(eidA, KA_DIST)\n    if spot:\n        for i in range(6):\n            pass\n    before = guard_begin('killaura', 3.0)"),
+        "choreo.run_arm('killaura',\n                   lambda: stage_to(KA_DIST, 100.0),\n                   lambda: guard_begin('killaura', 3.0),",
+        "choreo.run_arm('killaura',\n                   lambda: guard_begin('killaura', 3.0),\n                   lambda: stage_to(KA_DIST, 100.0),"),
+    # bot2: no-victims path exits 0 again
+    "M-bot2-open-exit": ("bot2",
+        "    log('ARM GUARD FAIL: NO VICTIMS SEEN - combat arms not exercised, failing closed')\n    sys.exit(1)",
+        "    log('NO VICTIMS SEEN - combat arms not exercised')"),
+    # run_arm: staging failure no longer aborts
+    "M-arm-stage-optional": ("choreo",
+        "    if not stage():",
+        "    if not stage() and False:"),
+    # run_arm: attacks before the band verify
+    "M-arm-verify-after-attacks": ("choreo",
+        "    before = pre_arm()\n    attacks()",
+        "    attacks()\n    before = pre_arm()"),
     # bot2: receipt loop skipped in guard_end
     "M-bot2-no-receipt-loop": ("bot2",
         "    for v in expect_damaged:",
@@ -91,6 +103,9 @@ EXPECT = {
     "M-bot2-no-count-guard": {"T-bot2-count-guard"},
     "M-bot2-wiring-killaura-late": {"T-bot2-wiring-killaura"},
     "M-bot2-no-receipt-loop": {"T-bot2-guard-end-receipts"},
+    "M-bot2-open-exit": {"T-bot2-fail-closed"},
+    "M-arm-stage-optional": {"T-arm-stage-fail-closed"},
+    "M-arm-verify-after-attacks": {"T-arm-sequence-evolving", "T-arm-band-abort-before-attacks"},
 }
 
 ONLY = set(filter(None, os.environ.get("MUT_ONLY", "").split(",")))

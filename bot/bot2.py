@@ -199,6 +199,8 @@ KA_DIST = 2.5
 REACH_DIST = 5.2
 MULTI_DIST = 2.5
 CHOREO = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'choreo.py')
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import choreo
 SERVERDIR = os.environ.get('SERVERDIR', 'server')
 sent = {'VictimA': 0, 'VictimB': 0}
 
@@ -241,7 +243,10 @@ def guard_end(arm, before, expect_sent, expect_damaged):
             ok = False
     if not ok:
         sys.exit(1)
-    log('arm guard ok:', arm)
+    log('arm guard ok:', arm,
+        '- G4 note: sent counts + health delta only; per-hit server receipt',
+        'counts UNVERIFIED at 4-tick cadence')
+
 
 selfpos = [0.0, 0.0, 0.0]
 def tick_send(x, y, z, onground, yaw=None, pitch=0.0):
@@ -341,55 +346,83 @@ if ents:
         tick_send(A()[0], ty, A()[2], True)
         time.sleep(1.0)
         log('descend done at', ty)
-    before = guard_begin('killaura', 3.0)
-    spot = near(eidA, KA_DIST)
-    if spot:
+    def stage_to(dist, yaw_off):
+        spot = near(eidA, dist)
+        if not spot:
+            return False
+        ax, ay, az, vx, vz = spot
+        walk_to(ax, ay, az, yaw=bearing_yaw(ax, az, vx, vz) + yaw_off)
+        return True
+
+    def ka_attacks():
         for i in range(6):
             spot = near(eidA, KA_DIST)  # recompute from live ents: victims wander
             if not spot: break
             ax, ay, az, vx, vz = spot
             away = bearing_yaw(ax, az, vx, vz) + 100.0  # spec P1: ~100 deg off-facing
-            walk_to(ax, ay, az, yaw=away) if i == 0 else tick_send(ax, ay, az, True, yaw=away)
+            tick_send(ax, ay, az, True, yaw=away)
             attack(eidA, 'VictimA')
             log('killaura hit', i + 1, 'off-facing from', KA_DIST)
             time.sleep(0.2)  # 4 ticks apart per spec
-    guard_end('killaura', before, {'VictimA': 6}, ('VictimA',))
+
+    choreo.run_arm('killaura',
+                   lambda: stage_to(KA_DIST, 100.0),
+                   lambda: guard_begin('killaura', 3.0),
+                   ka_attacks,
+                   lambda before: guard_end('killaura', before, {'VictimA': 6}, ('VictimA',)))
     _ap = float(os.environ.get('ARM_PAUSE', '0'))
     if _ap:
         log('ARM killaura DONE, pausing', _ap)
         time.sleep(_ap)
-    spot = None if os.environ.get('KA_ONLY') else near(eidA, REACH_DIST)
-    if spot:
-        before = guard_begin('reach', REACH_DIST + 1.5, min_reach=4.6)
-        for i in range(6):
-            spot = near(eidA, REACH_DIST)
-            if not spot: break
-            ax, ay, az, vx, vz = spot
-            toward = bearing_yaw(ax, az, vx, vz)
-            walk_to(ax, ay, az, yaw=toward) if i == 0 else tick_send(ax, ay, az, True, yaw=toward)
-            attack(eidA, 'VictimA')
-            log('reach hit', i+1, 'from', REACH_DIST)
-            time.sleep(0.2)  # 4 ticks apart per spec
-        guard_end('reach', before, {'VictimA': 6}, ('VictimA',))
+
+    if os.environ.get('KA_ONLY'):
+        log('reach arm skipped by KA_ONLY')
+    else:
+        def reach_attacks():
+            for i in range(6):
+                spot = near(eidA, REACH_DIST)
+                if not spot: break
+                ax, ay, az, vx, vz = spot
+                toward = bearing_yaw(ax, az, vx, vz)
+                tick_send(ax, ay, az, True, yaw=toward)
+                attack(eidA, 'VictimA')
+                log('reach hit', i+1, 'from', REACH_DIST)
+                time.sleep(0.2)  # 4 ticks apart per spec
+
+        choreo.run_arm('reach',
+                       lambda: stage_to(REACH_DIST, 0.0),
+                       lambda: guard_begin('reach', REACH_DIST + 1.5, min_reach=4.6),
+                       reach_attacks,
+                       lambda before: guard_end('reach', before, {'VictimA': 6}, ('VictimA',)))
     if _ap:
         log('ARM reach DONE, pausing', _ap)
         time.sleep(_ap)
-    if eidB and not os.environ.get('KA_ONLY'):
-        before = guard_begin('multiaura', 3.0)
-        spot = near(eidA, MULTI_DIST)
-        if spot:
-            for b in range(4):
+
+    if os.environ.get('KA_ONLY'):
+        log('multiaura arm skipped by KA_ONLY')
+    elif not eidB:
+        log('ARM GUARD FAIL: multiaura needs VictimB, not seen')
+        sys.exit(1)
+    else:
+        def multi_attacks():
+            for bn in range(4):
                 spot = near(eidA, MULTI_DIST)
                 if not spot: break
                 ax, ay, az, vx, vz = spot
                 toward = bearing_yaw(ax, az, vx, vz)
-                walk_to(ax, ay, az, yaw=toward) if b == 0 else tick_send(ax, ay, az, True, yaw=toward)
+                tick_send(ax, ay, az, True, yaw=toward)
                 attack(eidA, 'VictimA'); attack(eidB, 'VictimB')
-                log('multiaura burst', b+1)
+                log('multiaura burst', bn+1)
                 time.sleep(0.15)  # one burst every 3 ticks per spec
-        guard_end('multiaura', before, {'VictimA': 4, 'VictimB': 4}, ('VictimA', 'VictimB'))
+
+        choreo.run_arm('multiaura',
+                       lambda: stage_to(MULTI_DIST, 0.0),
+                       lambda: guard_begin('multiaura', 3.0),
+                       multi_attacks,
+                       lambda before: guard_end('multiaura', before, {'VictimA': 4, 'VictimB': 4}, ('VictimA', 'VictimB')))
 else:
-    log('NO VICTIMS SEEN - combat arms not exercised')
+    log('ARM GUARD FAIL: NO VICTIMS SEEN - combat arms not exercised, failing closed')
+    sys.exit(1)
 _hold = float(os.environ.get('HOLD_AFTER', '0'))
 if _hold:
     log('holding', _hold, 's for console queries')

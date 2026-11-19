@@ -28,6 +28,10 @@ tests/test_choreo.py + tests/mut_choreo.py):
      decoy containing the answer text is never accepted
   G9 arm receipt: post-arm victim Health must have DROPPED server-side,
      compared by check_damage_receipt - a provoke the server never felt aborts
+  arms run through run_arm: STAGE -> server-verify band -> attack, fail-closed
+     (QA 8.0: verifying before staging aborted every combined sequence -
+     after killaura at 2.5 the reach band 4.6+ can never verify, and vice
+     versa; the intended position must be walked to FIRST)
 
 known limits (documented, not guarded):
   - "freshest" (G4) is the freshest COMPLETE line in the buffer at read time;
@@ -156,6 +160,21 @@ def verify_arm(serverdir, va, vb, attacker, max_reach, min_reach=0.0, gap=2.0):
     if da < min_reach:
         raise SystemExit(f"attacker {da:.2f} from {va} inside min_reach {min_reach} - killaura-band geometry in the wrong arm, abort")
     return da, db, pa, pb
+
+
+def run_arm(name, stage, pre_arm, attacks, post_arm):
+    """Fail-closed arm sequence: STAGE the intended geometry first,
+    server-verify the band SECOND, then attack. stage() returns False when
+    the position cannot be staged (no victims, placement impossible) and the
+    run aborts - an unexercised arm never exits normally. pre_arm() returns
+    the pre-arm state handed to post_arm()."""
+    if not stage():
+        raise SystemExit(
+            f"ARM GUARD FAIL {name}: could not stage the intended position - "
+            f"arm not exercised, refusing to continue")
+    before = pre_arm()
+    attacks()
+    post_arm(before)
 
 
 def check_damage_receipt(serverdir, name, before, arm, timeout=5.0):

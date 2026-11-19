@@ -188,23 +188,83 @@ except SystemExit:
     check("G9-no-damage-aborts", True)
 
 # --- whole-arm wiring: guard_begin -> attacks -> guard_end, per arm --------
-LOOP_MARK = {"killaura": "for i in range(6):", "reach": "for i in range(6):",
-           "multiaura": "for b in range(4):"}
 for arm in ("killaura", "reach", "multiaura"):
-    gb = b2.find(f"guard_begin('{arm}'")
-    ge = b2.find(f"guard_end('{arm}'")
+    i = b2.find(f"choreo.run_arm('{arm}'")
+    seg = b2[i:i + 500] if i != -1 else ""
+    st, gb, ge = seg.find("stage_to("), seg.find(f"guard_begin('{arm}'"), seg.find(f"guard_end('{arm}'")
     if gb == -1 or ge == -1:
         # presence is owned (and mutant-pinned) by the guard-count gates
         check(f"T-bot2-wiring-{arm}", True, "presence owned by the guard-count gates")
     else:
-        seg = b2[gb:ge]
-        loop_at = seg.find(LOOP_MARK[arm])
-        atk_at = seg.find("attack(eid")
-        check(f"T-bot2-wiring-{arm}", 0 <= loop_at < atk_at,
-              "order must be guard_begin -> arm loop -> attacks -> guard_end")
+        check(f"T-bot2-wiring-{arm}", 0 <= st < gb < ge,
+              "run_arm args must be stage_to -> guard_begin -> guard_end")
+check("T-bot2-fail-closed",
+      "ARM GUARD FAIL: NO VICTIMS SEEN" in b2 and "sys.exit(1)" in b2,
+      "no victims or an unstaged arm must fail closed, never exit 0")
 check("T-bot2-guard-end-receipts",
       "for v in expect_damaged:" in b2.split("def guard_end")[1] and "'receipt'" in b2,
       "guard_end must route every attacked victim through the choreo receipt check")
+
+# --- run_arm: stage -> verify -> attacks, positions evolving across arms --
+class Rig:
+    def __init__(self):
+        self.d = None
+        self.events = []
+
+def mk_stage(rig, d, ok=True):
+    def s():
+        if not ok:
+            return False
+        rig.d = d
+        rig.events.append(("stage", d))
+        return True
+    return s
+
+def mk_verify(rig, lo, hi):
+    def v():
+        rig.events.append(("verify", rig.d))
+        if not (lo <= rig.d <= hi):
+            raise SystemExit(f"band {lo}..{hi}")
+        return {"VictimA": 20.0}
+    return v
+
+def mk_attacks(rig, n):
+    def a():
+        rig.events.append(("attacks", n))
+    return a
+
+def mk_post(rig):
+    def p(before):
+        rig.events.append(("post", sorted(before)))
+    return p
+
+rig = Rig()
+choreo.run_arm("killaura", mk_stage(rig, 2.5), mk_verify(rig, 0, 3.0), mk_attacks(rig, 6), mk_post(rig))
+choreo.run_arm("reach", mk_stage(rig, 5.2), mk_verify(rig, 4.6, 6.7), mk_attacks(rig, 6), mk_post(rig))
+choreo.run_arm("multiaura", mk_stage(rig, 2.5), mk_verify(rig, 0, 3.0), mk_attacks(rig, 8), mk_post(rig))
+check("T-arm-sequence-evolving", rig.events == [
+    ("stage", 2.5), ("verify", 2.5), ("attacks", 6), ("post", ["VictimA"]),
+    ("stage", 5.2), ("verify", 5.2), ("attacks", 6), ("post", ["VictimA"]),
+    ("stage", 2.5), ("verify", 2.5), ("attacks", 8), ("post", ["VictimA"])],
+    str(rig.events))
+
+rig = Rig()
+try:
+    choreo.run_arm("killaura", mk_stage(rig, None, ok=False), mk_verify(rig, 0, 3.0), mk_attacks(rig, 6), mk_post(rig))
+    check("T-arm-stage-fail-closed", False, "unstaged arm proceeded")
+except SystemExit:
+    check("T-arm-stage-fail-closed", rig.events == [], str(rig.events))
+except Exception as e:
+    check("T-arm-stage-fail-closed", False, "wrong failure type: " + type(e).__name__)
+
+# QA 8.0 defect repro: attacker still at the killaura spot (2.5) when the
+# reach arm's band is verified -> abort, and no attack may have run
+rig = Rig()
+try:
+    choreo.run_arm("reach", mk_stage(rig, 2.5), mk_verify(rig, 4.6, 6.7), mk_attacks(rig, 6), mk_post(rig))
+    check("T-arm-band-abort-before-attacks", False, "attacked outside the band")
+except SystemExit:
+    check("T-arm-band-abort-before-attacks", rig.events == [("stage", 2.5), ("verify", 2.5)], str(rig.events))
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)
