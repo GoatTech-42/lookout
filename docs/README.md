@@ -19,10 +19,13 @@ Other design and rig documents may describe the older meshac implementation or u
 
 ## test caveats (QA 9.0, 2026-11-19)
 
-- tests/check_deps.py unions every jar under build/libs when checking bundled
-  deps. run it on a CLEAN build and inspect the selected ship jar; a stale jar
-  with a bundle can mask a dropped include (the gradle-rule half of the gate
-  still catches it, but the jar half is only as honest as the build dir).
+- tests/check_deps.py binds the exact target artifact and the active build
+  route: pass --jar PATH and --build-file (build-remap.gradle for the remap
+  route). it never unions jars under build/libs; a bare run with zero or
+  several non-sources jars fails loud. the nested archive is inspected (valid
+  zip, its fabric.mod.json id and version), so matching filenames or stale
+  neighbour jars never satisfy it. fixtures and mutants live in
+  tests/test_check_deps.py and need no gradle run.
 - tests/check_r4_loudness.py is a lexical gate, not a runtime one: it proves
   the warn exists in the handler before the fallback, not that it fires in a
   running client. runtime proof is the 26.1.2 first-capture smoke (stimulus 4).
