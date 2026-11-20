@@ -22,6 +22,20 @@ Expected outcomes:
   K malformed outer zips (empty, non-zip, truncated)    -> FAIL outer-metadata-readable, no traceback
   L wrong-typed metadata (outer non-object, depends as
     list, jars entries non-dict, nested non-object)     -> named FAILs, no traceback
+  M constraint/jars boundary: non-string jars[].file,
+    non-string or malformed depends constraints         -> named FAILs, no traceback
+    all-valid incl. '*' platform dep and bundled '*'
+    dependency                                          -> PASS (exit 0)
+  Mutant controls: the pre-boundary checker at bc8b711
+    must fail M1-M4 with its documented pre-boundary defect
+    (M1 TypeError, M2 AttributeError, M3/M4 silent
+    shipped=False), and the committed checker minus its
+    wildcard short-circuit must fail M6 with FAIL
+    resolved-mixinextras. every mutant first proves a
+    healthy baseline (fixture A passes under the mutant).
+    missing git history reports NOT_QUALIFIED and fails
+    the suite. named assertions match line-prefix
+    FAIL/PASS lines, never bare substrings
 Run from the repo root: python3 tests/test_check_deps.py"""
 import json, os, subprocess, sys, tempfile, zipfile
 
@@ -65,6 +79,39 @@ def expect(name, res, want_exit, must_contain=None):
     if not ok:
         fails.append(name)
         print(res.stdout[-600:])
+
+def has_prefix(res, prefix):
+    return any(l.startswith(prefix) for l in res.stdout.splitlines())
+
+def expect_line(name, res, want_exit, prefix):
+    ok = res.returncode == want_exit and has_prefix(res, prefix)
+    print(("PASS " if ok else "FAIL ") + name
+          + f" (exit={res.returncode}, want {want_exit}, line {prefix!r})")
+    if not ok:
+        fails.append(name)
+        print(res.stdout[-600:])
+
+def mutant_run(script, jar, build_file):
+    return subprocess.run([sys.executable, script, "--jar", jar, "--build-file", build_file],
+                          cwd=ROOT, capture_output=True, text=True)
+
+def mutant_baseline(name, script, good_jar, build_file):
+    b = mutant_run(script, good_jar, build_file)
+    ok = b.returncode == 0 and "Traceback" not in b.stderr
+    print(("PASS " if ok else "FAIL ") + name
+          + f"-baseline-healthy (exit={b.returncode})")
+    if not ok:
+        fails.append(name + "-baseline-healthy")
+        print((b.stdout + b.stderr)[-400:])
+    return ok
+
+def mutant_kill(name, script, jar, build_file, evidence):
+    r = mutant_run(script, jar, build_file)
+    ok, why = evidence(r)
+    print(("PASS " if ok else "FAIL ") + name + f" ({why})")
+    if not ok:
+        fails.append(name)
+        print((r.stdout + r.stderr)[-500:])
 
 with tempfile.TemporaryDirectory() as td:
     bf = os.path.join(td, "route.gradle")
@@ -146,6 +193,79 @@ with tempfile.TemporaryDirectory() as td:
         if not ok:
             fails.append(name + "-no-traceback")
             print(r.stderr[-400:])
+
+    # M: constraint/jars boundary - named FAILs, never tracebacks
+    m1 = os.path.join(td, "m1.jar")
+    mod_jar(m1, True, nested_jar(),
+            raw_outer=json.dumps({"id": "meshac", "depends": {DEP: f">={VER}"},
+                                  "jars": [{"file": [NESTED]}]}))
+    m2 = os.path.join(td, "m2.jar"); mod_jar(m2, True, nested_jar(), depends={DEP: 5})
+    m3 = os.path.join(td, "m3.jar"); mod_jar(m3, True, nested_jar(), depends={DEP: ">=x.y"})
+    m4 = os.path.join(td, "m4.jar"); mod_jar(m4, True, nested_jar(), depends={DEP: "[0.5,)"})
+    m5 = os.path.join(td, "m5.jar")
+    mod_jar(m5, True, nested_jar(), depends={DEP: f">={VER}", "fabric-api": "*"})
+    m6 = os.path.join(td, "m6.jar"); mod_jar(m6, True, nested_jar(), depends={DEP: "*"})
+    expect_line("M1-jars-file-non-string", run(m1, bf), 1, "FAIL shipped-jars-typed")
+    expect_line("M2-constraint-non-string", run(m2, bf), 1, "FAIL shipped-constraints-typed")
+    expect_line("M3-constraint-malformed", run(m3, bf), 1, "FAIL shipped-constraints-typed")
+    expect_line("M4-constraint-maven-range", run(m4, bf), 1, "FAIL shipped-constraints-typed")
+    expect_line("M5-valid-with-wildcard-platform", run(m5, bf), 0, "PASS shipped-constraints-typed")
+    expect_line("M6-bundled-wildcard-resolves", run(m6, bf), 0, "PASS resolved-mixinextras")
+    for name, jar in [("M1", m1), ("M2", m2), ("M3", m3), ("M4", m4)]:
+        r = run(jar, bf)
+        ok = "Traceback" not in r.stderr
+        print(("PASS " if ok else "FAIL ") + name + "-no-traceback")
+        if not ok:
+            fails.append(name + "-no-traceback")
+            print(r.stderr[-400:])
+
+    # mutant 1: the pre-boundary checker at bc8b711 must fail M1-M4 with
+    # its documented pre-boundary defect, after proving a healthy
+    # baseline (fixture A). pinned by sha, not HEAD~1: after this commit
+    # lands, HEAD~1 HAS the boundary checks. missing history means the
+    # mutation coverage is not qualified and the suite must not pass.
+    def pre_m1(r):
+        ok = (r.returncode == 1 and "TypeError: unhashable type" in r.stderr
+              and not has_prefix(r, "FAIL shipped-jars-typed"))
+        return ok, "want exit 1 + TypeError (unhashable jars[].file), no typed check"
+    def pre_m2(r):
+        ok = (r.returncode == 1 and "AttributeError" in r.stderr
+              and not has_prefix(r, "FAIL shipped-constraints-typed"))
+        return ok, "want exit 1 + AttributeError (non-string constraint), no typed check"
+    def pre_m34(r):
+        resolved = [l for l in r.stdout.splitlines() if l.startswith("FAIL resolved-mixinextras")]
+        ok = (r.returncode == 1 and "Traceback" not in r.stderr
+              and any("shipped=False" in l for l in resolved)
+              and not has_prefix(r, "FAIL shipped-constraints-typed"))
+        return ok, "want exit 1, no traceback, silent shipped=False, no typed check"
+    prev = subprocess.run(["git", "show",
+                           "bc8b711d6fe8cbef30d546db837be0f8aa063c69:tests/check_deps.py"],
+                          cwd=ROOT, capture_output=True, text=True)
+    if prev.returncode != 0:
+        print("NOT_QUALIFIED mutant-preboundary (pre-boundary commit not in history)")
+        fails.append("mutant-preboundary-not-qualified")
+    else:
+        mut1 = os.path.join(td, "check_deps_pre.py")
+        open(mut1, "w").write(prev.stdout)
+        if mutant_baseline("mutant-preboundary", mut1, good, bf):
+            mutant_kill("M1-mutant-preboundary-killed", mut1, m1, bf, pre_m1)
+            mutant_kill("M2-mutant-preboundary-killed", mut1, m2, bf, pre_m2)
+            mutant_kill("M3-mutant-preboundary-killed", mut1, m3, bf, pre_m34)
+            mutant_kill("M4-mutant-preboundary-killed", mut1, m4, bf, pre_m34)
+
+    # mutant 2: committed checker minus the wildcard short-circuit must
+    # fail M6 with FAIL resolved-mixinextras, after a healthy baseline
+    def lit_m6(r):
+        ok = (r.returncode == 1 and "Traceback" not in r.stderr
+              and has_prefix(r, "FAIL resolved-mixinextras"))
+        return ok, "want exit 1, no traceback, FAIL resolved-mixinextras"
+    cur = open(CHECK).read()
+    snippet = "    if constraint.strip() == \"*\":\n        return True\n"
+    assert snippet in cur, "wildcard short-circuit missing from committed checker"
+    mut2 = os.path.join(td, "check_deps_literal.py")
+    open(mut2, "w").write(cur.replace(snippet, ""))
+    if mutant_baseline("mutant-literal-wildcard", mut2, good, bf):
+        mutant_kill("M6-mutant-literal-wildcard-killed", mut2, m6, bf, lit_m6)
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)
