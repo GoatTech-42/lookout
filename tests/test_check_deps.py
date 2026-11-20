@@ -83,6 +83,17 @@ def expect(name, res, want_exit, must_contain=None):
 def has_prefix(res, prefix):
     return any(l.startswith(prefix) for l in res.stdout.splitlines())
 
+def expect_fail(name, res, want_exit, check_name, marker=None):
+    matched = [l for l in res.stdout.splitlines() if l.startswith("FAIL " + check_name)]
+    ok = (res.returncode == want_exit
+          and any(marker is None or marker in l for l in matched))
+    print(("PASS " if ok else "FAIL ") + name
+          + f" (exit={res.returncode}, want {want_exit}, FAIL {check_name}"
+          + (f" line with {marker!r})" if marker else ")"))
+    if not ok:
+        fails.append(name)
+        print(res.stdout[-600:])
+
 def expect_line(name, res, want_exit, prefix):
     ok = res.returncode == want_exit and has_prefix(res, prefix)
     print(("PASS " if ok else "FAIL ") + name
@@ -133,16 +144,16 @@ with tempfile.TemporaryDirectory() as td:
     baddep = os.path.join(td, "baddep.jar"); mod_jar(baddep, True, nested_jar(), depends={DEP: ">=9.9.9"})
 
     expect("A-valid-bundle", run(good, bf), 0)
-    expect("B-stale-neighbour-not-unioned", run(empty, bf), 1, "nested=False")
-    expect("C-invalid-nested-bytes", run(garbage, bf), 1, "invalid nested archive")
-    expect("D1-nested-wrong-id", run(wrongid, bf), 1, "!=")
-    expect("D2-nested-wrong-version", run(wrongver, bf), 1, "version")
-    expect("E-empty-jar", run(empty, bf), 1, "nested=False")
-    expect("F-mutant-prose-only-route", run(good, bf_prose), 1, "include=False")
-    expect("H-absent-registration", run(noreg, bf), 1, "registered=False")
-    expect("I-wrong-registration-path", run(wrongreg, bf), 1, "registered=False")
-    expect("J1-shipped-dep-missing", run(nodep, bf), 1, "shipped=False")
-    expect("J2-shipped-constraint-unsatisfiable", run(baddep, bf), 1, "shipped=False")
+    expect_fail("B-stale-neighbour-not-unioned", run(empty, bf), 1, "resolved-mixinextras", "nested=False")
+    expect_fail("C-invalid-nested-bytes", run(garbage, bf), 1, "resolved-mixinextras", "invalid nested archive")
+    expect_fail("D1-nested-wrong-id", run(wrongid, bf), 1, "resolved-mixinextras", "!=")
+    expect_fail("D2-nested-wrong-version", run(wrongver, bf), 1, "resolved-mixinextras", "version")
+    expect_fail("E-empty-jar", run(empty, bf), 1, "resolved-mixinextras", "nested=False")
+    expect_fail("F-mutant-prose-only-route", run(good, bf_prose), 1, "resolved-mixinextras", "include=False")
+    expect_fail("H-absent-registration", run(noreg, bf), 1, "resolved-mixinextras", "registered=False")
+    expect_fail("I-wrong-registration-path", run(wrongreg, bf), 1, "resolved-mixinextras", "registered=False")
+    expect_fail("J1-shipped-dep-missing", run(nodep, bf), 1, "resolved-mixinextras", "shipped=False")
+    expect_fail("J2-shipped-constraint-unsatisfiable", run(baddep, bf), 1, "resolved-mixinextras", "shipped=False")
 
     # G: bare run in a minimal tree with two non-sources jars must fail loud
     g = os.path.join(td, "gtree")
@@ -154,7 +165,7 @@ with tempfile.TemporaryDirectory() as td:
     mod_jar(os.path.join(g, "build", "libs", "a.jar"), True, nested_jar())
     mod_jar(os.path.join(g, "build", "libs", "b.jar"), True, nested_jar())
     open(os.path.join(g, "build.gradle"), "w").write(INCLUDE)
-    expect("G-bare-run-ambiguous", run(cwd=g), 1, "pass --jar")
+    expect_fail("G-bare-run-ambiguous", run(cwd=g), 1, "jar-unambiguous", "pass --jar")
 
     # K: malformed outer zips must be structured FAILs, never a traceback
     for label, payload in [("empty", b""),
@@ -163,7 +174,7 @@ with tempfile.TemporaryDirectory() as td:
         bad = os.path.join(td, "bad-" + label + ".zip")
         open(bad, "wb").write(payload)
         r = run(bad, bf)
-        expect("K-malformed-outer-zip-" + label, r, 1, "outer-metadata-readable")
+        expect_fail("K-malformed-outer-zip-" + label, r, 1, "outer-metadata-readable")
         ok = "Traceback" not in r.stderr
         print(("PASS " if ok else "FAIL ") + "K-no-traceback-" + label)
         if not ok:
@@ -173,20 +184,20 @@ with tempfile.TemporaryDirectory() as td:
     # L: wrong-typed metadata must be named FAILs, never tracebacks
     l1 = os.path.join(td, "l1.jar"); mod_jar(l1, True, nested_jar(), raw_outer="[]")
     r = run(l1, bf)
-    expect("L1-outer-non-object", r, 1, "outer-metadata-readable")
+    expect_fail("L1-outer-non-object", r, 1, "outer-metadata-readable")
     l2 = os.path.join(td, "l2.jar")
     mod_jar(l2, True, nested_jar(),
             raw_outer=json.dumps({"id": "meshac", "depends": [DEP], "jars": [{"file": NESTED}]}))
     r = run(l2, bf)
-    expect("L2-depends-as-list", r, 1, "shipped-depends-typed")
+    expect_fail("L2-depends-as-list", r, 1, "shipped-depends-typed")
     l3 = os.path.join(td, "l3.jar")
     mod_jar(l3, True, nested_jar(),
             raw_outer=json.dumps({"id": "meshac", "depends": {DEP: f">={VER}"}, "jars": [NESTED]}))
     r = run(l3, bf)
-    expect("L3-jars-entries-non-dict", r, 1, "shipped-jars-typed")
+    expect_fail("L3-jars-entries-non-dict", r, 1, "shipped-jars-typed")
     l4 = os.path.join(td, "l4.jar"); mod_jar(l4, True, nested_jar(raw="[]"))
     r = run(l4, bf)
-    expect("L4-nested-non-object", r, 1, "not a JSON object")
+    expect_fail("L4-nested-non-object", r, 1, "resolved-mixinextras", "not a JSON object")
     for name, r in [("L1", run(l1, bf)), ("L2", run(l2, bf)), ("L3", run(l3, bf)), ("L4", run(l4, bf))]:
         ok = "Traceback" not in r.stderr
         print(("PASS " if ok else "FAIL ") + name + "-no-traceback")
