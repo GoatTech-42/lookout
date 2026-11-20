@@ -80,6 +80,39 @@ if (variant == "26.1.2") {
     }
 }
 
+if (variant == "26.2") {
+    // 26.2 renames one lookout seam (entityIds()->getEntityIds()). The src/mc26.2 override of
+    // ClientPacketListenerMixin replaces the src/main copy for this variant only. ChatAlerter
+    // is unaffected: 26.2 keeps Gui.chatListener().
+    tasks.named("compileJava") {
+        source = source.filter { f ->
+            def p = f.path.replace(File.separatorChar, '/' as char)
+            !p.contains("src/main/java/dev/lookout/mixin/ClientPacketListenerMixin.java")
+        }
+    }
+    // Same fail-closed sourcesJar handling as 26.1.2, with the single 26.2 override path.
+    sourceSets.main.java.setSrcDirs([file("src/mc26.2/java"), file("src/main/java")])
+    tasks.named("sourcesJar") {
+        def intended = ["dev/lookout/mixin/ClientPacketListenerMixin.java"] as Set
+        def seen = new HashSet()
+        def dropped = new HashSet()
+        eachFile { cd ->
+            if (!seen.add(cd.path)) {
+                if (!(cd.path in intended)) {
+                    throw new GradleException("sourcesJar: unexpected duplicate source path: " + cd.path)
+                }
+                dropped.add(cd.path)
+            }
+        }
+        doLast {
+            if (dropped != intended) {
+                throw new GradleException("sourcesJar: expected exactly the 26.2 override path to be dropped, got " + dropped)
+            }
+        }
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+}
+
 base { archivesName = "meshac-${project.minecraft_version}" }
 
 if (project.java_min.toString() != "25") throw new GradleException("java_min does not match this build route")
