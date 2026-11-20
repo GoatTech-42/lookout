@@ -16,17 +16,21 @@ ROOT = Path(__file__).resolve().parents[1]
 ENGINE = Path('src/main/java/dev/lookout/core/LookoutEngine.java')
 ALERTER = Path('src/main/java/dev/lookout/mc/ChatAlerter.java')
 # The chat route differs by variant (javap-verified): 26.3 uses
-# Gui.chatListener().handleSystemMessage, 26.1.2 uses Gui.getChat().addClientSystemMessage.
+# Gui.chatListener().handleSystemMessage, 26.1.2 uses Gui.getChat().addClientSystemMessage,
+# 1.21.11 uses Gui.getChat().addMessage (its ChatComponent has no addClientSystemMessage).
 # Each variant's alerter is compiled against a Gui stub shaped like its own target jar.
 VARIANT_ALERTERS = {
     '26.3': (ALERTER, Path('src/main/java')),
     '26.1.2': (Path('src/mc26.1.2/java/dev/lookout/mc/ChatAlerter.java'), Path('src/mc26.1.2/java')),
+    '1.21.11': (Path('src/mc1.21.11/java/dev/lookout/mc/ChatAlerter.java'), Path('src/mc1.21.11/java')),
 }
 GUI_STUBS = {
     '26.3': ''' public static class ObjectGui { public Listener chatListener() { return new Listener(); } }
  public static class Listener { public void handleSystemMessage(Object c, boolean b) { System.out.println("CHAT " + c); } }''',
     '26.1.2': ''' public static class ObjectGui { public ChatComp getChat() { return new ChatComp(); } }
  public static class ChatComp { public void addClientSystemMessage(Object c) { System.out.println("CHAT " + c); } }''',
+    '1.21.11': ''' public static class ObjectGui { public ChatComp getChat() { return new ChatComp(); } }
+ public static class ChatComp { public void addMessage(Object c) { System.out.println("CHAT " + c); } }''',
 }
 def make_stubs(variant):
     return {
@@ -92,7 +96,7 @@ def evaluate(mutation=None, empty_guard=False, privacy=None, variant='26.3'):
                 if path == ROOT / which:
                     assert text.count(old) == 1
                     text = text.replace(old, new, 1)
-            src_root = alerter_root if 'mc26.1.2' in str(path) else Path('src/main/java')
+            src_root = alerter_root if 'src/mc' in str(path) else Path('src/main/java')
             target = root / path.relative_to(ROOT / src_root)
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(text)
@@ -138,8 +142,9 @@ def main():
     args = parser.parse_args()
     failures = evaluate()
     failures |= evaluate(variant='26.1.2')
+    failures |= evaluate(variant='1.21.11')
     if args.mutants:
-        for variant in ('26.3', '26.1.2'):
+        for variant in ('26.3', '26.1.2', '1.21.11'):
             variant_alerter = VARIANT_ALERTERS[variant][0]
             for path, expected in ((ENGINE, {variant + '-engine-unset', variant + '-engine-empty'}),
                                    (variant_alerter, {variant + '-alerter-unset', variant + '-alerter-empty',

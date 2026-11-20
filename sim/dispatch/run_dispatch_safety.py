@@ -11,7 +11,7 @@ JDK=Path(os.environ.get('JAVA_HOME',str(Path.home()/'jdk25')))/'bin'
 # getEntityIds() on 26.2 and 26.1.2. The stub pair below is shaped per variant so the
 # fixture cannot silently hardcode one variant's API. Variant-jar truth stays with the
 # per-variant gradle compile; this pins the sim's fixture seam per variant.
-VARIANTS={'26.3':'entityIds','26.2':'getEntityIds','26.1.2':'getEntityIds'}
+VARIANTS={'26.3':'entityIds','26.2':'getEntityIds','26.1.2':'getEntityIds','1.21.11':'getEntityIds'}
 stubs={}
 def put(name,text): stubs[name+'.java']='package '+name.rsplit('/',1)[0].replace('/','.')+'; '+text
 put('dev/meshac/compat/VersionBridge','public class VersionBridge {public static Object hand(net.minecraft.network.protocol.game.ServerboundUseItemOnPacket p){return p.hand();} public static net.minecraft.network.protocol.game.ServerboundUseItemOnPacket hit(net.minecraft.network.protocol.game.ServerboundUseItemOnPacket p){return p.hitResult();} public static int chunkX(net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket p){return p.x();} public static int chunkZ(net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket p){return p.z();} public static int motionEntity(net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket p){return p.id();} public static net.minecraft.world.phys.Vec3 motion(net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket p){return p.movement();} public static int[] removedIds(net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket p){return p.REMOVED_IDS_GETTER().toIntArray();} public static net.minecraft.world.phys.Vec3 relativeDelta(Object a,Object t){return new net.minecraft.world.phys.Vec3(0,0,0);}}')
