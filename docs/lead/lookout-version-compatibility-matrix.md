@@ -84,7 +84,7 @@ client adapter.
 | evidence | 1.21.11 | 26.1.2 | 26.2 | 26.3 |
 |---|---|---|---|---|
 | fresh target build + exact jar/dependency inspection | fresh online build green on 4bd648b; sources-jar override bytes and override class presence verified; dependency inspection exit 0 on fresh online build 2026-11-20, meshac-1.21.11-2.9.7.28-meshac-0.1.0.jar sha256 885c7490775db2333a394e57ef744f82ad6f20b5e64a48c50efead748a86f9b2, route build-remap.gradle | fresh online build 2026-11-20; check_deps exit 0 on meshac-26.1.2-2.9.7.28-meshac-0.1.0.jar sha256 40ce14f1ef9d87552d66845a271d07f2088bc9fbf67a95f25f4a4c2380f8251f, route build.gradle | fresh online build 2026-11-20; check_deps exit 0 on meshac-26.2-2.9.7.28-meshac-0.1.0.jar sha256 61085bbc7d0457fe3f9f49ba013067095e873f7da80225b25cec2c48c217c09d, route build.gradle | fresh online build 2026-11-20; check_deps exit 0 on meshac-26.3-2.9.7.28-meshac-0.1.0.jar sha256 796e9c8f8bb90706588c872f0f9745b9ef017f8bcd1573f195fc3a894466acac, route build.gradle |
-| generated/shipped required:true + correct compatibilityLevel | U | U | U | U |
+| generated/shipped required:true + correct compatibilityLevel | shipped lookout.mixins.json gate tests/check_mixins_config.py exit 0 on fresh online build 2026-11-20, jar sha256 885c7490775db2333a394e57ef744f82ad6f20b5e64a48c50efead748a86f9b2, JAVA_21 | exit 0, jar sha256 40ce14f1ef9d87552d66845a271d07f2088bc9fbf67a95f25f4a4c2380f8251f, JAVA_25 | exit 0, jar sha256 61085bbc7d0457fe3f9f49ba013067095e873f7da80225b25cec2c48c217c09d, JAVA_25 | exit 0, jar sha256 796e9c8f8bb90706588c872f0f9745b9ef017f8bcd1573f195fc3a894466acac, JAVA_25 |
 | real watcher boot, target delivery, chat/log capture | U | U | U | U |
 | protocol-matched stimuli + G1-G4 proof | U | U | U | U |
 Dependency inspection covers the known mixinextras include route,
@@ -93,7 +93,11 @@ registration and nested archive version; platform constraints
 four forms the metadata ships ('>=<version>', exact pin, '<version>.x',
 '*') but never resolved - '<version>.x' is platform metadata syntax only
 and version_satisfies runs only for bundled deps. This is not general
-Fabric version-range support or full dependency discovery. G4 remains UNQUALIFIED. Trace semantics have Java/stub tests, not game proof.
+Fabric version-range support or full dependency discovery. The mixins-config gate inspects the shipped lookout.mixins.json bytes in a
+caller-bound jar only: required:true, exact compatibilityLevel vs the
+caller-supplied java_min, client array, package. It does not inspect
+meshac.mixins.json and proves nothing about how the resource was
+generated. G4 remains UNQUALIFIED. Trace semantics have Java/stub tests, not game proof.
 Main 271474a5 supersedes named-capture logging: alert/stats records use IDs, not
 player names/messages. IDs and chat captures remain private and correlatable.
 Any nonempty trace value, including "0", is on; unset/empty is off.
