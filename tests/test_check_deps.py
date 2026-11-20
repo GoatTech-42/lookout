@@ -24,8 +24,9 @@ Expected outcomes:
     list, jars entries non-dict, nested non-object)     -> named FAILs, no traceback
   M constraint/jars boundary: non-string jars[].file,
     non-string or malformed depends constraints         -> named FAILs, no traceback
-    all-valid incl. '*' platform dep and bundled '*'
-    dependency                                          -> PASS (exit 0)
+    all-valid incl. '*' platform dep, bundled '*'
+    dependency and the shipped '<version>.x' range
+    form                                                  -> PASS (exit 0)
   Mutant controls: the pre-boundary checker at bc8b711
     must fail M1-M4 with its documented pre-boundary defect
     (M1 TypeError, M2 AttributeError, M3/M4 silent
@@ -216,12 +217,15 @@ with tempfile.TemporaryDirectory() as td:
     m5 = os.path.join(td, "m5.jar")
     mod_jar(m5, True, nested_jar(), depends={DEP: f">={VER}", "fabric-api": "*"})
     m6 = os.path.join(td, "m6.jar"); mod_jar(m6, True, nested_jar(), depends={DEP: "*"})
+    m7 = os.path.join(td, "m7.jar")
+    mod_jar(m7, True, nested_jar(), depends={DEP: f">={VER}", "minecraft": "26.1.x"})
     expect_line("M1-jars-file-non-string", run(m1, bf), 1, "FAIL shipped-jars-typed")
     expect_line("M2-constraint-non-string", run(m2, bf), 1, "FAIL shipped-constraints-typed")
     expect_line("M3-constraint-malformed", run(m3, bf), 1, "FAIL shipped-constraints-typed")
     expect_line("M4-constraint-maven-range", run(m4, bf), 1, "FAIL shipped-constraints-typed")
     expect_line("M5-valid-with-wildcard-platform", run(m5, bf), 0, "PASS shipped-constraints-typed")
     expect_line("M6-bundled-wildcard-resolves", run(m6, bf), 0, "PASS resolved-mixinextras")
+    expect_line("M7-xrange-constraint-accepted", run(m7, bf), 0, "PASS shipped-constraints-typed")
     for name, jar in [("M1", m1), ("M2", m2), ("M3", m3), ("M4", m4)]:
         r = run(jar, bf)
         ok = "Traceback" not in r.stderr
@@ -277,6 +281,20 @@ with tempfile.TemporaryDirectory() as td:
     open(mut2, "w").write(cur.replace(snippet, ""))
     if mutant_baseline("mutant-literal-wildcard", mut2, good, bf):
         mutant_kill("M6-mutant-literal-wildcard-killed", mut2, m6, bf, lit_m6)
+
+    # mutant 3: committed checker minus the '<version>.x' range form must
+    # reject M7 with FAIL shipped-constraints-typed, after a healthy
+    # baseline
+    def narrow_m7(r):
+        ok = (r.returncode == 1 and "Traceback" not in r.stderr
+              and has_prefix(r, "FAIL shipped-constraints-typed"))
+        return ok, "want exit 1, no traceback, FAIL shipped-constraints-typed"
+    xrange_token = "|\\d+(\\.\\d+)*\\.x"
+    assert xrange_token in cur, "x-range form missing from committed checker"
+    mut3 = os.path.join(td, "check_deps_noxrange.py")
+    open(mut3, "w").write(cur.replace(xrange_token, ""))
+    if mutant_baseline("mutant-no-xrange", mut3, good, bf):
+        mutant_kill("M7-mutant-no-xrange-killed", mut3, m7, bf, narrow_m7)
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)

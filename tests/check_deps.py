@@ -124,13 +124,22 @@ if outer is not None:
           "outer jars must be a list of objects with string file values")
     if jars_typed:
         outer_jar_entries = {j.get("file") for j in jars_field}
+    # '<version>.x' is accepted as platform metadata syntax (the
+    # minecraft key ships e.g. '26.1.x'); platform constraints are
+    # syntax-checked here and NEVER resolved. The regex permits '.x' on
+    # ANY depends key - it is not key-restricted - but a bundled dep
+    # shipping '.x' still fails closed, because version_satisfies below
+    # (bundled deps only, e.g. mixinextras) resolves '>=', an exact pin,
+    # or '*' and treats '.x' as a literal equality miss. 'Platform-only'
+    # describes the supported semantics, not the parsing.
     constraint_reasons = []
     if isinstance(dep_field, dict):
         for dep_name, constraint in dep_field.items():
             if not isinstance(constraint, str):
                 constraint_reasons.append(f"{dep_name}: constraint is {type(constraint).__name__}, not a string")
-            elif not re.fullmatch(r"(>=\d+(\.\d+)*|\d+(\.\d+)*|\*)", constraint.strip()):
-                constraint_reasons.append(f"{dep_name}: constraint {constraint!r} is neither '>=<version>' nor an exact pinned version")
+            elif not re.fullmatch(r"(>=\d+(\.\d+)*|\d+(\.\d+)*|\d+(\.\d+)*\.x|\*)", constraint.strip()):
+                constraint_reasons.append(
+                    f"{dep_name}: constraint {constraint!r} is none of '>=<version>', an exact pinned version, a '<version>.x' range, or '*'")
     check("shipped-constraints-typed", not constraint_reasons,
           "; ".join(constraint_reasons))
     shipped_missing = src_imports - shipped
