@@ -88,17 +88,20 @@ else:
 # inspect the exact artifact only; never union across the build dir
 nested_entries = {}
 outer = None
+outer_error = None
 if jars and os.path.isfile(jars[0]):
-    with zipfile.ZipFile(jars[0]) as z:
-        for n in z.namelist():
-            if n.startswith("META-INF/jars/") and n.endswith(".jar"):
-                nested_entries[n] = z.read(n)
-        try:
+    try:
+        with zipfile.ZipFile(jars[0]) as z:
+            for n in z.namelist():
+                if n.startswith("META-INF/jars/") and n.endswith(".jar"):
+                    nested_entries[n] = z.read(n)
             outer = json.loads(z.read("fabric.mod.json"))
-        except Exception:
-            outer = None
+    except Exception as e:
+        outer = None
+        outer_error = f"{type(e).__name__}: {e}"
 check("outer-metadata-readable", outer is not None,
-      "outer artifact fabric.mod.json missing or invalid")
+      f"outer artifact unreadable or fabric.mod.json missing/invalid ({outer_error})" if outer_error
+      else "outer artifact fabric.mod.json missing or invalid")
 
 shipped = set()
 outer_jar_entries = set()

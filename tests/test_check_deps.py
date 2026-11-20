@@ -19,6 +19,7 @@ Expected outcomes:
   H nested archive present but outer jars[] omits it    -> FAIL registered=False
   I outer jars[] names a different path                 -> FAIL registered=False
   J outer shipped depends missing / unsatisfiable       -> FAIL shipped=False
+  K malformed outer zips (empty, non-zip, truncated)    -> FAIL outer-metadata-readable, no traceback
 Run from the repo root: python3 tests/test_check_deps.py"""
 import json, os, subprocess, sys, tempfile, zipfile
 
@@ -105,6 +106,20 @@ with tempfile.TemporaryDirectory() as td:
     mod_jar(os.path.join(g, "build", "libs", "b.jar"), True, nested_jar())
     open(os.path.join(g, "build.gradle"), "w").write(INCLUDE)
     expect("G-bare-run-ambiguous", run(cwd=g), 1, "pass --jar")
+
+    # K: malformed outer zips must be structured FAILs, never a traceback
+    for label, payload in [("empty", b""),
+                           ("nonzip", b"this is plain text, no zip magic at all"),
+                           ("truncated", b"PK\x03\x04 truncated garbage, not a real archive")]:
+        bad = os.path.join(td, "bad-" + label + ".zip")
+        open(bad, "wb").write(payload)
+        r = run(bad, bf)
+        expect("K-malformed-outer-zip-" + label, r, 1, "outer-metadata-readable")
+        ok = "Traceback" not in r.stderr
+        print(("PASS " if ok else "FAIL ") + "K-no-traceback-" + label)
+        if not ok:
+            fails.append("K-no-traceback-" + label)
+            print(r.stderr[-400:])
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)
