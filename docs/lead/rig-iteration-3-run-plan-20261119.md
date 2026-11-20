@@ -19,11 +19,14 @@ contain dashes; record each PID/PGID at launch in shell vars):
 3. stage + verify: python3 bot/choreo.py prepare server VictimA VictimB
    (stone platform, slowness 255 + gravity 0 + kb-resist 1, static-verified
    at the expected coordinates or abort).
-4. attacker: COMBAT_ONLY=1 DESCEND=1 ARM_PAUSE=12 HOLD_AFTER=20 SERVERDIR=server
+4. full rig only: watcher client FIRST, before any stimulus: owned Xvfb plus
+   watcher via --quickPlayMultiplayer 127.0.0.1:25565 (26.1.2 dropped
+   --server/--port), MESHAC_TRACE=1. Prove loaded/watching and effective
+   opt-ins (G1/G2 greps) before the attacker joins, or provokes can land
+   before capture is live. Same ordering as the HOST-RUN GO packet.
+5. attacker: COMBAT_ONLY=1 DESCEND=1 ARM_PAUSE=12 HOLD_AFTER=20 SERVERDIR=server
    bot2.py - run_arm stages, server-verifies the band, attacks, count+receipt
    guards; any guard failure aborts nonzero and the session is invalid.
-5. full rig only: watcher client via --quickPlayMultiplayer 127.0.0.1:25565
-   (26.1.2 dropped --server/--port), MESHAC_TRACE=1; G1/G2 greps.
 
 verdicts: per RUNBOOK-combat.md mapping. bot-only = lane-run calibration
 (G3/G4-side; G4 UNQUALIFIED). watcher-note halves need the real client.
