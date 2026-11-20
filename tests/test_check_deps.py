@@ -20,6 +20,8 @@ Expected outcomes:
   I outer jars[] names a different path                 -> FAIL registered=False
   J outer shipped depends missing / unsatisfiable       -> FAIL shipped=False
   K malformed outer zips (empty, non-zip, truncated)    -> FAIL outer-metadata-readable, no traceback
+  L wrong-typed metadata (outer non-object, depends as
+    list, jars entries non-dict, nested non-object)     -> named FAILs, no traceback
 Run from the repo root: python3 tests/test_check_deps.py"""
 import json, os, subprocess, sys, tempfile, zipfile
 
@@ -30,23 +32,23 @@ VER = "0.5.5"
 NESTED = f"META-INF/jars/{DEP}-fabric-{VER}.jar"
 INCLUDE = f'include "io.github.llamalad7:mixinextras-fabric:{VER}"\n'
 
-def nested_jar(modid=DEP, version=VER):
+def nested_jar(modid=DEP, version=VER, raw=None):
     import io
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
-        z.writestr("fabric.mod.json", json.dumps({"id": modid, "version": version}))
+        z.writestr("fabric.mod.json", raw if raw is not None else json.dumps({"id": modid, "version": version}))
     return buf.getvalue()
 
 def mod_jar(path, nested_name=None, nested_bytes=None, register=True, depends=None,
-            register_path=None):
+            register_path=None, raw_outer=None):
     reg = []
     if nested_name and register:
         reg = [{"file": register_path or NESTED}]
-    outer = {"id": "meshac",
+    outer = raw_outer if raw_outer is not None else json.dumps({"id": "meshac",
              "depends": depends if depends is not None else {DEP: f">={VER}"},
-             "jars": reg}
+             "jars": reg})
     with zipfile.ZipFile(path, "w") as z:
-        z.writestr("fabric.mod.json", json.dumps(outer))
+        z.writestr("fabric.mod.json", outer)
         if nested_name:
             z.writestr(NESTED if nested_name is True else nested_name, nested_bytes)
 
@@ -119,6 +121,30 @@ with tempfile.TemporaryDirectory() as td:
         print(("PASS " if ok else "FAIL ") + "K-no-traceback-" + label)
         if not ok:
             fails.append("K-no-traceback-" + label)
+            print(r.stderr[-400:])
+
+    # L: wrong-typed metadata must be named FAILs, never tracebacks
+    l1 = os.path.join(td, "l1.jar"); mod_jar(l1, True, nested_jar(), raw_outer="[]")
+    r = run(l1, bf)
+    expect("L1-outer-non-object", r, 1, "outer-metadata-readable")
+    l2 = os.path.join(td, "l2.jar")
+    mod_jar(l2, True, nested_jar(),
+            raw_outer=json.dumps({"id": "meshac", "depends": [DEP], "jars": [{"file": NESTED}]}))
+    r = run(l2, bf)
+    expect("L2-depends-as-list", r, 1, "shipped-depends-typed")
+    l3 = os.path.join(td, "l3.jar")
+    mod_jar(l3, True, nested_jar(),
+            raw_outer=json.dumps({"id": "meshac", "depends": {DEP: f">={VER}"}, "jars": [NESTED]}))
+    r = run(l3, bf)
+    expect("L3-jars-entries-non-dict", r, 1, "shipped-jars-typed")
+    l4 = os.path.join(td, "l4.jar"); mod_jar(l4, True, nested_jar(raw="[]"))
+    r = run(l4, bf)
+    expect("L4-nested-non-object", r, 1, "not a JSON object")
+    for name, r in [("L1", run(l1, bf)), ("L2", run(l2, bf)), ("L3", run(l3, bf)), ("L4", run(l4, bf))]:
+        ok = "Traceback" not in r.stderr
+        print(("PASS " if ok else "FAIL ") + name + "-no-traceback")
+        if not ok:
+            fails.append(name + "-no-traceback")
             print(r.stderr[-400:])
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")

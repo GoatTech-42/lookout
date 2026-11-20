@@ -96,6 +96,8 @@ if jars and os.path.isfile(jars[0]):
                 if n.startswith("META-INF/jars/") and n.endswith(".jar"):
                     nested_entries[n] = z.read(n)
             outer = json.loads(z.read("fabric.mod.json"))
+            if not isinstance(outer, dict):
+                raise ValueError("fabric.mod.json is not a JSON object")
     except Exception as e:
         outer = None
         outer_error = f"{type(e).__name__}: {e}"
@@ -106,8 +108,17 @@ check("outer-metadata-readable", outer is not None,
 shipped = set()
 outer_jar_entries = set()
 if outer is not None:
-    shipped = set(outer.get("depends", {})) - PLATFORM
-    outer_jar_entries = {j.get("file") for j in outer.get("jars", []) if isinstance(j, dict)}
+    dep_field = outer.get("depends", {})
+    check("shipped-depends-typed", isinstance(dep_field, dict),
+          f"outer depends must be an object, got {type(dep_field).__name__}")
+    if isinstance(dep_field, dict):
+        shipped = set(dep_field) - PLATFORM
+    jars_field = outer.get("jars", [])
+    jars_typed = isinstance(jars_field, list) and all(isinstance(j, dict) for j in jars_field)
+    check("shipped-jars-typed", jars_typed,
+          "outer jars must be a list of objects with file keys")
+    if jars_typed:
+        outer_jar_entries = {j.get("file") for j in jars_field}
     shipped_missing = src_imports - shipped
     check("shipped-covers-imports", not shipped_missing,
           f"missing from shipped depends: {sorted(shipped_missing)}" if shipped_missing
@@ -122,8 +133,10 @@ for dep in sorted(declared):
         try:
             with zipfile.ZipFile(io.BytesIO(b)) as nz:
                 nfmj = json.loads(nz.read("fabric.mod.json"))
+            if not isinstance(nfmj, dict):
+                raise ValueError("nested fabric.mod.json is not a JSON object")
         except Exception as e:
-            reasons.append(f"{n}: invalid nested archive ({type(e).__name__})")
+            reasons.append(f"{n}: invalid nested archive ({type(e).__name__}: {e})")
             continue
         if nfmj.get("id") != dep:
             reasons.append(f"{n}: nested fabric.mod.json id={nfmj.get('id')!r} != {dep!r}")
