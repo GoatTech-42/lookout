@@ -588,5 +588,61 @@ with tempfile.TemporaryDirectory() as td:
     expect("mutant-corpus-nocap-killed", r.returncode == 0 and r.stdout.split() == ["15"],
            "15 logs carry pinned truncations; the no-cap mutant must mismatch exactly those")
 
+
+# --- server receipt corpus: parse_server_log over every committed real
+# server log. pins exact receipt counts (0-based content stays out of
+# the pins: real logs carry a player handle, so counts only). bounded
+# corpus: receipts are any-player join lines, never per-target proof.
+SERVER_CORPUS = {
+    "docs/build-evidence/abilities26.3/abilities-constructed-first/abilities-constructed-server.log": 2,
+    "docs/build-evidence/abilities26.3/abilities-constructed-server.log": 2,
+    "docs/build-evidence/abilities26.3/abilities-failed-hotbar/abilities-server.log": 2,
+    "docs/build-evidence/abilities26.3/abilities-failed-input/abilities-server.log": 2,
+    "docs/build-evidence/abilities26.3/abilities-interrupted/abilities-server.log": 2,
+    "docs/build-evidence/abilities26.3/failed-readiness/abilities-server.log": 0,
+    "docs/build-evidence/anchor26.3/anchor-server.log": 2,
+    "docs/build-evidence/anchor26.3/first-anchor-run/anchor-server.log": 2,
+    "docs/build-evidence/anchor26.3/observer-boot-failure/anchor-server.log": 0,
+    "docs/build-evidence/held26.3/first-run/held-server.log": 2,
+    "docs/build-evidence/held26.3/held-server.log": 2,
+    "docs/build-evidence/lifecycle26.3/lifecycle-server.log": 2,
+    "docs/build-evidence/lifecycle26.3/transitions-server.log": 4,
+    "docs/build-evidence/move26.3/failure2/move-server.log": 2,
+    "docs/build-evidence/move26.3/move-failure1-server.log": 2,
+    "docs/build-evidence/move26.3/move-server.log": 2,
+    "docs/build-evidence/outbound26.3/outbound-server.log": 2,
+    "docs/build-evidence/session-pong26.3/anchor-server.log": 2,
+    "rig/proof/fixtures/server-good.log": 2,
+}
+for rel, want in sorted(SERVER_CORPUS.items()):
+    got = len(parsers.parse_server_log((ROOT / rel).read_text()))
+    expect(f"srv-corpus-{pathlib.Path(rel).parent.name}-{pathlib.Path(rel).stem}",
+           got == want, f"got {got}")
+
+# server corpus mutation protection: a receipt regex that never matches
+# must break exactly the 17 receipt-bearing pins (the 2 zero-receipt
+# evidence logs still match and are not part of the kill count)
+_SERVER_PINS = repr(sorted(SERVER_CORPUS.items()))
+_SERVER_PROBE = ("import sys, pathlib; sys.path.insert(0, '.');"
+                 "from rig.proof import parsers;"
+                 f"ROOT = {str(ROOT)!r}; pins = {_SERVER_PINS};"
+                 "bad = [rel for rel, want in pins"
+                 " if len(parsers.parse_server_log(pathlib.Path(ROOT, rel).read_text())) != want];"
+                 "print(len(bad))")
+with tempfile.TemporaryDirectory() as td:
+    mutant_tree(td)  # healthy copy of the committed tree
+    r = subprocess.run([sys.executable, "-c", _SERVER_PROBE], cwd=td,
+                       capture_output=True, text=True)
+    expect("mutant-srv-corpus-baseline-healthy", r.returncode == 0 and r.stdout.split() == ["0"],
+           r.stdout[-100:] + r.stderr[-200:])
+with tempfile.TemporaryDirectory() as td:
+    mutant_tree(td, parser_subs=[(
+        'SERVER_RECEIPT = re.compile(r"joined the game|logged in with entity id")',
+        'SERVER_RECEIPT = re.compile(r"a-string-that-never-appears")')])
+    r = subprocess.run([sys.executable, "-c", _SERVER_PROBE], cwd=td,
+                       capture_output=True, text=True)
+    expect("mutant-srv-corpus-killed", r.returncode == 0 and r.stdout.split() == ["17"],
+           "17 files carry receipts; the never-match mutant must mismatch exactly those")
+
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)
