@@ -55,6 +55,16 @@ intended target. A green run here does not satisfy the combat arms'
 watcher-note halves (RUNBOOK-combat.md verdict mapping), and no row
 proves punish-safety or any other-version behavior.
 
+## human review overrides the harness
+
+block review (see docs/lead/mixin-error-multiline-limits.md) runs per
+scored boot/log. a failure-shaped block triggers investigation and the
+run scores UNVERIFIED until a human confirms or clears it; a confirmed
+failure overrides any harness verdict for that run, even when the row
+printed PASS. PASS is never the operational verdict against a confirmed
+failure. real excerpts enter shared artifacts only after redaction to
+IDs.
+
 ## abort conditions
 
 Stop and mark the session UNVERIFIED, never PASS, when: RAM below the

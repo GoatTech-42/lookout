@@ -1,0 +1,54 @@
+# mixin error detection: limits and next steps
+
+bound to main 6bdd2ab. the rig-proof boot row scores the watcher client
+log with a single-line detector: severity (ERROR/WARN), the dev.lookout
+package and mixin vocabulary (mixin/apply/inject/callback), each matched
+independently anywhere on the same line.
+
+## what the single-line detector misses
+
+real mixin failures often span lines:
+
+- a one-line summary ("ERROR Mixin apply failed") followed by the class
+  on the NEXT line ("Caused by: ... dev.lookout.client.AttackHooks"), so
+  no single line carries severity + package + vocabulary together
+- stack traces where dev.lookout frames appear several lines below the
+  ERROR header, without mixin vocabulary on the same line
+- wrapped exceptions ("Caused by:" chains) where only the innermost line
+  names the failing callback
+- per-callback injection errors logged at DEBUG/INFO on some loaders,
+  which the severity rule deliberately excludes; if a target ever logs
+  failures at INFO, the detector will not see them
+
+the detector CAN miss these forms, and QA replayed the first shape
+against the healthy fixture: boot still scored PASS. so a boot PASS
+means exactly "no same-line match", never "no mixin errors". treat any
+PASS that was not backed by a block review (below) as unproven, not
+green.
+
+## how a rig run would capture them
+
+1. boot the watcher client on the rig with the log captured to a file
+   (RUNBOOK-combat.md's boot step, plus `tee` to a dated evidence file).
+2. grep the captured log for `dev.lookout` with generous context
+   (`grep -n -B5 -A30 'dev\.lookout'`) and human-review the blocks for
+   EVERY scored boot/log, not once per target. this grep is triage, not
+   a complete audit: errors that never name dev.lookout (package-less
+   summaries, config-name-only failures) can still be missed. any
+   failure-shaped block triggers investigation and the run scores
+   UNVERIFIED until a human confirms or clears it; a confirmed failure
+   overrides the row verdict (see the runbook).
+3. before a real excerpt enters any shared artifact (fixtures, notes,
+   reports), redact it to IDs: player names, session ids, paths and
+   chat text out, entity ids in. synthetic fixtures stay id-only.
+4. if a multi-line failure form appears, extend the detector with a
+   sliding-window pass (severity line opens a window; package +
+   vocabulary within N lines counts as one error) plus red fixtures
+   built from the redacted captured block, before the window form is
+   trusted for scoring.
+
+next step when the rig is unheld: capture one real boot log per target,
+run step 2, and record the outcome per boot. one clean boot closes only
+that boot. the general limitation closes only when a window detector
+with real fixtures lands; finite clean observations do not remove a
+known parser blind spot.
