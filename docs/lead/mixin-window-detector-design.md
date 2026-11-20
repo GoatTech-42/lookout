@@ -66,7 +66,11 @@ entry. they never open or extend a window, but the same-line scan
   no-match is not clean. the entry is reported TRUNCATED and scores
   UNVERIFIED for human review - a package hit on continuation line 31
   is invisible to the window, and the design says so instead of
-  implying operational green. an entry that genuinely ends (next
+  implying operational green. the harness detail words it exactly
+  and unconditionally: "entry truncated at 30 continuations; omitted
+  content not qualified" - an in-prefix finding, when one exists, is
+  listed separately, and truncated entries are never described as
+  benign or cleared. an entry that genuinely ends (next
   header or EOF) within the cap with no match is a clean no-finding.
 - SAME-LINE SCAN IS KEPT over ALL lines, including orphans and lines
   beyond any cap, exactly as `is_mixin_error` works today. a same-line

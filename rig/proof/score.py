@@ -23,7 +23,8 @@ def row_boot(client):
         problems.append("watching line absent")
     # parsed indices are 0-based; details render 1-based for human review
     review = ([f"lines {f.start + 1}-{f.end + 1} ({f.severity} entry)" for f in client.window_findings]
-              + [f"lines {s + 1}-{e + 1}+ (truncated at {parsers.MAX_CONTINUATION} continuation lines)"
+              + [f"lines {s + 1}-{e + 1}+ (entry truncated at "
+                 f"{parsers.MAX_CONTINUATION} continuations; omitted content not qualified)"
                  for s, e in client.truncated_error_entries])
     if problems:
         detail = "; ".join(problems)

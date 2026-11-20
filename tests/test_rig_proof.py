@@ -261,7 +261,9 @@ expect("win-f5-no-finding-past-cap", c5.window_findings == [])
 expect("win-f5-truncated-flagged", c5.truncated_error_entries == [(3, 33)],
        f"got {c5.truncated_error_entries}")
 v5, d5 = score.row_boot(c5)
-expect("win-f5-boot-unverified-truncated", v5 == "UNVERIFIED" and "truncated" in d5)
+expect("win-f5-boot-unverified-truncated",
+       v5 == "UNVERIFIED"
+       and "entry truncated at 30 continuations; omitted content not qualified" in d5, d5)
 
 # f6: clean boundary - entry ends exactly at the cap via next header
 f6 = (BASE + "[12:10:00] [Render thread/ERROR]: Mixin apply failed\n" + _filler(30)
@@ -370,6 +372,20 @@ c16b = parsers.parse_client_log(f16b)
 expect("win-f16-malformed-header-no-window",
        c16b.window_findings == [] and c16b.mixin_errors == [])
 
+# f19: a truncated entry can ALSO carry an in-prefix finding; both are
+# listed separately (the truncation wording stays unconditional)
+f19 = (BASE + "[12:10:00] [Render thread/ERROR]: Mixin apply failed\n"
+       "Caused by: java.lang.IllegalStateException: dev.lookout.client.AttackHooks\n"
+       + _filler(30) + "[12:11:00] [main/INFO]: done\n")
+c19 = parsers.parse_client_log(f19)
+expect("win-f19-finding-and-truncation-coexist",
+       len(c19.window_findings) == 1 and c19.truncated_error_entries == [(3, 33)],
+       f"got {c19.window_findings} {c19.truncated_error_entries}")
+v19, d19 = score.row_boot(c19)
+expect("win-f19-detail-lists-both",
+       v19 == "UNVERIFIED" and "lines 4-34 (ERROR entry)" in d19
+       and "entry truncated at 30 continuations; omitted content not qualified" in d19, d19)
+
 # f18: any bare-word level opens an entry - a FATAL header resets the
 # window instead of merging into the open ERROR entry, and the
 # ERROR/WARN gate keeps the FATAL entry itself out of findings
@@ -415,6 +431,8 @@ def boot_line(cwd, text):
     for l in r.stdout.splitlines():
         parts = l.split(" ", 2)
         if len(parts) >= 2 and parts[0] in ("PASS", "FAIL", "UNVERIFIED") and parts[1] == "boot":
+            assert (r.returncode == 0) == (parts[0] == "PASS"), \
+                f"rc {r.returncode} vs verdict {l!r}"
             return l
     raise AssertionError("no boot verdict line: " + (r.stdout + r.stderr)[-300:])
 
@@ -505,12 +523,70 @@ with tempfile.TemporaryDirectory() as td:
     case = pathlib.Path(td, "case.log")
     case.write_text(GOOD)
     r = subprocess.run([sys.executable, "-c", probe], cwd=td, capture_output=True, text=True)
-    expect("mutant-dedup-baseline-healthy", r.stdout.split() == ["0", "0"],
+    expect("mutant-dedup-baseline-healthy", r.returncode == 0 and r.stdout.split() == ["0", "0"],
            r.stdout[-100:] + r.stderr[-200:])
     case.write_text(f14a)
     r = subprocess.run([sys.executable, "-c", probe], cwd=td, capture_output=True, text=True)
-    expect("mutant-dedup-killed", r.stdout.split() == ["1", "1"],
+    expect("mutant-dedup-killed", r.returncode == 0 and r.stdout.split() == ["1", "1"],
            "healthy tree prints '1 0' (same-line only); mutant double-counts")
+
+
+# --- corpus regression: the window detector over every committed real
+# client log (docs/build-evidence + the committed fixture). pins zero
+# false findings and the exact truncation footprint (0-based indices);
+# any parser change that alters real-log behavior goes red. the logs
+# are immutable meshac 26.3 evidence; lookout was not loaded in them,
+# so this proves absence of false positives, not detection.
+CORPUS = {
+    "docs/build-evidence/abilities26.3/abilities-constructed-client.log": (0, 0, [(0, 30), (41, 71)]),
+    "docs/build-evidence/abilities26.3/abilities-constructed-first/abilities-constructed-client.log": (0, 0, [(0, 30), (42, 72)]),
+    "docs/build-evidence/abilities26.3/abilities-failed-hotbar/abilities-client.log": (0, 0, [(0, 30), (42, 72)]),
+    "docs/build-evidence/abilities26.3/abilities-failed-input/abilities-client.log": (0, 0, [(0, 30), (41, 71)]),
+    "docs/build-evidence/abilities26.3/abilities-interrupted/abilities-client.log": (0, 0, [(0, 30), (42, 72), (213, 243)]),
+    "docs/build-evidence/abilities26.3/failed-readiness/abilities-client.log": (0, 0, [(0, 30), (41, 71)]),
+    "docs/build-evidence/anchor26.3/anchor-client.log": (0, 0, [(0, 30), (41, 71)]),
+    "docs/build-evidence/anchor26.3/first-anchor-run/anchor-client.log": (0, 0, [(0, 30), (41, 71)]),
+    "docs/build-evidence/held26.3/first-run/held-client.log": (0, 0, [(0, 30), (42, 72)]),
+    "docs/build-evidence/held26.3/held-client.log": (0, 0, [(0, 30), (42, 72)]),
+    "docs/build-evidence/lifecycle26.3/lifecycle-client.log": (0, 0, []),
+    "docs/build-evidence/lifecycle26.3/transitions-client.log": (0, 0, []),
+    "docs/build-evidence/move26.3/failure2/move-client.log": (0, 0, [(0, 30), (42, 72)]),
+    "docs/build-evidence/move26.3/move-client.log": (0, 0, [(0, 30), (43, 73)]),
+    "docs/build-evidence/move26.3/move-failure1-client.log": (0, 0, [(0, 30), (42, 72)]),
+    "docs/build-evidence/outbound26.3/outbound-client.log": (0, 0, [(0, 30), (42, 72)]),
+    "docs/build-evidence/session-pong26.3/anchor-client.log": (0, 0, [(0, 30), (42, 72)]),
+    "rig/proof/fixtures/client-good.log": (0, 0, []),
+}
+for rel, want in sorted(CORPUS.items()):
+    got_c = parsers.parse_client_log((ROOT / rel).read_text())
+    got = (len(got_c.mixin_errors), len(got_c.window_findings), got_c.truncated_error_entries)
+    expect(f"win-corpus-{pathlib.Path(rel).parent.name}-{pathlib.Path(rel).stem}",
+           got == want, f"got {got}")
+
+# corpus mutation protection: a bad parser (cap removed) must break the
+# pinned corpus footprint; the probe runs the corpus pins against a
+# mutant tree (logs read from the real repo), the healthy copy first.
+# demonstrated as changed output, like the other mutants.
+_CORPUS_PINS = repr(sorted(CORPUS.items()))
+_CORPUS_PROBE = ("import sys, pathlib; sys.path.insert(0, '.');"
+                 "from rig.proof import parsers;"
+                 f"ROOT = {str(ROOT)!r}; pins = {_CORPUS_PINS};"
+                 "bad = [rel for rel, want in pins"
+                 " if (lambda c: (len(c.mixin_errors), len(c.window_findings), c.truncated_error_entries))"
+                 "(parsers.parse_client_log(pathlib.Path(ROOT, rel).read_text())) != want];"
+                 "print(len(bad))")
+with tempfile.TemporaryDirectory() as td:
+    mutant_tree(td)  # no substitutions: healthy copy of the committed tree
+    r = subprocess.run([sys.executable, "-c", _CORPUS_PROBE], cwd=td,
+                       capture_output=True, text=True)
+    expect("mutant-corpus-baseline-healthy", r.returncode == 0 and r.stdout.split() == ["0"],
+           r.stdout[-100:] + r.stderr[-200:])
+with tempfile.TemporaryDirectory() as td:
+    mutant_tree(td, parser_subs=[("MAX_CONTINUATION = 30\n", "MAX_CONTINUATION = 10000\n")])
+    r = subprocess.run([sys.executable, "-c", _CORPUS_PROBE], cwd=td,
+                       capture_output=True, text=True)
+    expect("mutant-corpus-nocap-killed", r.returncode == 0 and r.stdout.split() == ["15"],
+           "15 logs carry pinned truncations; the no-cap mutant must mismatch exactly those")
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)
