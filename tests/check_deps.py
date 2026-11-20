@@ -70,6 +70,10 @@ for m in re.finditer(r'^\s*(?:include|jarJar)\b\s+["\']([\w.\-]+):([\w.\-]+):([\
             include_versions[modid] = version
 
 def version_satisfies(have, constraint):
+    if not isinstance(have, str) or not isinstance(constraint, str):
+        return False
+    if constraint.strip() == "*":
+        return True
     have_t = tuple(int(x) for x in re.findall(r"\d+", have))
     m = re.fullmatch(r">=\s*([\d.]+)", constraint.strip())
     if m:
@@ -114,11 +118,21 @@ if outer is not None:
     if isinstance(dep_field, dict):
         shipped = set(dep_field) - PLATFORM
     jars_field = outer.get("jars", [])
-    jars_typed = isinstance(jars_field, list) and all(isinstance(j, dict) for j in jars_field)
+    jars_typed = (isinstance(jars_field, list)
+                  and all(isinstance(j, dict) and isinstance(j.get("file"), str) for j in jars_field))
     check("shipped-jars-typed", jars_typed,
-          "outer jars must be a list of objects with file keys")
+          "outer jars must be a list of objects with string file values")
     if jars_typed:
         outer_jar_entries = {j.get("file") for j in jars_field}
+    constraint_reasons = []
+    if isinstance(dep_field, dict):
+        for dep_name, constraint in dep_field.items():
+            if not isinstance(constraint, str):
+                constraint_reasons.append(f"{dep_name}: constraint is {type(constraint).__name__}, not a string")
+            elif not re.fullmatch(r"(>=\d+(\.\d+)*|\d+(\.\d+)*|\*)", constraint.strip()):
+                constraint_reasons.append(f"{dep_name}: constraint {constraint!r} is neither '>=<version>' nor an exact pinned version")
+    check("shipped-constraints-typed", not constraint_reasons,
+          "; ".join(constraint_reasons))
     shipped_missing = src_imports - shipped
     check("shipped-covers-imports", not shipped_missing,
           f"missing from shipped depends: {sorted(shipped_missing)}" if shipped_missing
