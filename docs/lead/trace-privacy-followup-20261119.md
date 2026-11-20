@@ -5,20 +5,24 @@ new jar, or rig run. G4 remains UNQUALIFIED in bot-only mode.
 
 ## changes
 
-- F-B: shared ChatAlerter keeps its pre-GUI evidence line. Without MESHAC_TRACE,
-  it logs entity ID and check ID only. With MESHAC_TRACE present, it logs the
-  player name and message. Capture tracing therefore still creates named logs;
-  use it only for the controlled capture and scrub names before sharing logs.
-  The initial packet (through d58a0d5) used presence as the switch, so even an
-  empty value enabled capture. The empty-trace follow-up changes both consumers:
-  unset or empty is off; any nonempty value, including "0", is on. Named logs
-  remain sensitive whenever enabled.
-- F-A: the reviewed variant path does not exist in this tree. There is exactly
-  one ChatAlerter, in src/main. build.gradle and build-remap.gradle add version
-  compatibility sources; neither replaces that class. No duplicate was added.
-  The gate now discovers src/*/java/dev/lookout/mc/ChatAlerter.java and checks
-  every match. A synthetic silent second variant proves discovery is enforced.
-  This does not establish that the complete 1.21.11 build compiles or runs.
+- F-B: shared ChatAlerter keeps its pre-GUI evidence line. Both branches log
+  entity ID and check ID only; trace mode adds a trace marker to the same line.
+  Names and messages never reach the log: they stay in the local chat feed, and
+  the suppression messages that carry name lists are excluded from the log
+  surface. The initial packet (through d58a0d5) used presence as the switch, so
+  even an empty value enabled capture. The empty-trace follow-up changes both
+  consumers: unset or empty is off; any nonempty value, including "0", is on.
+  Earlier revisions of this note described named trace logs; that behavior was
+  removed by the log-privacy fix and no longer exists.
+- F-A: at the originally reviewed tree there was exactly one ChatAlerter, in
+  src/main, and no variant override. That changed with the accepted 26.1.2
+  variant-seam slice: src/mc26.1.2/java carries a ChatAlerter override for the
+  renamed chat route (Gui.getChat().addClientSystemMessage), and build.gradle
+  excludes the src/main copy for variant 26.1.2 only; other variants keep the
+  reference copy. The gate discovers src/*/java/dev/lookout/mc/ChatAlerter.java
+  and checks every match, so both copies are gated. A synthetic silent second
+  variant proves discovery is enforced. This does not establish that the
+  complete 1.21.11 build compiles or runs.
 - F-E: the gate tokenizes comments and quoted literals, checks the first real
   statement in each of the seven handlers, and checks the helper's trace guard.
   R9 now checks named arguments separately from default-log privacy and position.
