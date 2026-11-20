@@ -21,9 +21,21 @@ def row_boot(client):
         problems.append(f"{len(client.mixin_errors)} dev.lookout mixin error lines")
     if not client.watching:
         problems.append("watching line absent")
+    # parsed indices are 0-based; details render 1-based for human review
+    review = ([f"lines {f.start + 1}-{f.end + 1} ({f.severity} entry)" for f in client.window_findings]
+              + [f"lines {s + 1}-{e + 1}+ (truncated at {parsers.MAX_CONTINUATION} continuation lines)"
+                 for s, e in client.truncated_error_entries])
     if problems:
-        return "FAIL", "; ".join(problems)
-    return "PASS", ("mod listed, watching line present, no detected mixin errors "
+        detail = "; ".join(problems)
+        if review:
+            detail += "; plus unreviewed window candidates: " + "; ".join(review)
+        return "FAIL", detail
+    if review:
+        return "UNVERIFIED", ("mixin error window candidates need human block review: "
+                              + "; ".join(review)
+                              + " (see docs/lead/mixin-window-detector-design.md)")
+    return "PASS", ("mod listed, watching line present, no same-line or in-entry "
+                    "mixin error match, no truncated error entries "
                     "(surface check only; not full G1 weave proof)")
 
 def row_g2_optin(config):

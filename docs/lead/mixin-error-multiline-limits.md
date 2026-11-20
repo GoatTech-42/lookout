@@ -47,8 +47,18 @@ green.
    built from the redacted captured block, before the window form is
    trusted for scoring.
 
+status: the window detector designed in
+mixin-window-detector-design.md has landed in the proof harness
+(parsers/score + fixtures + demonstrated mutants, synthetic id-only
+fixtures). window-only findings and truncated error entries now score
+UNVERIFIED for human block review instead of passing silently; the
+same-line FAIL scan is unchanged. this does NOT close the limitation:
+the exclusions above (INFO/DEBUG severity, package-less summaries,
+config-name-only errors) still stand, and the detector's fixtures are
+synthetic until real rig captures feed them.
+
 next step when the rig is unheld: capture one real boot log per target,
 run step 2, and record the outcome per boot. one clean boot closes only
-that boot. the general limitation closes only when a window detector
-with real fixtures lands; finite clean observations do not remove a
-known parser blind spot.
+that boot. real multi-line blocks are redacted to ids and become
+detector fixtures before the window form is trusted for scoring; finite
+clean observations do not remove a known parser blind spot.

@@ -28,7 +28,7 @@ rig itself; this page covers only proof scoring.
 
 | row | PASS needs | FAIL | UNVERIFIED |
 |---|---|---|---|
-| boot (surface check) | lookout in the loader mod list, watching line present, no detected mixin error lines (severity + dev.lookout + mixin vocabulary, order-insensitive) | any of those missing | no client log |
+| boot (surface check) | lookout in the loader mod list, watching line present, no same-line mixin error matches, no in-entry window findings, no truncated error entries (severity + dev.lookout + mixin vocabulary, order-insensitive; window detector per docs/lead/mixin-window-detector-design.md) | any of those missing | no client log, or window candidates / truncated error entries awaiting human block review |
 | g2-optin (G2) | master enabled true AND killaura, reach, timer, multiAura all true in lookout.json | any of those off/missing/wrong-typed | no/unreadable config |
 | target-delivery | some entity reaches 5 `[lookout-stats]` samples | none does (trace off, no packets, wrong target) | no client log |
 | chat-capture | >=1 alert line (plain or trace) on the log surface | no alert lines | no client log |
@@ -46,7 +46,11 @@ print all PASS.
 
 Log-level proof only. boot is a surface check: mod-list entry + watching
 line + no detected mixin errors is NOT full G1 weave proof (it does not
-show the mixin actually applied and fired). null-gui relies on operator
+show the mixin actually applied and fired). the window detector reduces
+the multi-line blind spot but does not close it: INFO/DEBUG-severity
+failures, package-less summaries and config-name-only errors stay
+invisible to scoring, and window-only findings score UNVERIFIED until a
+human reviews the block (see docs/lead/mixin-error-multiline-limits.md). null-gui relies on operator
 window markers and does not prove the GUI was actually null. g3 counts
 any-player join lines and is not a receipt for the intended target.
 chat-capture scores the log surface, not visual chat rendering.

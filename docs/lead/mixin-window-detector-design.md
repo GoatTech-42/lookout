@@ -35,6 +35,11 @@ header formats pinned from captured client logs
    seen for early log4j init lines before the launcher pattern
    attaches. fractional-second precision varies.
 
+LEVEL is any bare word, including levels the gate does not score: an
+unknown or FATAL header still opens a new entry, so it resets the
+window instead of merging its lines into the open entry. only
+ERROR/WARN entries produce findings or truncation reports.
+
 a line matching either grammar is a header. anything else is a
 continuation line.
 
@@ -54,7 +59,8 @@ entry. they never open or extend a window, but the same-line scan
   entry. each clause is still matched independently and
   order-insensitively; they just no longer have to share a line.
 - one finding per entry, reporting the entry's line range and the
-  exact lines that satisfied each clause (for review).
+  exact lines that satisfied each clause (for review). parsed line
+  indices are 0-based; CLI/verdict details render them 1-based.
 - TRUNCATION: if an ERROR/WARN entry hits the 30-continuation-line
   cap without a finding (the entry continues past the cap), the
   no-match is not clean. the entry is reported TRUNCATED and scores
@@ -141,9 +147,9 @@ green (guards; each pins an exclusion or regression):
 
 ## planned mutant mapping
 
-planned, not demonstrated - each mutant is expected to be killed
-exactly by the fixture listed, to be proven red-first when the
-detector lands:
+each mutant is demonstrated as a CHANGED OUTPUT (verdict line or
+parsed finding) on exactly its mapped fixture, after a healthy
+baseline on the good log - not a whole-suite rerun per mutant:
 
 - no 30-line cap -> fixture 5.
 - cap counts header (29 continuations) -> fixtures 4 and 5.

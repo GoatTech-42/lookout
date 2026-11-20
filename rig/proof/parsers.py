@@ -15,6 +15,9 @@ Recognized line formats (kept in sync with the lookout sources):
 - null-gui window:  "[lookout-proof] null-gui-window begin|end" markers the
                     rig wrapper injects (see the runbook); the lookout code
                     itself logs nothing when the GUI is absent
+- window finding:  per log ENTRY (header + continuations, capped),
+                    severity on the header + dev.lookout + mixin vocabulary
+                    anywhere in the entry (multi-line forms)
 """
 import re
 from dataclasses import dataclass, field
@@ -34,12 +37,39 @@ ALERT = re.compile(r"\[lookout\] (trace )?alert entity=(\d+) check=([a-z0-9_]+)"
 STATS = re.compile(r"\[lookout-stats\] entity=(\d+) samples=(\d+)")
 NULL_GUI = re.compile(r"\[lookout-proof\] null-gui-window (begin|end)")
 
+# --- window detector (multi-line mixin error forms) -------------------
+# spec: docs/lead/mixin-window-detector-design.md. an entry is a header
+# line plus its continuation lines (no header prefix), up to the next
+# header, EOF, or a cap of MAX_CONTINUATION continuation lines. window
+# findings are per entry; the same-line scan above runs over ALL lines
+# independently and is never bounded by the cap.
+MAX_CONTINUATION = 30
+# line indices in parsed data (mixin_errors, window_findings,
+# truncated_error_entries, alerts, null_gui_windows) are 0-based; the
+# CLI/row details render them 1-based for human review
+_HEADER_LAUNCHER = re.compile(r"^\[\d{1,2}:\d{2}:\d{2}\] \[([^]/]+)/([A-Z]+)\]:")
+_HEADER_LOG4J = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z (.+?) ([A-Z]+) ")
+def _header_severity(line):
+    # any bare-word LEVEL opens an entry (unknown levels included, so a
+    # FATAL line resets the window instead of merging into the open
+    # entry); the ERROR/WARN gate in flush_entry decides what scores
+    m = _HEADER_LAUNCHER.match(line) or _HEADER_LOG4J.match(line)
+    return m.group(2) if m else None
+
 @dataclass
 class Alert:
     entity: int
     check: str
     trace: bool
     line: int
+
+@dataclass
+class WindowFinding:
+    start: int            # header line index
+    end: int              # last continuation line inside the window
+    severity: str
+    package_lines: list
+    vocab_lines: list
 
 @dataclass
 class ClientLog:
@@ -49,10 +79,39 @@ class ClientLog:
     alerts: list = field(default_factory=list)
     stats: dict = field(default_factory=dict)          # entity -> max samples
     null_gui_windows: list = field(default_factory=list)  # (begin_line, end_line)
+    window_findings: list = field(default_factory=list)   # WindowFinding, window-only (deduped)
+    truncated_error_entries: list = field(default_factory=list)  # (header_line, capped_last_line)
+
+class _Entry:
+    __slots__ = ("severity", "lines", "truncated")
+
+    def __init__(self, severity, first):
+        self.severity = severity
+        self.lines = [first]
+        self.truncated = False
+
 
 def parse_client_log(text):
     out = ClientLog()
     pending = None
+    entry = None  # open _Entry, or None between entries
+
+    def flush_entry():
+        nonlocal entry
+        if entry is None:
+            return
+        if entry.severity in ("ERROR", "WARN"):
+            if entry.truncated:
+                out.truncated_error_entries.append((entry.lines[0][0], entry.lines[-1][0]))
+            pkg = [i for i, l in entry.lines if _PACKAGE.search(l)]
+            voc = [i for i, l in entry.lines if _VOCAB.search(l)]
+            if pkg and voc and not any(is_mixin_error(l) for _, l in entry.lines):
+                # window-only finding: a same-line match in this entry is
+                # already FAIL evidence in mixin_errors, never counted twice
+                out.window_findings.append(WindowFinding(entry.lines[0][0], entry.lines[-1][0],
+                                                         entry.severity, pkg, voc))
+        entry = None
+
     for i, line in enumerate(text.splitlines()):
         if MOD_ENTRY.match(line):
             out.mod_listed = True
@@ -74,6 +133,21 @@ def parse_client_log(text):
             elif pending is not None:
                 out.null_gui_windows.append((pending, i))
                 pending = None
+        sev = _header_severity(line)
+        if sev is not None:
+            flush_entry()
+            entry = _Entry(sev, (i, line))
+        elif entry is not None and not entry.truncated:
+            if len(entry.lines) <= MAX_CONTINUATION:
+                entry.lines.append((i, line))
+            else:
+                # the entry continues past the cap: truncated. later lines
+                # are orphans for the window pass only (the same-line scan
+                # above still sees them)
+                entry.truncated = True
+        # else: orphan line (no open entry, or entry already capped):
+        # no window membership
+    flush_entry()
     return out
 
 OPT_INS = ("killaura", "reach", "timer", "multiAura")
