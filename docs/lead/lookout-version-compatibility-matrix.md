@@ -1,7 +1,7 @@
 # lookout compatibility matrix, source inventory
 
 HISTORICAL, AS OF THE TAG EXPORT inspected 2026-11-19 (local tree 34e436c).
-Current-fix annotations below are bound to main 4bd648b. Source-compile seam
+Current-fix annotations below are bound to main 7c15f68. Source-compile seam
 fixes landed since 271474a5: b510e25 (26.1.2, 26.2) and 4bd648b (1.21.11),
 each with per-version src/mc*/java/dev/lookout overrides. No game run.
 V = verified-from-source declaration/relationship, NOT verified compatibility.
@@ -47,6 +47,28 @@ client adapter.
   sourceType() unwrapKey(), key.identifier(), event 35, OFFHAND and totem
   item matching; the per-version overrides carry the renamed equivalents
   verified per target jar.
+- Accessor audit 2026-11-20, v2 (scripts/audit_accessors.py gate, exit 0;
+  sources at this commit; each mapped jar bound by path and sha256 in the
+  run output; javap dumps pinned per target): every required member the
+  effective per-variant lookout sources reference resolves on its required
+  targets, with the declaring class and inheritance chain recorded per row
+  (340 required rows, 0 absences). Receiver coverage is derived from the
+  sources' net.minecraft/com.mojang imports (fail-closed); the member list
+  per receiver is curated from the call sites, exactly as CHECKS lists.
+  Matching is anchored on the declaration token (SPECTRAL_ARROW never
+  satisfies ARROW; negatives pinned in tests/test_audit_accessors.py).
+  Packet accessors, probe and client sampling members, and the chat route
+  (Gui.chatListener on 26.2/26.3 vs Gui.getChat with
+  addClientSystemMessage on 26.1.2 / addMessage on 1.21.11;
+  Component.literal; Minecraft.getInstance/gui/level/player/getConnection)
+  are covered. The only per-target differences are the three known seams
+  the overrides carry: entityIds() (26.3) vs getEntityIds() (other
+  targets), SetEntityMotionPacket.id() (26.x) vs getId() (1.21.11),
+  EntityTypes holder (26.2/26.3) vs EntityType constants (26.1.2/1.21.11).
+  Library surface (authlib GameProfile.name, datafixers Pair accessors) is
+  verified per cached library jar (path + sha256 in the run output), not
+  per-target bound. No new mismatch found. This is member presence only:
+  bytecode descriptors, callback timing and game load remain U.
 - The 1.21.11 source conflict is resolved on 4bd648b: its override uses
   getId()/getEntityIds(), matching the mapped 1.21.11 jar (javap). Other
   affected lookout packet classes per target remain U beyond compile.
