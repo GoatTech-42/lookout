@@ -7,9 +7,21 @@ in your own chat.
 
 ## status
 
-experimental. 26.3 only. validated at the source level with a headless
-simulation of scripted scenarios (see sim/lookout/); it has not been smoke-tested
-on a real client or server yet. treat every alert as a hint, not a signal.
+experimental. as of main fbe6e10 (2026-11-20), proven per target:
+
+- source compiles green on 26.3 (shared source), 26.1.2, 26.2 and
+  1.21.11 (per-version overrides under src/mc*/java)
+- dependency and shipped lookout.mixins.json gates pass on fresh online
+  builds of all four targets (exact jars and shas in
+  docs/lead/lookout-version-compatibility-matrix.md)
+- detector logic validated at the source level with a headless
+  simulation of scripted scenarios (see sim/lookout/)
+
+not proven for any target: game load, real watcher boot, chat delivery,
+protocol-matched stimuli, G1-G4 runtime proof. it has not been
+smoke-tested on a real client or server yet. treat every alert as a
+hint, not a signal. the compatibility matrix is the detailed record;
+this paragraph names only the rows above, nothing more.
 
 ## two parts in this repo
 
