@@ -15,13 +15,26 @@ import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 ENGINE = Path('src/main/java/dev/lookout/core/LookoutEngine.java')
 ALERTER = Path('src/main/java/dev/lookout/mc/ChatAlerter.java')
-STUBS = {
+# The chat route differs by variant (javap-verified): 26.3 uses
+# Gui.chatListener().handleSystemMessage, 26.1.2 uses Gui.getChat().addClientSystemMessage.
+# Each variant's alerter is compiled against a Gui stub shaped like its own target jar.
+VARIANT_ALERTERS = {
+    '26.3': (ALERTER, Path('src/main/java')),
+    '26.1.2': (Path('src/mc26.1.2/java/dev/lookout/mc/ChatAlerter.java'), Path('src/mc26.1.2/java')),
+}
+GUI_STUBS = {
+    '26.3': ''' public static class ObjectGui { public Listener chatListener() { return new Listener(); } }
+ public static class Listener { public void handleSystemMessage(Object c, boolean b) { System.out.println("CHAT " + c); } }''',
+    '26.1.2': ''' public static class ObjectGui { public ChatComp getChat() { return new ChatComp(); } }
+ public static class ChatComp { public void addClientSystemMessage(Object c) { System.out.println("CHAT " + c); } }''',
+}
+def make_stubs(variant):
+    return {
     'net/minecraft/client/Minecraft.java': '''package net.minecraft.client;
 public class Minecraft {
  public ObjectGui gui = Boolean.getBoolean("probe.chat") ? new ObjectGui() : null;
  public static Minecraft getInstance() { return new Minecraft(); }
- public static class ObjectGui { public Listener chatListener() { return new Listener(); } }
- public static class Listener { public void handleSystemMessage(Object c, boolean b) { System.out.println("CHAT " + c); } }
+''' + GUI_STUBS[variant] + '''
 }''',
     'net/minecraft/network/chat/Component.java': '''package net.minecraft.network.chat;
 public class Component { private String text; private Component(String s) { text=s; } public String toString() { return text; } public static Component literal(String s) { return new Component(s); } }''',
@@ -53,12 +66,13 @@ public class TraceEnvProbe {
 }
 
 
-def evaluate(mutation=None, empty_guard=False, privacy=None):
+def evaluate(mutation=None, empty_guard=False, privacy=None, variant='26.3'):
+    alerter_path, alerter_root = VARIANT_ALERTERS[variant]
     results = set()
     with tempfile.TemporaryDirectory(prefix='trace-env-') as d:
         root = Path(d)
         sources = []
-        for path in sorted((ROOT / 'src/main/java/dev/lookout/core').rglob('*.java')) + [ROOT / ALERTER]:
+        for path in sorted((ROOT / 'src/main/java/dev/lookout/core').rglob('*.java')) + [ROOT / alerter_path]:
             text = path.read_text()
             if mutation and path == ROOT / mutation:
                 if empty_guard:
@@ -69,7 +83,7 @@ def evaluate(mutation=None, empty_guard=False, privacy=None):
                     assert text.count('if (TRACE)') == 1
                     text = text.replace('if (TRACE)', 'if (true)', 1)
             privacy_edits = {
-                'named-alert': (ALERTER, 'LOGGER.info("[lookout] trace alert entity={} check={}", entityId, checkId);', 'LOGGER.info("[lookout] {}: {}", name, message);'),
+                'named-alert': (alerter_path, 'LOGGER.info("[lookout] trace alert entity={} check={}", entityId, checkId);', 'LOGGER.info("[lookout] {}: {}", name, message);'),
                 'named-stats': (ENGINE, '"[lookout-stats] entity=" + entityId', '"[lookout-stats] " + p.name'),
                 'stats-always-on': (ENGINE, 'if (config.teleportJumpStats', 'if (true'),
             }
@@ -78,11 +92,12 @@ def evaluate(mutation=None, empty_guard=False, privacy=None):
                 if path == ROOT / which:
                     assert text.count(old) == 1
                     text = text.replace(old, new, 1)
-            target = root / path.relative_to(ROOT / 'src/main/java')
+            src_root = alerter_root if 'mc26.1.2' in str(path) else Path('src/main/java')
+            target = root / path.relative_to(ROOT / src_root)
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(text)
             sources.append(str(target))
-        for name, text in STUBS.items():
+        for name, text in make_stubs(variant).items():
             path = root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text)
@@ -105,7 +120,7 @@ def evaluate(mutation=None, empty_guard=False, privacy=None):
                               'LOG [lookout] alert entity={} check={} ARGS=[17, reach]\n')
                 if consumer == 'chat':
                     wanted += 'CHAT [lookout] PrivatePlayer: PrivateMessage\n'
-                name = consumer + '-' + case
+                name = variant + '-' + consumer + '-' + case
                 if consumer.startswith('stats'):
                     ok = ('PrivatePlayer' not in p.stdout and 'PrivateMessage' not in p.stdout and
                           (('[lookout-stats] entity=17 ' in p.stdout) if consumer == 'stats-on' else p.stdout == '') and p.stderr == '')
@@ -122,31 +137,35 @@ def main():
     parser.add_argument('--mutants', action='store_true')
     args = parser.parse_args()
     failures = evaluate()
+    failures |= evaluate(variant='26.1.2')
     if args.mutants:
-        for path, expected in ((ENGINE, {'engine-unset', 'engine-empty'}),
-                               (ALERTER, {'alerter-unset', 'alerter-empty', 'chat-unset', 'chat-empty'})):
-            actual = evaluate(path)
-            ok = actual == expected
-            print(('PASS ' if ok else 'FAIL ') + 'guard-only-' + path.stem +
-                  ' expected=' + repr(sorted(expected)) + ' actual=' + repr(sorted(actual)))
-            if not ok:
-                failures.add('mutant-' + path.stem)
-            actual = evaluate(path, empty_guard=True)
-            expected = {'engine-empty'} if path == ENGINE else {'alerter-empty', 'chat-empty'}
-            ok = actual == expected
-            print(('PASS ' if ok else 'FAIL ') + 'empty-guard-only-' + path.stem +
-                  ' expected=' + repr(sorted(expected)) + ' actual=' + repr(sorted(actual)))
-            if not ok:
-                failures.add('empty-guard-mutant-' + path.stem)
-        for mutant, expected in (
-            ('named-alert', {'alerter-nonempty', 'chat-nonempty'}),
-            ('named-stats', {'stats-on-unset', 'stats-on-empty', 'stats-on-nonempty'}),
-            ('stats-always-on', {'stats-default-unset', 'stats-default-empty', 'stats-default-nonempty'})):
-            actual = evaluate(privacy=mutant)
-            ok = actual == expected
-            print(('PASS ' if ok else 'FAIL ') + mutant + ' exact=' + repr(sorted(actual)))
-            if not ok:
-                failures.add(mutant)
+        for variant in ('26.3', '26.1.2'):
+            variant_alerter = VARIANT_ALERTERS[variant][0]
+            for path, expected in ((ENGINE, {variant + '-engine-unset', variant + '-engine-empty'}),
+                                   (variant_alerter, {variant + '-alerter-unset', variant + '-alerter-empty',
+                                                      variant + '-chat-unset', variant + '-chat-empty'})):
+                actual = evaluate(path, variant=variant)
+                ok = actual == expected
+                print(('PASS ' if ok else 'FAIL ') + variant + '-guard-only-' + path.stem +
+                      ' expected=' + repr(sorted(expected)) + ' actual=' + repr(sorted(actual)))
+                if not ok:
+                    failures.add(variant + '-mutant-' + path.stem)
+                actual = evaluate(path, empty_guard=True, variant=variant)
+                expected = {variant + '-engine-empty'} if path == ENGINE else {variant + '-alerter-empty', variant + '-chat-empty'}
+                ok = actual == expected
+                print(('PASS ' if ok else 'FAIL ') + variant + '-empty-guard-only-' + path.stem +
+                      ' expected=' + repr(sorted(expected)) + ' actual=' + repr(sorted(actual)))
+                if not ok:
+                    failures.add(variant + '-empty-guard-mutant-' + path.stem)
+            for mutant, expected in (
+                ('named-alert', {variant + '-alerter-nonempty', variant + '-chat-nonempty'}),
+                ('named-stats', {variant + '-stats-on-unset', variant + '-stats-on-empty', variant + '-stats-on-nonempty'}),
+                ('stats-always-on', {variant + '-stats-default-unset', variant + '-stats-default-empty', variant + '-stats-default-nonempty'})):
+                actual = evaluate(privacy=mutant, variant=variant)
+                ok = actual == expected
+                print(('PASS ' if ok else 'FAIL ') + variant + '-' + mutant + ' exact=' + repr(sorted(actual)))
+                if not ok:
+                    failures.add(variant + '-' + mutant)
     print('SUITE: ' + ('all pass' if not failures else 'failures=' + repr(sorted(failures))))
     raise SystemExit(bool(failures))
 

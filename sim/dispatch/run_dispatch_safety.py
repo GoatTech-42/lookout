@@ -7,9 +7,14 @@ from pathlib import Path
 import tempfile,subprocess,os
 ROOT=Path(__file__).resolve().parents[2]
 JDK=Path(os.environ.get('JAVA_HOME',str(Path.home()/'jdk25')))/'bin'
+# Remove-entities getter differs by target jar (javap-verified): entityIds() on 26.3,
+# getEntityIds() on 26.2 and 26.1.2. The stub pair below is shaped per variant so the
+# fixture cannot silently hardcode one variant's API. Variant-jar truth stays with the
+# per-variant gradle compile; this pins the sim's fixture seam per variant.
+VARIANTS={'26.3':'entityIds','26.2':'getEntityIds','26.1.2':'getEntityIds'}
 stubs={}
 def put(name,text): stubs[name+'.java']='package '+name.rsplit('/',1)[0].replace('/','.')+'; '+text
-put('dev/meshac/compat/VersionBridge','public class VersionBridge {public static Object hand(net.minecraft.network.protocol.game.ServerboundUseItemOnPacket p){return p.hand();} public static net.minecraft.network.protocol.game.ServerboundUseItemOnPacket hit(net.minecraft.network.protocol.game.ServerboundUseItemOnPacket p){return p.hitResult();} public static int chunkX(net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket p){return p.x();} public static int chunkZ(net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket p){return p.z();} public static int motionEntity(net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket p){return p.id();} public static net.minecraft.world.phys.Vec3 motion(net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket p){return p.movement();} public static int[] removedIds(net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket p){return p.entityIds().toIntArray();} public static net.minecraft.world.phys.Vec3 relativeDelta(Object a,Object t){return new net.minecraft.world.phys.Vec3(0,0,0);}}')
+put('dev/meshac/compat/VersionBridge','public class VersionBridge {public static Object hand(net.minecraft.network.protocol.game.ServerboundUseItemOnPacket p){return p.hand();} public static net.minecraft.network.protocol.game.ServerboundUseItemOnPacket hit(net.minecraft.network.protocol.game.ServerboundUseItemOnPacket p){return p.hitResult();} public static int chunkX(net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket p){return p.x();} public static int chunkZ(net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket p){return p.z();} public static int motionEntity(net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket p){return p.id();} public static net.minecraft.world.phys.Vec3 motion(net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket p){return p.movement();} public static int[] removedIds(net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket p){return p.REMOVED_IDS_GETTER().toIntArray();} public static net.minecraft.world.phys.Vec3 relativeDelta(Object a,Object t){return new net.minecraft.world.phys.Vec3(0,0,0);}}')
 put('dev/meshac/check/AbstractCheck','''public class AbstractCheck { public int handlers,vl,alerts,heat,effects; public void handlePacket(dev.meshac.packet.MeshPacketEvent e){handlers++;vl++;alerts++;heat++;effects++;} public void handleEvent(dev.meshac.event.MeshEvent e){handlers++;vl++;alerts++;heat++;effects++;} }''')
 put('dev/meshac/MeshServices','public class MeshServices {public static void log(String s){} }')
 put('dev/meshac/data/PlayerDataManager','public class PlayerDataManager {public static PlayerData current; public static PlayerData get(net.minecraft.server.level.ServerPlayer p){return current;}}')
@@ -75,25 +80,27 @@ packets={
 'VecDeltaCodec':'public void setBase(net.minecraft.world.phys.Vec3 b){} public VecDeltaCodec decode(VecDeltaCodec c){return this;} public net.minecraft.world.phys.Vec3 endPosition(){return new net.minecraft.world.phys.Vec3(0,0,0);}',
 'ClientboundTeleportEntityPacket':'public int id(){return 1;} public ClientboundTeleportEntityPacket change(){return this;} public net.minecraft.world.phys.Vec3 position(){return new net.minecraft.world.phys.Vec3(0,0,0);} public float yRot(){return 0;} public float xRot(){return 0;}',
 'ClientboundAddEntityPacket':'public int getId(){return 1;} public Object getUUID(){return null;} public Object getType(){return null;} public double getX(){return 0;} public double getY(){return 0;} public double getZ(){return 0;}',
-'ClientboundRemoveEntitiesPacket':'public ClientboundRemoveEntitiesPacket entityIds(){return this;} public int[] toIntArray(){return new int[0];}',
+'ClientboundRemoveEntitiesPacket':'public ClientboundRemoveEntitiesPacket REMOVED_IDS_GETTER(){return this;} public int[] toIntArray(){return new int[0];}',
 'ClientboundSetPassengersPacket':'public int getVehicle(){return 1;} public int[] getPassengers(){return new int[0];}',
 'ServerboundUseItemOnPacket':'public Object hand(){return null;} public ServerboundUseItemOnPacket hitResult(){return this;} public net.minecraft.core.BlockPos getBlockPos(){return new net.minecraft.core.BlockPos(0,0,0);} public Object getDirection(){return null;}'
 }
 for name in ['ServerboundInteractPacket','ServerboundMovePlayerPacket','ServerboundPlayerActionPacket','ServerboundPlayerCommandPacket','ServerboundSetCarriedItemPacket','ServerboundPlayerAbilitiesPacket','ServerboundAttackPacket']: packets[name]=''
 for name,body in packets.items():put('net/minecraft/network/protocol/game/'+name,'public class '+name+' implements net.minecraft.network.protocol.Packet<Object> {'+body+'}')
 put('net/minecraft/network/protocol/common/ClientboundPingPacket','public class ClientboundPingPacket implements net.minecraft.network.protocol.Packet<Object> {public int getId(){return -1;}}')
-with tempfile.TemporaryDirectory(prefix='meshac-dispatch-') as tmp:
- put('net/minecraft/network/Connection','public class Connection {public Object getPacketListener(){return null;}}')
- put('net/minecraft/server/network/ServerGamePacketListenerImpl','public class ServerGamePacketListenerImpl {public net.minecraft.server.level.ServerPlayer player;}')
- put('dev/meshac/tracker/ConfirmationTransport','public class ConfirmationTransport {public static boolean isPlay(dev.meshac.data.PlayerData d,net.minecraft.network.Connection c){return false;}}')
- stubs['dev/meshac/data/PlayerData.java']=stubs['dev/meshac/data/PlayerData.java'].replace('public class PlayerData {','public class PlayerData {public net.minecraft.server.level.ServerPlayer getPlayer(){return null;}')
- stubs['net/minecraft/server/level/ServerPlayer.java']=stubs['net/minecraft/server/level/ServerPlayer.java'].replace('public class ServerPlayer {','public class ServerPlayer {public net.minecraft.server.network.ServerGamePacketListenerImpl connection;')
- t=Path(tmp); files=[]
- for name,text in stubs.items():
-  p=t/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text);files.append(str(p))
- for name in ['check/ContextGate','check/CheckDependencies','config/MeshVersion','packet/PacketDispatcher','packet/OutboundDispatcher','event/MoveEventDispatcher']:
-  files.append(str(ROOT/'src/main/java/dev/meshac'/(name+'.java')))
- files.append(str(ROOT/'sim/dispatch/DispatchSafetyTest.java'))
- subprocess.run([str(JDK/'javac'),'-d',str(t/'classes'),*files],check=True)
- subprocess.run([str(JDK/'jar'),'--create','--file',str(t/'fixture.jar'),'-C',str(t/'classes'),'.'],check=True)
- subprocess.run([str(JDK/'java'),'-cp',str(t/'fixture.jar'),'DispatchSafetyTest'],check=True,cwd=t)
+stubs['dev/meshac/data/PlayerData.java']=stubs['dev/meshac/data/PlayerData.java'].replace('public class PlayerData {','public class PlayerData {public net.minecraft.server.level.ServerPlayer getPlayer(){return null;}')
+stubs['net/minecraft/server/level/ServerPlayer.java']=stubs['net/minecraft/server/level/ServerPlayer.java'].replace('public class ServerPlayer {','public class ServerPlayer {public net.minecraft.server.network.ServerGamePacketListenerImpl connection;')
+for variant,getter in VARIANTS.items():
+ with tempfile.TemporaryDirectory(prefix='meshac-dispatch-') as tmp:
+  put('net/minecraft/network/Connection','public class Connection {public Object getPacketListener(){return null;}}')
+  put('net/minecraft/server/network/ServerGamePacketListenerImpl','public class ServerGamePacketListenerImpl {public net.minecraft.server.level.ServerPlayer player;}')
+  put('dev/meshac/tracker/ConfirmationTransport','public class ConfirmationTransport {public static boolean isPlay(dev.meshac.data.PlayerData d,net.minecraft.network.Connection c){return false;}}')
+  t=Path(tmp); files=[]
+  for name,text in stubs.items():
+   p=t/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text(text.replace('REMOVED_IDS_GETTER',getter));files.append(str(p))
+  for name in ['check/ContextGate','check/CheckDependencies','config/MeshVersion','packet/PacketDispatcher','packet/OutboundDispatcher','event/MoveEventDispatcher']:
+   files.append(str(ROOT/'src/main/java/dev/meshac'/(name+'.java')))
+  files.append(str(ROOT/'sim/dispatch/DispatchSafetyTest.java'))
+  subprocess.run([str(JDK/'javac'),'-d',str(t/'classes'),*files],check=True)
+  subprocess.run([str(JDK/'jar'),'--create','--file',str(t/'fixture.jar'),'-C',str(t/'classes'),'.'],check=True)
+  subprocess.run([str(JDK/'java'),'-cp',str(t/'fixture.jar'),'DispatchSafetyTest'],check=True,cwd=t)
+  print('PASS variant-'+variant+' (getter '+getter+')')
