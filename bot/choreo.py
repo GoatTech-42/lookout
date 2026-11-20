@@ -214,6 +214,28 @@ def run_arm(name, stage, pre_arm, attacks, post_arm):
     post_arm(before)
 
 
+def bind_victims(spawned, required=("VictimA", "VictimB")):
+    """Explicit victim identity binding: name -> eid, from spawn-time UUID
+    identification, never arrival order. spawned maps live eid -> victim name.
+    Fails closed (ValueError) when a required name has no live eid, or when two
+    live eids carry the same name (a replaced id whose predecessor was never
+    seen to leave is ambiguous - never guess which one is real)."""
+    by_name = {}
+    for eid, name in spawned.items():
+        if name in by_name:
+            raise ValueError(
+                f"victim {name} has two live entity ids {by_name[name]} and {eid}; "
+                f"ambiguous binding, aborting instead of guessing")
+        by_name[name] = eid
+    out = {}
+    for name in required:
+        eid = by_name.get(name)
+        if eid is None:
+            raise ValueError(f"victim identity missing: {name} not seen")
+        out[name] = eid
+    return out
+
+
 def check_damage_receipt(serverdir, name, before, arm, timeout=5.0):
     """Post-arm server-side receipt: victim Health must be strictly below
     `before`. Raises SystemExit otherwise - zero-delta means the provoke

@@ -206,6 +206,31 @@ check("T-bot2-guard-end-receipts",
       and "for v in expect_damaged:" in open(CHOREO).read().split("def end")[1],
       "guard_end must route every attacked victim through the choreo receipt check")
 
+# --- victim identity binding: name -> eid by spawn-time UUID, never order --
+check("T-bind-order-ab",
+      choreo.bind_victims({10: "VictimA", 11: "VictimB"}) == {"VictimA": 10, "VictimB": 11})
+check("T-bind-order-ba",
+      choreo.bind_victims({11: "VictimB", 10: "VictimA"}) == {"VictimA": 10, "VictimB": 11},
+      "VictimB arriving first must still bind VictimA to its own eid")
+for name, spawned in (("T-bind-missing-a", {11: "VictimB"}),
+                      ("T-bind-missing-b", {10: "VictimA"})):
+    try:
+        choreo.bind_victims(spawned)
+        check(name, False, f"missing identity accepted: {spawned}")
+    except ValueError:
+        check(name, True)
+try:
+    choreo.bind_victims({10: "VictimA", 42: "VictimA", 11: "VictimB"})
+    check("T-bind-replaced-ambiguous", False, "two live ids for one victim accepted")
+except ValueError:
+    check("T-bind-replaced-ambiguous", True)
+check("T-bind-replaced-clean",
+      choreo.bind_victims({42: "VictimA", 11: "VictimB"}) == {"VictimA": 42, "VictimB": 11},
+      "once the old id is gone, the replacement id binds")
+check("T-bot2-identity-bound",
+      "choreo.bind_victims(name_by_eid)" in b2,
+      "bot2 must bind victims by spawn-time UUID via choreo.bind_victims, never arrival order")
+
 # --- run_arm: stage -> verify -> attacks, positions evolving across arms --
 class Rig:
     def __init__(self):

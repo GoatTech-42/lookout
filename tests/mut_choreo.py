@@ -93,6 +93,22 @@ MUTANTS = {
     "M-arm-shortcount-ok": ("choreo",
         "            if got != n:",
         "            if False:"),
+    # bind_victims: arrival order decides the binding (the original bot2 defect)
+    "M-bind-arrival-order": ("choreo",
+        "    for name in required:\n        eid = by_name.get(name)",
+        "    for name in required:\n        eid = list(spawned)[required.index(name)] if required.index(name) < len(spawned) else None"),
+    # bind_victims: two live ids for one victim silently last-wins
+    "M-bind-no-ambiguity-check": ("choreo",
+        "        if name in by_name:\n            raise ValueError(\n                f\"victim {name} has two live entity ids {by_name[name]} and {eid}; \"\n                f\"ambiguous binding, aborting instead of guessing\")\n        by_name[name] = eid",
+        "        by_name[name] = eid"),
+    # bind_victims: a missing identity is accepted
+    "M-bind-missing-ok": ("choreo",
+        "        if eid is None:\n            raise ValueError(f\"victim identity missing: {name} not seen\")",
+        "        if eid is None and False:\n            raise ValueError(f\"victim identity missing: {name} not seen\")"),
+    # bot2: eidA/eidB assigned by entity arrival order again
+    "M-bot2-arrival-order-binding": ("bot2",
+        "        _bound = choreo.bind_victims(name_by_eid)",
+        "        _bound = {'VictimA': list(ents)[0], 'VictimB': list(ents)[1] if len(ents) > 1 else None}"),
 }
 
 EXPECT = {
@@ -114,6 +130,10 @@ EXPECT = {
     "M-arm-cumulative-counts": {"T-guard-sequence-deltas"},
     "M-arm-shortcount-ok": {"T-guard-short-count-aborts"},
     "M-bot2-open-exit": {"T-bot2-fail-closed"},
+    "M-bind-arrival-order": {"T-bind-order-ba"},
+    "M-bind-no-ambiguity-check": {"T-bind-replaced-ambiguous"},
+    "M-bind-missing-ok": {"T-bind-missing-a", "T-bind-missing-b"},
+    "M-bot2-arrival-order-binding": {"T-bot2-identity-bound"},
     "M-arm-stage-optional": {"T-arm-stage-fail-closed"},
     "M-arm-verify-after-attacks": {"T-arm-sequence-evolving", "T-arm-band-abort-before-attacks"},
 }

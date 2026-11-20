@@ -174,6 +174,7 @@ def reader():
                         log('add-entity: id', eid, 'type', etype, 'uuid', euuid, round(ex,1), round(ez,1))
                         if euuid in VUUID:
                             ents[eid] = [ex, ey, ez]
+                            name_by_eid[eid] = VUUID[euuid]
                             log('victim seen:', VUUID[euuid], 'id', eid, round(ex,1), round(ez,1))
                     except Exception as e:
                         log('add-entity parse (nonfatal):', e)
@@ -193,6 +194,7 @@ def _juuid(n):  # java UUID.nameUUIDFromBytes: namespace-less MD5
     return str(uuidlib.UUID(bytes=bytes(b)))
 VUUID = {_juuid(n): n for n in VICTIMS}
 ents = {}  # entityId -> [x,y,z]
+name_by_eid = {}  # entityId -> victim name, from the spawn-time UUID match
 
 # spec distances (verification spec P1/P2/P4): killaura + multiaura at 2.5, reach at 5.2
 KA_DIST = 2.5
@@ -322,10 +324,18 @@ _tw = time.time()
 while len(ents) < 1 and time.time() - _tw < 6 and not disconnected.is_set():
     time.sleep(0.1)
 if ents:
-    ids = list(ents.items())
-    (eidA, posA) = ids[0]
-    eidB, posB = ids[1] if len(ids) > 1 else (None, None)
-    log('combat victims:', ents)
+    # Identity is bound by spawn-time UUID, never by entity arrival order: the
+    # first entity seen is not necessarily VictimA, and mislabeled attacks or
+    # receipts invalidate the session. Both identities are required; a missing
+    # or ambiguous one fails closed.
+    try:
+        _bound = choreo.bind_victims(name_by_eid)
+    except ValueError as e:
+        log('ARM GUARD FAIL: victim identity binding -', e)
+        sys.exit(1)
+    eidA, eidB = _bound['VictimA'], _bound['VictimB']
+    posA = ents[eidA]
+    log('combat victims bound:', _bound)
     if os.environ.get('DESCEND'):
         ty = posA[1]
         y = A()[1]
@@ -391,10 +401,7 @@ if ents:
 
     if os.environ.get('KA_ONLY'):
         log('multiaura arm skipped by KA_ONLY')
-    elif not eidB:
-        log('ARM GUARD FAIL: multiaura needs VictimB, not seen')
-        sys.exit(1)
-    else:
+    else:  # bind_victims already required both identities; eidB is bound
         def multi_attacks():
             for bn in range(4):
                 spot = near(eidA, MULTI_DIST)
