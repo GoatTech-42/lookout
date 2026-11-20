@@ -1,0 +1,4 @@
+arm=killaura sent=6
+arm=reach sent=6
+arm=multiaura sent=4
+arm=timer sent=6
