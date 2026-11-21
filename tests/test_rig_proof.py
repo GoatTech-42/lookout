@@ -27,8 +27,11 @@ def ok_str(cond):
 GOOD = """[main/INFO]: Loading Minecraft 26.3 with Fabric Loader 0.19.5
 \t- lookout 2.9.7.28-meshac-0.1.0
 [Render thread/INFO]: [lookout] watching (client-side companion to meshac)
-[Render thread/INFO]: [lookout-stats] entity=7 samples=3
-[Render thread/INFO]: [lookout-stats] entity=7 samples=9
+[Render thread/INFO]: [lookout-stats] entity=7 d=1.20 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=100 tp=200 grace=false
+[Render thread/INFO]: [lookout-stats] entity=7 d=0.80 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false
+[Render thread/INFO]: [lookout-stats] entity=7 d=2.10 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=110 tp=200 grace=false
+[Render thread/INFO]: [lookout-stats] entity=7 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=95 tp=200 grace=false
+[Render thread/INFO]: [lookout-stats] entity=7 d=1.00 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=105 tp=200 grace=false
 [Render thread/INFO]: [lookout] alert entity=7 check=killaura_facing
 """
 
@@ -37,7 +40,31 @@ c = parsers.parse_client_log(GOOD)
 expect("parse-mod-listed", c.mod_listed)
 expect("parse-watching", c.watching)
 expect("parse-mixin-clean", c.mixin_errors == [])
-expect("parse-stats-max", c.stats == {7: 9}, f"got {c.stats}")
+expect("parse-stats-count", c.stats == {7: 5}, f"got {c.stats}")
+_real_stats = ("[Render thread/INFO]: [lookout-stats] entity=7 d=1.20 dy=0.42"
+               " ground=true glide=false water=false vehicle=false"
+               " exempt=false vel=100 tp=200 grace=false")
+expect("parse-stats-negative-old-form",
+       parsers.parse_client_log("[lookout-stats] entity=7 samples=9\n").stats == {})
+expect("parse-stats-negative-incomplete",
+       parsers.parse_client_log(_real_stats.rsplit(" grace=false", 1)[0] + "\n").stats == {})
+expect("parse-stats-negative-suffix",
+       parsers.parse_client_log(_real_stats + " extra=1\n").stats == {})
+expect("parse-stats-entity-separation",
+       parsers.parse_client_log(
+           ("[lookout-stats] entity=7 d=1.20 dy=0.42 ground=true glide=false water=false"
+            " vehicle=false exempt=false vel=100 tp=200 grace=false\n") * 3 +
+           ("[lookout-stats] entity=9 d=0.50 dy=-0.10 ground=false glide=true water=false"
+            " vehicle=false exempt=false vel=90 tp=200 grace=false\n") * 2).stats == {7: 3, 9: 2})
+expect("score-delivery-boundary-4",
+       score.row_target_delivery(parsers.parse_client_log((_real_stats + "\n") * 4))[0] == "FAIL")
+expect("score-delivery-boundary-5",
+       score.row_target_delivery(parsers.parse_client_log((_real_stats + "\n") * 5))[0] == "PASS")
+expect("parse-stats-comma-decimal",
+       parsers.parse_client_log(
+           "[lookout-stats] entity=7 d=1,20 dy=-0,10 ground=true glide=false"
+           " water=false vehicle=false exempt=false vel=100 tp=200 grace=false\n"
+       ).stats == {7: 1})
 expect("parse-alert-fields",
        [(a.entity, a.check, a.trace) for a in c.alerts] == [(7, "killaura_facing", False)])
 
@@ -109,12 +136,22 @@ expect("parse-config-enabled-wrong-type",
        (parsers.parse_config('{"enabled": "yes", "killaura": true}') or {}).get("enabled") is False)
 
 expect("score-delivery-pass", score.row_target_delivery(good)[0] == "PASS")
-thin = parsers.parse_client_log("[lookout-stats] entity=1 samples=2\n")
+expect("score-delivery-pass-detail",
+       "entity 7 (5 lines)" in score.row_target_delivery(good)[1]
+       and "sampled-stats smoke heuristic" in score.row_target_delivery(good)[1]
+       and "packet flow observed" not in score.row_target_delivery(good)[1],
+       score.row_target_delivery(good)[1])
+thin = parsers.parse_client_log("[Render thread/INFO]: [lookout-stats] entity=1 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false\n")
 expect("score-delivery-fail-thin", score.row_target_delivery(thin)[0] == "FAIL")
+expect("score-delivery-fail-detail",
+       "stats lines" in score.row_target_delivery(thin)[1]
+       and "teleportJumpStats" in score.row_target_delivery(thin)[1]
+       and "trace off" not in score.row_target_delivery(thin)[1],
+       score.row_target_delivery(thin)[1])
 
 expect("score-chat-pass", score.row_chat_capture(good)[0] == "PASS")
 expect("score-chat-fail-none",
-       score.row_chat_capture(parsers.parse_client_log("[lookout-stats] entity=1 samples=9\n"))[0] == "FAIL")
+       score.row_chat_capture(parsers.parse_client_log("[Render thread/INFO]: [lookout-stats] entity=1 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false\n"))[0] == "FAIL")
 
 ng_client = parsers.parse_client_log(
     GOOD + "[lookout-proof] null-gui-window begin\n[lookout] alert entity=7 check=reach_rough\n"
@@ -643,6 +680,82 @@ with tempfile.TemporaryDirectory() as td:
                        capture_output=True, text=True)
     expect("mutant-srv-corpus-killed", r.returncode == 0 and r.stdout.split() == ["17"],
            "17 files carry receipts; the never-match mutant must mismatch exactly those")
+
+
+# --- format sync gate: parser formats pinned against the exact source
+# literals that emit them (a format change in lookout source breaks the
+# harness visibly here, not silently in a scored row). alert formats are
+# checked in all three variant sources. checks live in
+# tests/sync_helper.py so mutant probes can reuse them.
+sys.path.insert(0, str(ROOT / "tests"))
+import sync_helper
+expect("format-sync-source-literals", sync_helper.sync_findings(ROOT, parsers) == [])
+
+# sync-gate mutation protection, shown as changed output: the pre-fix
+# drifted stats regex and a broken alert regex must each fail the gate
+# inside a mutant tree, healthy copy first.
+_SYNC_PROBE = ("import sys, pathlib; sys.path.insert(0, '.');"
+               "from rig.proof import parsers; import sync_helper;"
+               "print(','.join(sync_helper.sync_findings(pathlib.Path('.'), parsers)) or 'clean')")
+_SYNC_SOURCES = ("src/main/java/dev/lookout/LookoutClient.java",
+                 "src/main/java/dev/lookout/core/LookoutEngine.java",
+                 "src/main/java/dev/lookout/mc/ChatAlerter.java",
+                 "src/mc1.21.11/java/dev/lookout/mc/ChatAlerter.java",
+                 "src/mc26.1.2/java/dev/lookout/mc/ChatAlerter.java")
+def sync_mutant(name, want_in_output, parser_subs=None, java_subs=None):
+    # parser_subs: (line_prefix, replacement) swaps one regex definition
+    # line in the mutant parser. java_subs: (relpath, old, new) literal
+    # substitutions on the copied emission sources. None = healthy copy.
+    with tempfile.TemporaryDirectory() as td:
+        mutant_tree(td)
+        if parser_subs is not None:
+            line_prefix, replacement = parser_subs
+            p = pathlib.Path(td, "rig/proof/parsers.py")
+            lines = p.read_text().splitlines()
+            hit = [i for i, ln in enumerate(lines) if ln.startswith(line_prefix)]
+            assert len(hit) == 1, f"sync mutant prefix not unique: {line_prefix!r}"
+            # consume the whole (possibly multi-line) regex statement
+            end = hit[0]
+            while lines[end].count("(") > lines[end].count(")") or \
+                    (end > hit[0] and
+                     "\n".join(lines[hit[0]:end + 1]).count("(") >
+                     "\n".join(lines[hit[0]:end + 1]).count(")")):
+                end += 1
+            lines[hit[0]:end + 1] = [replacement]
+            p.write_text("\n".join(lines) + "\n")
+        for rel in _SYNC_SOURCES:
+            dst = pathlib.Path(td, rel)
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            dst.write_text((ROOT / rel).read_text())
+        for rel, old, new in (java_subs or []):
+            f = pathlib.Path(td, rel)
+            body = f.read_text()
+            assert body.count(old) == 1, f"java mutant anchor not unique: {old[:60]!r}"
+            f.write_text(body.replace(old, new))
+        (pathlib.Path(td) / "sync_helper.py").write_text(
+            (ROOT / "tests/sync_helper.py").read_text())
+        r = subprocess.run([sys.executable, "-c", _SYNC_PROBE], cwd=td,
+                           capture_output=True, text=True)
+        expect(name, r.returncode == 0 and want_in_output in r.stdout,
+               r.stdout[-120:] + r.stderr[-200:])
+_ENG = "src/main/java/dev/lookout/core/LookoutEngine.java"
+sync_mutant("mutant-sync-baseline-healthy", "clean")
+sync_mutant("mutant-sync-drifted-stats-killed", "stats",
+            parser_subs=("STATS = re.compile",
+                         'STATS = re.compile(r"\\[lookout-stats\\] entity=(\\d+) samples=(\\d+)")'))
+sync_mutant("mutant-sync-broken-alert-killed", "alert-main",
+            parser_subs=("ALERT = re.compile",
+                         'ALERT = re.compile(r"\\[lookout\\] (trace )?alert entity=(\\d+) check=(zzz)")'))
+sync_mutant("mutant-sync-emitter-prefix-killed", "stats",
+            java_subs=[(_ENG, '"[lookout-stats] entity="', '"[lookout-stats] id="')])
+sync_mutant("mutant-sync-emitter-field-killed", "stats",
+            java_subs=[(_ENG, '" ground="', '" gnd="')])
+sync_mutant("mutant-sync-emitter-commented-killed", "stats",
+            java_subs=[(_ENG, 'System.out.println("[lookout-stats] entity="',
+                        '// System.out.println("[lookout-stats] entity="')])
+sync_mutant("mutant-sync-emitter-assignment-killed", "stats",
+            java_subs=[(_ENG, 'System.out.println("[lookout-stats] entity="',
+                        'String lookoutStatsUnused = "[lookout-stats] entity="')])
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)

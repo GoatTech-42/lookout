@@ -8,7 +8,7 @@ the runbook for what each row does not prove.
 """
 from rig.proof import parsers
 
-MIN_SAMPLES = 5          # stats lines per entity for target delivery
+MIN_STATS_LINES = 5      # stats lines per entity for target delivery
 G4_MIN_COUNTS = {"killaura": 6, "reach": 6, "multiaura": 3, "timer": 6}
 
 def row_boot(client):
@@ -50,12 +50,16 @@ def row_g2_optin(config):
 def row_target_delivery(client):
     if client is None:
         return "UNVERIFIED", "no client log supplied (trace mode required on the rig)"
-    delivered = {e: n for e, n in client.stats.items() if n >= MIN_SAMPLES}
+    delivered = {e: n for e, n in client.stats.items() if n >= MIN_STATS_LINES}
     if not delivered:
-        return "FAIL", (f"no entity reached {MIN_SAMPLES} stats samples "
-                        "(trace off, no packets, or wrong target)")
-    ents = ", ".join(f"entity {e} ({n} samples)" for e, n in sorted(delivered.items()))
-    return "PASS", f"packet flow observed: {ents}"
+        return "FAIL", (f"no entity reached {MIN_STATS_LINES} stats lines "
+                        "(teleportJumpStats off in the config, per-tick "
+                        "horizontal deltas never over the configured floor, "
+                        "or no packet flow)")
+    ents = ", ".join(f"entity {e} ({n} lines)" for e, n in sorted(delivered.items()))
+    return "PASS", (f"stats lines observed: {ents}; narrow sampled-stats "
+                    "smoke heuristic, not intended-target or general "
+                    "packet delivery proof")
 
 def row_chat_capture(client):
     if client is None:

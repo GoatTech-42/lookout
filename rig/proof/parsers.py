@@ -11,7 +11,17 @@ Recognized line formats (kept in sync with the lookout sources):
 - alert line:       "[lookout] alert entity=<id> check=<check>" or, under
                     MESHAC_TRACE, "[lookout] trace alert entity=<id> check=<check>"
                     (ChatAlerter; names never appear in logs)
-- stats line:       "[lookout-stats] entity=<id> samples=<n>" (LookoutEngine)
+- stats line:       "[lookout-stats] entity=<id> d=<f> dy=<f> ground=<b>
+                    glide=<b> water=<b> vehicle=<b> exempt=<b> vel=<n>
+                    tp=<n> grace=<b>" - matched with the full field layout
+                    bounded to end-of-line. decimals accept dot or comma
+                    (the emitter uses String.format without a Locale, so
+                    the JVM default locale decides). LookoutEngine emits a
+                    line every engine tick while config.teleportJumpStats
+                    is on and the per-tick horizontal delta exceeds
+                    teleportJumpStatsFloor - per-tick samples, not
+                    discrete teleport events, and NOT gated on
+                    MESHAC_TRACE - so the parser COUNTS lines per entity
 - null-gui window:  "[lookout-proof] null-gui-window begin|end" markers the
                     rig wrapper injects (see the runbook); the lookout code
                     itself logs nothing when the GUI is absent
@@ -34,7 +44,11 @@ _VOCAB = re.compile(r"mixin|apply|inject|callback", re.I)
 def is_mixin_error(line):
     return bool(_SEVERITY.search(line) and _PACKAGE.search(line) and _VOCAB.search(line))
 ALERT = re.compile(r"\[lookout\] (trace )?alert entity=(\d+) check=([a-z0-9_]+)")
-STATS = re.compile(r"\[lookout-stats\] entity=(\d+) samples=(\d+)")
+STATS = re.compile(r"\[lookout-stats\] entity=(\d+)"
+                  r" d=\d+[.,]\d+ dy=-?\d+[.,]\d+"
+                  r" ground=(?:true|false) glide=(?:true|false) water=(?:true|false)"
+                  r" vehicle=(?:true|false) exempt=(?:true|false)"
+                  r" vel=\d+ tp=\d+ grace=(?:true|false)\s*$")
 NULL_GUI = re.compile(r"\[lookout-proof\] null-gui-window (begin|end)")
 
 # --- window detector (multi-line mixin error forms) -------------------
@@ -77,7 +91,7 @@ class ClientLog:
     watching: bool = False
     mixin_errors: list = field(default_factory=list)
     alerts: list = field(default_factory=list)
-    stats: dict = field(default_factory=dict)          # entity -> max samples
+    stats: dict = field(default_factory=dict)          # entity -> stats line count
     null_gui_windows: list = field(default_factory=list)  # (begin_line, end_line)
     window_findings: list = field(default_factory=list)   # WindowFinding, window-only (deduped)
     truncated_error_entries: list = field(default_factory=list)  # (header_line, capped_last_line)
@@ -124,8 +138,8 @@ def parse_client_log(text):
             out.alerts.append(Alert(int(m.group(2)), m.group(3), bool(m.group(1)), i))
         m = STATS.search(line)
         if m:
-            ent, n = int(m.group(1)), int(m.group(2))
-            out.stats[ent] = max(out.stats.get(ent, 0), n)
+            ent = int(m.group(1))
+            out.stats[ent] = out.stats.get(ent, 0) + 1
         m = NULL_GUI.search(line)
         if m:
             if m.group(1) == "begin":

@@ -10,9 +10,11 @@ rig itself; this page covers only proof scoring.
 ## inputs (all operator-supplied paths, nothing guessed)
 
 - `--client-log`: the watcher client's log from a real boot on the rig,
-  with MESHAC_TRACE set (any nonempty value is on) so `[lookout-stats]`
-  and trace alert lines exist. Required for boot, target-delivery,
-  chat-capture, null-gui.
+  with MESHAC_TRACE set (any nonempty value is on) so trace alert lines
+  exist, and `teleportJumpStats: true` in the client config so
+  `[lookout-stats]` lines exist (they are per-tick sampled stats gated
+  on that flag and the configured movement floor, NOT on MESHAC_TRACE).
+  Required for boot, target-delivery, chat-capture, null-gui.
 - `--config`: the watcher client's config/lookout.json. Required for g2-optin.
 - `--server-log`: the rig server's log. Required for g3-receipt.
 - `--arm-counts`: text file of `arm=<name> sent=<n>` lines accumulated per
@@ -30,7 +32,7 @@ rig itself; this page covers only proof scoring.
 |---|---|---|---|
 | boot (surface check) | lookout in the loader mod list, watching line present, no same-line mixin error matches, no in-entry window findings, no truncated error entries (severity + dev.lookout + mixin vocabulary, order-insensitive; window detector per docs/lead/mixin-window-detector-design.md) | any of those missing | no client log, or window candidates / truncated error entries awaiting human block review |
 | g2-optin (G2) | master enabled true AND killaura, reach, timer, multiAura all true in lookout.json | any of those off/missing/wrong-typed | no/unreadable config |
-| target-delivery | some entity reaches 5 `[lookout-stats]` samples | none does (trace off, no packets, wrong target) | no client log |
+| target-delivery | some entity has >=5 `[lookout-stats]` lines (narrow sampled-stats smoke heuristic: count-only, duplicated or concatenated lines can satisfy it, 5 is chosen) | none does (`teleportJumpStats` off in the config, per-tick deltas never over the floor, or no packet flow) | no client log |
 | chat-capture | >=1 alert line (plain or trace) on the log surface | no alert lines | no client log |
 | null-gui (R9) | >=1 alert line inside a marker window | quiet window | no markers in the log |
 | g3-receipt | >=1 join/receipt line in the server log (any player; NOT a per-target receipt) | none | no server log |
@@ -54,8 +56,18 @@ human reviews the block (see docs/lead/mixin-error-multiline-limits.md). null-gu
 window markers and does not prove the GUI was actually null. g3 counts
 any-player join lines and is not a receipt for the intended target.
 chat-capture scores the log surface, not visual chat rendering.
-target-delivery proves packet flow for some entity, not that it was the
-intended target. A green run here does not satisfy the combat arms'
+target-delivery proves only that `[lookout-stats]` lines reached the log
+for some entity: not that it was the intended target, and not general
+packet delivery. the lines are per-tick sampled stats, emitted while
+`teleportJumpStats` is on and the per-tick horizontal delta exceeds the
+configured floor (default 1.0 blocks); they can repeat within one
+relocation, can include grace/exempt movement, and are not discrete
+teleport events. the count is a line count (duplicated or concatenated
+lines can satisfy it) and 5 is a chosen smoke heuristic. the direct
+per-handler trace receipts (onTeleport/onVelocity/onSwing/onDamage/
+onProjectileSpawn/onTotemPop/onTotemEquip under MESHAC_TRACE) are more
+direct delivery evidence where available; the inspected sources have no
+general per-target movement-delivery receipt. A green run here does not satisfy the combat arms'
 watcher-note halves (RUNBOOK-combat.md verdict mapping), and no row
 proves punish-safety or any other-version behavior.
 

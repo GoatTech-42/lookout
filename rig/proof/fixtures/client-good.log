@@ -5,8 +5,11 @@
 	- minecraft 26.3
 [12:00:04] [main/INFO]: Mixins applied to 26 targets
 [12:00:05] [Render thread/INFO]: [lookout] watching (client-side companion to meshac)
-[12:00:30] [Render thread/INFO]: [lookout-stats] entity=1042 samples=7
-[12:00:31] [Render thread/INFO]: [lookout-stats] entity=1042 samples=12
+[12:00:30] [Render thread/INFO]: [lookout-stats] entity=1042 d=1.20 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=100 tp=200 grace=false
+[12:00:31] [Render thread/INFO]: [lookout-stats] entity=1042 d=0.80 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false
+[12:00:32] [Render thread/INFO]: [lookout-stats] entity=1042 d=2.10 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=110 tp=200 grace=false
+[12:00:33] [Render thread/INFO]: [lookout-stats] entity=1042 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=95 tp=200 grace=false
+[12:00:34] [Render thread/INFO]: [lookout-stats] entity=1042 d=1.00 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=105 tp=200 grace=false
 [12:00:40] [Render thread/INFO]: [lookout-proof] null-gui-window begin
 [12:00:45] [Render thread/INFO]: [lookout] alert entity=1042 check=killaura_facing
 [12:00:47] [Render thread/INFO]: [lookout-proof] null-gui-window end
