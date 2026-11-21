@@ -770,6 +770,18 @@ sync_mutant("mutant-sync-watching-literal-killed", "watching",
                         'companion to meshac!)"')])
 sync_mutant("mutant-sync-nullgui-doc-killed", "null-gui",
             java_subs=[(_RB, 'null-gui-window begin', 'null-gui-window start')])
+sync_mutant("mutant-sync-alert-commented-killed", "alert-main",
+            java_subs=[("src/main/java/dev/lookout/mc/ChatAlerter.java",
+                        'LOGGER.info("[lookout] alert entity={} check={}"',
+                        '// LOGGER.info("[lookout] alert entity={} check={}"')])
+sync_mutant("mutant-sync-alert-assignment-killed", "alert-1.21.11",
+            java_subs=[("src/mc1.21.11/java/dev/lookout/mc/ChatAlerter.java",
+                        'LOGGER.info("[lookout] alert entity={} check={}"',
+                        'String lookoutAlertUnused = "[lookout] alert entity={} check={}"')])
+sync_mutant("mutant-sync-alert-literal-killed", "alert-26.1.2",
+            java_subs=[("src/mc26.1.2/java/dev/lookout/mc/ChatAlerter.java",
+                        '"[lookout] alert entity={} check={}"',
+                        '"[lookout] alert ent={} check={}"')])
 sync_mutant("mutant-sync-nullgui-parser-killed", "null-gui",
             parser_subs=("NULL_GUI = re.compile",
                          'NULL_GUI = re.compile(r"\\[lookout-proof\\] null-gui-window (start|stop)")'))

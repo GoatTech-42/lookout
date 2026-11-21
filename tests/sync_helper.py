@@ -1,24 +1,20 @@
 """Format sync checks shared by test_rig_proof.py and its mutant probes.
 
-stats and watching are bound to their emission statements: the source is
-comment-stripped string-aware, split into semicolon-terminated
-statements string-aware, and the single statement containing the
-literal must hold it inside the argument span of the emitting call
-(System.out.println for stats, LOGGER.info for watching; an unused
-assignment, a comment, or any other dead site is rejected). stats must
-additionally have the canonical field order, and rendered canonical
-lines must match the parser regexes.
+stats, watching and alert are bound to their emission statements: the
+source is comment-stripped string-aware, split into
+semicolon-terminated statements string-aware, and the single statement
+containing each literal must hold it inside the argument span of the
+emitting call (System.out.println for stats, LOGGER.info for watching
+and the plain/trace alert lines; an unused assignment, a comment, or
+any other dead site is rejected). stats must additionally have the
+canonical field order, and rendered canonical lines must match the
+parser regexes. alert is bound in all three variant sources
+(main, mc1.21.11, mc26.1.2).
 
 null-gui markers are operator-injected (no source emission), so they
 are bound to the RUNBOOK instead: the documented marker literals must
 appear in docs/lead/rig-proof-runbook.md and match the parser's
 NULL_GUI regex.
-
-alert checks are EXISTENCE PINS only: they fail when the exact literal
-vanishes from a variant source (or the parser no longer matches a
-rendered line), but they do not bind the emission statement (the alert
-format goes through AlertSink placeholders, out of scope for this
-gate).
 
 Returns the list of failed check names; empty means in sync.
 """
@@ -155,20 +151,25 @@ def _println_arg_span(stmt, start):
     return None
 
 
-def _watching_emitter_ok(client_src):
-    """True when the single statement holding the watching literal holds
-    it inside the argument span of a LOGGER.info call."""
-    literal = '"[lookout] watching (client-side companion to meshac)"'
-    hits = [s for s in _live_statements(client_src) if literal in s]
+def _emitter_ok(src, literal, callee):
+    """True when the single statement holding the quoted literal holds it
+    inside the argument span of a `callee` call (e.g. LOGGER.info)."""
+    hits = [s for s in _live_statements(src) if literal in s]
     if len(hits) != 1:
         return False
     stmt = hits[0]
     lit_i = stmt.find(literal)
-    for m in re.finditer(r"LOGGER\.info\(", stmt):
+    for m in re.finditer(re.escape(callee) + r"\(", stmt):
         span = _println_arg_span(stmt, m.start())
         if span and span[0] < lit_i < span[1]:
             return True
     return False
+
+
+def _watching_emitter_ok(client_src):
+    return _emitter_ok(client_src,
+                       '"[lookout] watching (client-side companion to meshac)"',
+                       "LOGGER.info")
 
 
 def _stats_emitter_fields(engine_src):
@@ -212,7 +213,7 @@ def sync_findings(root, pp):
         src = (root / path).read_text()
         for literal, trace in (("[lookout] alert entity={} check={}", False),
                                ("[lookout] trace alert entity={} check={}", True)):
-            if '"' + literal + '"' not in src:
+            if not _emitter_ok(src, '"' + literal + '"', "LOGGER.info"):
                 bad.append(key)
                 continue
             rendered = literal.replace("{}", "7", 1).replace("{}", "killaura_facing", 1)
