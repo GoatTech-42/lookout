@@ -55,7 +55,16 @@ UNVERIFIED for human block review instead of passing silently; the
 same-line FAIL scan is unchanged. this does NOT close the limitation:
 the exclusions above (INFO/DEBUG severity, package-less summaries,
 config-name-only errors) still stand, and the detector's fixtures are
-synthetic until real rig captures feed them.
+synthetic until real rig captures feed them. the three exclusions are
+frozen as explicit pins (win-f13-info-excluded,
+win-f20-packageless-invisible, win-f21-configname-invisible, each with
+its boot-PASS pin; the mutants demonstrate THESE relaxations -
+severity-dropped widens the severity gate, package-dropped removes the
+package requirement, package-widened relaxes the package pattern to
+the bare name), so a future detection change must edit the pins
+explicitly instead of silently widening coverage. DEBUG is not
+separately pinned: it shares f13's INFO code path (one severity gate),
+so the f13 pin covers it structurally but no DEBUG fixture exists.
 
 next step when the rig is unheld: capture one real boot log per target,
 run step 2, and record the outcome per boot. one clean boot closes only

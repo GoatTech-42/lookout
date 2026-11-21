@@ -447,6 +447,31 @@ expect("win-f17-healthy-regression",
        parsers.parse_client_log(GOOD).window_findings == []
        and parsers.parse_client_log(GOOD).truncated_error_entries == [])
 
+# f20: frozen blind spot (docs/lead/mixin-error-multiline-limits.md) -
+# package-less summary: an ERROR entry whose only failure signal is
+# mixin vocabulary, with dev.lookout nowhere in the log, is invisible
+# to the same-line scan AND the window detector. boot PASS here means
+# "no same-line match", never "no mixin errors"; the PASS detail says
+# surface-check-only. characterization pin: a detection change must
+# edit this pin explicitly
+f20 = (BASE + "[12:10:00] [Render thread/ERROR]: Mixin apply failed\n"
+       "[12:10:01] [main/INFO]: done\n")
+c20 = parsers.parse_client_log(f20)
+expect("win-f20-packageless-invisible",
+       c20.mixin_errors == [] and c20.window_findings == [])
+expect("win-f20-boot-pass", score.row_boot(c20)[0] == "PASS")
+
+# f21: frozen blind spot - config-name-only error: names lookout.json
+# and carries vocabulary but never the dev.lookout package form;
+# invisible to both scans. same PASS caveat as f20
+f21 = (BASE + "[12:10:00] [main/ERROR]: Failed to apply lookout.json"
+       " config - watcher disabled\n"
+       "[12:10:01] [main/INFO]: done\n")
+c21 = parsers.parse_client_log(f21)
+expect("win-f21-configname-invisible",
+       c21.mixin_errors == [] and c21.window_findings == [])
+expect("win-f21-boot-pass", score.row_boot(c21)[0] == "PASS")
+
 # --- window-detector mutants: each killed by its own fixture after a
 # healthy baseline. verdict-level via proof.py; parser-level probe for
 # the dedup mutant ------------------------------------------------------
@@ -543,6 +568,19 @@ mutant_case("autofail", f15,
             lambda l: l.startswith("FAIL boot"),
             score_subs=[('        return "UNVERIFIED", ("mixin error window candidates need human block review: "',
                          '        return "FAIL", ("mixin error window candidates need human block review: "')])
+# m10: package requirement dropped from the same-line scan -> f20's
+# package-less summary becomes a mixin error and boot FAILs
+mutant_case("package-dropped", f20,
+            lambda l: l.startswith("FAIL boot"),
+            parser_subs=[("    return bool(_SEVERITY.search(line) and _PACKAGE.search(line) and _VOCAB.search(line))",
+                          "    return bool(_SEVERITY.search(line) and _VOCAB.search(line))")])
+# m11: package pattern widened from dev.lookout to the bare name ->
+# f21's config-name-only error becomes a mixin error and boot FAILs
+mutant_case("package-widened", f21,
+            lambda l: l.startswith("FAIL boot"),
+            parser_subs=[('_PACKAGE = re.compile(r"dev\.lookout")',
+                          '_PACKAGE = re.compile(r"lookout")')])
+
 # m10: window findings dropped silently -> f1 scores PASS
 mutant_case("drop-window", f1,
             lambda l: l.startswith("PASS boot"),
