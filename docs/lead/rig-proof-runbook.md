@@ -20,7 +20,9 @@ rig itself; this page covers only proof scoring.
 - `--arm-counts`: text file of `arm=<name> sent=<n>` lines accumulated per
   arm (killaura, reach, multiaura, timer). Required for g4-coverage.
 - null-gui windows: the rig wrapper injects
-  `[lookout-proof] null-gui-window begin` / `end` lines into the captured
+  `[lookout-proof] null-gui-window begin` and
+  `[lookout-proof] null-gui-window end` lines (exact literals; the proof
+  harness pins them) into the captured
   client log around the window where the chat GUI is unavailable (e.g.
   early boot or an instrumented null-GUI build). lookout itself logs
   nothing special there; the markers are the operator's window claim.

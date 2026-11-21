@@ -1,17 +1,24 @@
 """Format sync checks shared by test_rig_proof.py and its mutant probes.
 
-stats is bound to its emission statement: the source is comment-stripped
-string-aware, split into semicolon-terminated statements string-aware,
-and the single statement containing the stats literal must BE a
-System.out.println call (an unused assignment, a comment, or any other
-dead site keeping the concatenation is rejected). Its field order must
-equal the canonical layout and a rendered canonical line must match the
-parser's STATS regex.
+stats and watching are bound to their emission statements: the source is
+comment-stripped string-aware, split into semicolon-terminated
+statements string-aware, and the single statement containing the
+literal must hold it inside the argument span of the emitting call
+(System.out.println for stats, LOGGER.info for watching; an unused
+assignment, a comment, or any other dead site is rejected). stats must
+additionally have the canonical field order, and rendered canonical
+lines must match the parser regexes.
 
-watching and alert are EXISTENCE PINS only: they fail when the exact
-literal vanishes from the source file (or the parser no longer matches a
-rendered line), but they do not bind the emission statement the way
-stats does.
+null-gui markers are operator-injected (no source emission), so they
+are bound to the RUNBOOK instead: the documented marker literals must
+appear in docs/lead/rig-proof-runbook.md and match the parser's
+NULL_GUI regex.
+
+alert checks are EXISTENCE PINS only: they fail when the exact literal
+vanishes from a variant source (or the parser no longer matches a
+rendered line), but they do not bind the emission statement (the alert
+format goes through AlertSink placeholders, out of scope for this
+gate).
 
 Returns the list of failed check names; empty means in sync.
 """
@@ -148,6 +155,22 @@ def _println_arg_span(stmt, start):
     return None
 
 
+def _watching_emitter_ok(client_src):
+    """True when the single statement holding the watching literal holds
+    it inside the argument span of a LOGGER.info call."""
+    literal = '"[lookout] watching (client-side companion to meshac)"'
+    hits = [s for s in _live_statements(client_src) if literal in s]
+    if len(hits) != 1:
+        return False
+    stmt = hits[0]
+    lit_i = stmt.find(literal)
+    for m in re.finditer(r"LOGGER\.info\(", stmt):
+        span = _println_arg_span(stmt, m.start())
+        if span and span[0] < lit_i < span[1]:
+            return True
+    return False
+
+
 def _stats_emitter_fields(engine_src):
     """Field order of the single live stats println emission, or None.
 
@@ -170,9 +193,16 @@ def _stats_emitter_fields(engine_src):
 def sync_findings(root, pp):
     bad = []
     watch_src = (root / "src/main/java/dev/lookout/LookoutClient.java").read_text()
-    if ('"[lookout] watching (client-side companion to meshac)"' not in watch_src
+    if (not _watching_emitter_ok(watch_src)
             or pp.WATCHING != "[lookout] watching (client-side companion to meshac)"):
         bad.append("watching")
+    runbook = (root / "docs/lead/rig-proof-runbook.md").read_text()
+    for marker in ("begin", "end"):
+        literal = f"[lookout-proof] null-gui-window {marker}"
+        m = pp.NULL_GUI.search(literal)
+        if literal not in runbook or not (m and m.group(1) == marker):
+            bad.append("null-gui")
+            break
     eng = (root / "src/main/java/dev/lookout/core/LookoutEngine.java").read_text()
     if _stats_emitter_fields(eng) != _STATS_FIELDS or not pp.STATS.search(_STATS_LINE):
         bad.append("stats")

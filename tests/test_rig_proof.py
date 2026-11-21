@@ -701,7 +701,8 @@ _SYNC_SOURCES = ("src/main/java/dev/lookout/LookoutClient.java",
                  "src/main/java/dev/lookout/core/LookoutEngine.java",
                  "src/main/java/dev/lookout/mc/ChatAlerter.java",
                  "src/mc1.21.11/java/dev/lookout/mc/ChatAlerter.java",
-                 "src/mc26.1.2/java/dev/lookout/mc/ChatAlerter.java")
+                 "src/mc26.1.2/java/dev/lookout/mc/ChatAlerter.java",
+                 "docs/lead/rig-proof-runbook.md")
 def sync_mutant(name, want_in_output, parser_subs=None, java_subs=None):
     # parser_subs: (line_prefix, replacement) swaps one regex definition
     # line in the mutant parser. java_subs: (relpath, old, new) literal
@@ -756,6 +757,22 @@ sync_mutant("mutant-sync-emitter-commented-killed", "stats",
 sync_mutant("mutant-sync-emitter-assignment-killed", "stats",
             java_subs=[(_ENG, 'System.out.println("[lookout-stats] entity="',
                         'String lookoutStatsUnused = "[lookout-stats] entity="')])
+_CLIENT = "src/main/java/dev/lookout/LookoutClient.java"
+_RB = "docs/lead/rig-proof-runbook.md"
+sync_mutant("mutant-sync-watching-commented-killed", "watching",
+            java_subs=[(_CLIENT, 'LOGGER.info("[lookout] watching',
+                        '// LOGGER.info("[lookout] watching')])
+sync_mutant("mutant-sync-watching-assignment-killed", "watching",
+            java_subs=[(_CLIENT, 'LOGGER.info("[lookout] watching',
+                        'String lookoutWatchUnused = "[lookout] watching')])
+sync_mutant("mutant-sync-watching-literal-killed", "watching",
+            java_subs=[(_CLIENT, 'companion to meshac)"',
+                        'companion to meshac!)"')])
+sync_mutant("mutant-sync-nullgui-doc-killed", "null-gui",
+            java_subs=[(_RB, 'null-gui-window begin', 'null-gui-window start')])
+sync_mutant("mutant-sync-nullgui-parser-killed", "null-gui",
+            parser_subs=("NULL_GUI = re.compile",
+                         'NULL_GUI = re.compile(r"\\[lookout-proof\\] null-gui-window (start|stop)")'))
 
 print("SUITE:", "all pass" if not fails else f"failures {fails}")
 sys.exit(0 if not fails else 1)
