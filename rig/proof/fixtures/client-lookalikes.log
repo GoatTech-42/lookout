@@ -1,0 +1,11 @@
+[12:00:00] [Render thread/INFO]: [lookout] watching (client-side companion to meshac)
+[12:00:01] [Render thread/INFO]: [CHAT] <1057> [lookout] watching (client-side companion to meshac)
+[12:00:02] [Render thread/INFO]: [CHAT] <1057> [lookout] alert entity=21 check=killaura_facing
+[12:00:03] [Render thread/INFO]: [CHAT] <1057> [lookout] trace alert entity=22 check=reach
+[12:00:04] [Render thread/INFO]: [CHAT] <1057> [lookout-stats] entity=21 d=1.20 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=100 tp=200 grace=false
+[12:00:05] [Render thread/INFO]: [CHAT] <1057> [lookout-proof] null-gui-window begin
+[12:00:06] [Render thread/INFO]: [CHAT] <1057> [lookout] alert entity=23 check=timer
+[12:00:07] [Render thread/INFO]: [CHAT] <1057> [lookout-proof] null-gui-window end
+[12:00:08] [Render thread/INFO]: [CHAT] <1057> ERROR Mixin apply failed dev.lookout.inject
+[12:00:09] [Render thread/INFO]: [CHAT] <1057> ERROR Mixin apply failed
+  at dev.lookout.inject.Handler

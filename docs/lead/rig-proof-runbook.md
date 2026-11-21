@@ -55,7 +55,14 @@ the multi-line blind spot but does not close it: INFO/DEBUG-severity
 failures, package-less summaries and config-name-only errors stay
 invisible to scoring, and window-only findings score UNVERIFIED until a
 human reviews the block (see docs/lead/mixin-error-multiline-limits.md). null-gui relies on operator
-window markers and does not prove the GUI was actually null. g3 counts
+window markers and does not prove the GUI was actually null. the
+scored log surface includes chat content: every marker format is plain
+unauthenticated text, and a chat participant can echo watching, alert,
+stats and null-gui marker lines. current parser behavior is a frozen
+characterization pinned on a bounded lookalike corpus
+(docs/lead/log-surface-lookalike-notes.md): echoes are counted like
+real emissions today, and a hardening diff changes that explicitly.
+rows satisfied by echoed markers prove nothing about lookout. g3 counts
 any-player join lines and is not a receipt for the intended target.
 chat-capture scores the log surface, not visual chat rendering.
 target-delivery proves only that `[lookout-stats]` lines reached the log

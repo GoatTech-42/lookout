@@ -682,6 +682,120 @@ with tempfile.TemporaryDirectory() as td:
            "17 files carry receipts; the never-match mutant must mismatch exactly those")
 
 
+# --- lookalike corpus: chat-echoed marker lines (spoof surface). the
+# pins are a FROZEN CHARACTERIZATION of current parser behavior, to be
+# changed explicitly by a hardening diff - they are not requirements to
+# keep this parsing. documented in
+# docs/lead/log-surface-lookalike-notes.md and the runbook known limits.
+_LOOKALIKE = parsers.parse_client_log(
+    (ROOT / "rig/proof/fixtures/client-lookalikes.log").read_text())
+expect("lookalike-alerts",
+       [(a.entity, a.check, a.trace) for a in _LOOKALIKE.alerts]
+       == [(21, "killaura_facing", False), (22, "reach", True), (23, "timer", False)],
+       f"got {[(a.entity, a.check, a.trace) for a in _LOOKALIKE.alerts]}")
+expect("lookalike-watching-counted", _LOOKALIKE.watching is True)
+expect("lookalike-stats-counted", _LOOKALIKE.stats == {21: 1}, f"got {_LOOKALIKE.stats}")
+expect("lookalike-null-gui-window", _LOOKALIKE.null_gui_windows == [(5, 7)],
+       f"got {_LOOKALIKE.null_gui_windows}")
+expect("lookalike-mixin-error-counted",
+       [i for i, _ in _LOOKALIKE.mixin_errors] == [8])
+expect("lookalike-no-window-findings", _LOOKALIKE.window_findings == [])
+
+# echo-only watching: no genuine watching line in the fixture at all
+_WATCH_ECHO = parsers.parse_client_log(
+    (ROOT / "rig/proof/fixtures/client-lookalikes-watching-echo.log").read_text())
+expect("lookalike-watching-echo-only", _WATCH_ECHO.watching is True)
+expect("lookalike-watching-real-control",
+       parsers.parse_client_log(
+           "[12:00:00] [Render thread/INFO]: [lookout] watching"
+           " (client-side companion to meshac)\n").watching is True)
+
+# scorer implications, tested through the actual scorer (isolated
+# cases, not deductions from the combined fixture):
+echo_stats5 = parsers.parse_client_log(
+    "".join(("[12:00:0%d] [Render thread/INFO]: [CHAT] <1057>"
+             " [lookout-stats] entity=21 d=1.20 dy=0.42 ground=true glide=false"
+             " water=false vehicle=false exempt=false vel=100 tp=200 grace=false\n")
+            % i for i in range(5)))
+expect("lookalike-scorer-delivery-pass",
+       score.row_target_delivery(echo_stats5)[0] == "PASS",
+       score.row_target_delivery(echo_stats5)[1])
+expect("lookalike-scorer-chat-capture-pass",
+       score.row_chat_capture(parsers.parse_client_log(
+           "[12:00:01] [Render thread/INFO]: [CHAT] <1057>"
+           " [lookout] alert entity=21 check=reach\n"))[0] == "PASS")
+expect("lookalike-scorer-null-gui-pass",
+       score.row_null_gui(parsers.parse_client_log(
+           "[12:00:05] [Render thread/INFO]: [CHAT] <1057> [lookout-proof] null-gui-window begin\n"
+           "[12:00:06] [Render thread/INFO]: [CHAT] <1057> [lookout] alert entity=23 check=timer\n"
+           "[12:00:07] [Render thread/INFO]: [CHAT] <1057> [lookout-proof] null-gui-window end\n"
+       ))[0] == "PASS")
+_spoof_boot = parsers.parse_client_log(
+    "\t- lookout 2.9.7.28\n"
+    "[12:00:00] [Render thread/INFO]: [lookout] watching (client-side companion to meshac)\n"
+    "[12:00:08] [Render thread/INFO]: [CHAT] <1057> ERROR Mixin apply failed dev.lookout.inject\n")
+expect("lookalike-scorer-boot-fail",
+       score.row_boot(_spoof_boot)[0] == "FAIL"
+       and "mixin error" in score.row_boot(_spoof_boot)[1],
+       score.row_boot(_spoof_boot)[1])
+expect("lookalike-scorer-boot-control-pass",
+       score.row_boot(parsers.parse_client_log(
+           "\t- lookout 2.9.7.28\n"
+           "[12:00:00] [Render thread/INFO]: [lookout] watching"
+           " (client-side companion to meshac)\n"))[0] == "PASS")
+
+# mutation protection. two families, labeled honestly:
+# - chat-filter mutants demonstrate SPOOF REMOVAL: echoed markers stop
+#   counting while real-prefixed controls keep counting
+# - anchored/exact mutants are BEHAVIOR-CHANGE CONTROLS: they are
+#   over-strict (they kill real prefixed lines too), proving only that
+#   the pins change when parsing changes
+_LOOKALIKE_SIG = ("import sys, pathlib; sys.path.insert(0, '.');"
+                  "from rig.proof import parsers;"
+                  f"c = parsers.parse_client_log(pathlib.Path({str(ROOT)!r},"
+                  " 'rig/proof/fixtures/client-lookalikes.log').read_text());"
+                  "r = parsers.parse_client_log("
+                  "'[12:00:00] [Render thread/INFO]:"
+                  " [lookout] alert entity=30 check=reach\\n');"
+                  "print(len(c.alerts), int(c.watching), sum(c.stats.values()),"
+                  " len(c.null_gui_windows), len(c.mixin_errors),"
+                  " len(c.window_findings), len(r.alerts))")
+_WATCH_SIG = ("import sys, pathlib; sys.path.insert(0, '.');"
+              "from rig.proof import parsers;"
+              f"e = parsers.parse_client_log(pathlib.Path({str(ROOT)!r},"
+              " 'rig/proof/fixtures/client-lookalikes-watching-echo.log').read_text());"
+              "r = parsers.parse_client_log("
+              "'[12:00:00] [Render thread/INFO]:"
+              " [lookout] watching (client-side companion to meshac)\\n');"
+              "print(int(e.watching), int(r.watching))")
+def lookalike_mutant(name, probe, subs, want_sig):
+    with tempfile.TemporaryDirectory() as td:
+        mutant_tree(td, parser_subs=subs)
+        r = subprocess.run([sys.executable, "-c", probe], cwd=td,
+                           capture_output=True, text=True)
+        expect(name, r.returncode == 0 and r.stdout.split() == want_sig,
+               r.stdout[-120:] + r.stderr[-200:])
+lookalike_mutant("mutant-lookalike-baseline-healthy", _LOOKALIKE_SIG, [],
+                 ["3", "1", "1", "1", "1", "0", "1"])
+lookalike_mutant("mutant-lookalike-alert-chatfilter-killed", _LOOKALIKE_SIG,
+                 [("        m = ALERT.search(line)",
+                   "        m = None if '[CHAT]' in line else ALERT.search(line)")],
+                 ["0", "1", "1", "1", "1", "0", "1"])
+lookalike_mutant("mutant-lookalike-alert-anchored-control", _LOOKALIKE_SIG,
+                 [('ALERT = re.compile(r"\\[lookout\\] (trace )?alert entity=(\\d+) check=([a-z0-9_]+)")',
+                   'ALERT = re.compile(r"^\\[lookout\\] (trace )?alert entity=(\\d+) check=([a-z0-9_]+)")')],
+                 ["0", "1", "1", "1", "1", "0", "0"])
+lookalike_mutant("mutant-lookalike-watch-baseline-healthy", _WATCH_SIG, [],
+                 ["1", "1"])
+lookalike_mutant("mutant-lookalike-watch-chatfilter-killed", _WATCH_SIG,
+                 [("        if WATCHING in line:",
+                   "        if WATCHING in line and '[CHAT]' not in line:")],
+                 ["0", "1"])
+lookalike_mutant("mutant-lookalike-watch-exact-control", _WATCH_SIG,
+                 [("        if WATCHING in line:",
+                   "        if line == WATCHING:")],
+                 ["0", "0"])
+
 # --- format sync gate: parser formats pinned against the exact source
 # literals that emit them (a format change in lookout source breaks the
 # harness visibly here, not silently in a scored row). alert formats are
