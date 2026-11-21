@@ -25,6 +25,23 @@ Recognized line formats (kept in sync with the lookout sources):
 - null-gui window:  "[lookout-proof] null-gui-window begin|end" markers the
                     rig wrapper injects (see the runbook); the lookout code
                     itself logs nothing when the GUI is absent
+
+envelope rules (the log surface is unauthenticated plain text):
+- chat-routed lines (payload starts "[System] [CHAT] " or "[CHAT] ")
+  are NEVER scanned for markers or same-line mixin errors: chat
+  participants can echo any marker format
+- a marker-shaped line (watching/alert/stats/null-gui only) with no
+  recognizable header, or whose payload itself starts with a fully
+  recognized header (nested), is AMBIGUOUS: recorded in
+  ambiguous_markers, counted in no marker collection, and the affected
+  scorer row goes UNVERIFIED. a payload starting with a MALFORMED
+  header is not detected as nested (known gap, pinned in the envelope
+  corpus)
+- the same-line mixin scan is not a marker scan: it keeps counting
+  headerless and nested lines (stack-trace continuations carry the real
+  evidence) and excludes only chat-routed lines
+- this filtering does not authenticate anything: a non-chat writer can
+  still echo markers
 - window finding:  per log ENTRY (header + continuations, capped),
                     severity on the header + dev.lookout + mixin vocabulary
                     anywhere in the entry (multi-line forms)
@@ -44,6 +61,9 @@ _VOCAB = re.compile(r"mixin|apply|inject|callback", re.I)
 def is_mixin_error(line):
     return bool(_SEVERITY.search(line) and _PACKAGE.search(line) and _VOCAB.search(line))
 ALERT = re.compile(r"\[lookout\] (trace )?alert entity=(\d+) check=([a-z0-9_]+)")
+# chat-routed payload: real client logs show "[System] [CHAT] ...";
+# server-style captures show "[CHAT] <name> ..."
+_CHAT_PAYLOAD = re.compile(r"^\[(?:System|CHAT)\] \[CHAT\] |^\[CHAT\] ")
 STATS = re.compile(r"\[lookout-stats\] entity=(\d+)"
                   r" d=\d+[.,]\d+ dy=-?\d+[.,]\d+"
                   r" ground=(?:true|false) glide=(?:true|false) water=(?:true|false)"
@@ -95,6 +115,7 @@ class ClientLog:
     null_gui_windows: list = field(default_factory=list)  # (begin_line, end_line)
     window_findings: list = field(default_factory=list)   # WindowFinding, window-only (deduped)
     truncated_error_entries: list = field(default_factory=list)  # (header_line, capped_last_line)
+    ambiguous_markers: list = field(default_factory=list)  # (line, kind) marker-shaped but unclassifiable envelope
 
 class _Entry:
     __slots__ = ("severity", "lines", "truncated")
@@ -127,27 +148,43 @@ def parse_client_log(text):
         entry = None
 
     for i, line in enumerate(text.splitlines()):
+        hm = _HEADER_LAUNCHER.match(line) or _HEADER_LOG4J.match(line)
+        payload = line[hm.end():].lstrip() if hm else None
+        chat_routed = bool(payload and _CHAT_PAYLOAD.match(payload))
+        nested = bool(payload and (_HEADER_LAUNCHER.match(payload)
+                                   or _HEADER_LOG4J.match(payload)))
+
+        def marker(kind, matched):
+            # chat-routed content is never counted (echo-able); a marker
+            # without a clean envelope is ambiguous, never counted
+            if not matched or chat_routed:
+                return False
+            if hm is None or nested:
+                out.ambiguous_markers.append((i, kind))
+                return False
+            return True
+
         if MOD_ENTRY.match(line):
             out.mod_listed = True
-        if WATCHING in line:
+        if marker("watching", WATCHING in line):
             out.watching = True
-        if is_mixin_error(line):
+        if is_mixin_error(line) and not chat_routed:
             out.mixin_errors.append((i, line.strip()))
         m = ALERT.search(line)
-        if m:
+        if marker("alert", m):
             out.alerts.append(Alert(int(m.group(2)), m.group(3), bool(m.group(1)), i))
         m = STATS.search(line)
-        if m:
+        if marker("stats", m):
             ent = int(m.group(1))
             out.stats[ent] = out.stats.get(ent, 0) + 1
         m = NULL_GUI.search(line)
-        if m:
+        if marker("null-gui", m):
             if m.group(1) == "begin":
                 pending = i
             elif pending is not None:
                 out.null_gui_windows.append((pending, i))
                 pending = None
-        sev = _header_severity(line)
+        sev = hm.group(2) if hm else None
         if sev is not None:
             flush_entry()
             entry = _Entry(sev, (i, line))

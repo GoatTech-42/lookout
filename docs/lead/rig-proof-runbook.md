@@ -56,13 +56,19 @@ failures, package-less summaries and config-name-only errors stay
 invisible to scoring, and window-only findings score UNVERIFIED until a
 human reviews the block (see docs/lead/mixin-error-multiline-limits.md). null-gui relies on operator
 window markers and does not prove the GUI was actually null. the
-scored log surface includes chat content: every marker format is plain
-unauthenticated text, and a chat participant can echo watching, alert,
-stats and null-gui marker lines. current parser behavior is a frozen
-characterization pinned on a bounded lookalike corpus
-(docs/lead/log-surface-lookalike-notes.md): echoes are counted like
-real emissions today, and a hardening diff changes that explicitly.
-rows satisfied by echoed markers prove nothing about lookout. g3 counts
+scored log surface is unauthenticated plain text. chat-routed lines
+("[System] [CHAT] " / "[CHAT] " payloads) are never scanned for
+markers, and marker-shaped lines with a bare, malformed or nested
+header are ambiguous: counted as no marker kind
+(watching/alert/stats/null-gui; the same-line mixin error scan is not a
+marker scan and still counts headerless/nested error lines), and the
+affected row goes UNVERIFIED (docs/lead/log-surface-lookalike-notes.md).
+scorer precedence per row: definitive FAIL evidence (real mixin error
+lines) is never masked by ambiguity; ambiguity blocks
+absence-of-evidence FAILs and the PASS. this filtering
+does not authenticate the log: a non-chat writer can still echo
+markers, and rows satisfied by echoed markers prove nothing about
+lookout. g3 counts
 any-player join lines and is not a receipt for the intended target.
 chat-capture scores the log surface, not visual chat rendering.
 target-delivery proves only that `[lookout-stats]` lines reached the log

@@ -1,0 +1,11 @@
+2026-11-13T22:47:14.000Z Render thread INFO [lookout] watching (client-side companion to meshac)
+[12:00:01] [Render thread/INFO]: [lookout] alert entity=31 check=reach
+[14:48:21] [Render thread/INFO]: [System] [CHAT] [lookout] alert entity=32 check=timer
+[12:03:58] [Render thread/INFO]: [System] [CHAT] <1057> was killed
+[12:00:02] [Render thread/INFO]: [CHAT] <1057> [lookout-stats] entity=31 d=1.20 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=100 tp=200 grace=false
+[lookout] alert entity=33 check=multiaura
+[12:00:03] [Render thread/INFO]: [12:00:04] [Render thread/INFO]: [lookout] alert entity=34 check=reach
+[12:0:03] [Render thread/INFO]: [lookout] alert entity=35 check=timer
+[12:00:10] [main/ERROR]: some unrelated failure
+[12:00:11] [Render thread/INFO]: [System] [CHAT] dev.lookout inject failed
+[12:00:12] [Render thread/INFO]: [12:0:13] [Render thread/INFO]: [lookout] alert entity=36 check=reach

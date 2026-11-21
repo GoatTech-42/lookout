@@ -1,66 +1,92 @@
-# log-surface lookalike corpus notes (r2)
+# log-surface lookalike + hardening notes (r4)
 
-companion to the pins in tests/test_rig_proof.py (lookalike-* and
-mutant-lookalike-*). fixtures (synthetic, ID-only):
+companion to the pins in tests/test_rig_proof.py (lookalike-*,
+envelope-*, mutant-hardening-*). fixtures (synthetic, ID-only):
 
 - rig/proof/fixtures/client-lookalikes.log
   sha256 3bc5c8555b9311e3c3c431744f073b9a64b082c94f1b6e79c491f234e3120f42
 - rig/proof/fixtures/client-lookalikes-watching-echo.log
   sha256 fc0c081af275fcb4d5c67c6f4a529bb47c6a678492033f6aa474f7095179410a
+- rig/proof/fixtures/client-hardening-envelopes.log
+  sha256 535b1e93fbccb15a061a51997e9381018462d8a80d6da823824e6c3e4356304a
 
-the pins are a FROZEN CHARACTERIZATION of current parser behavior. they
-are not requirements to keep this parsing: a hardening diff is expected
-to change them explicitly, and the mutant families below distinguish
-spoof removal from over-strict parsing.
+## history
 
-## the spoof surface, as measured on this bounded corpus
+r2 pinned the pre-hardening characterization (chat echoes counted like
+real emissions). r3 changes that characterization explicitly, in the
+same diff as the parser hardening: the r2 pins were replaced, not
+silently edited away.
 
-every lookout marker format is plain text on an unauthenticated log
-surface. a chat participant (or any other log writer) can echo the
-formats, and the parser counts them exactly like real emissions:
+r4 (this document) is the QA rework of r3. what changed, each with its
+own red-first pin:
 
-| line (fixture, 0-indexed) | echoed marker | parser result today |
-|---|---|---|
-| 1 | watching literal in [CHAT] | watching = True (indistinguishable from the real line 0) |
-| echo fixture | watching literal in [CHAT], no genuine line | watching = True (lookalike-watching-echo-only) |
-| 2 | plain alert | counted: entity=21 check=killaura_facing |
-| 3 | trace alert | counted: entity=22 check=reach trace=True |
-| 4 | stats line | counted: stats {21: 1} |
-| 5 + 7 | null-gui begin/end pair | window recorded: (5, 7) |
-| 6 | alert inside the echoed window | counted; satisfies the null-gui row (tested) |
-| 8 | ERROR + dev.lookout + mixin vocab in chat text | counted as a same-line mixin error; FAILs boot (tested) |
-| 9 + 10 | ERROR text in a chat header + dev.lookout continuation | NO window finding: the entry severity comes from the header LEVEL field (INFO), not from text content |
+- scorer precedence (boot): definitive FAIL evidence (real mixin error
+  lines) is scored BEFORE ambiguity, so a bare watching marker can no
+  longer mask a real mixin failure as UNVERIFIED. ambiguity still
+  blocks absence-of-evidence FAILs and the PASS. the other rows were
+  checked for the same ordering: boot is the only row with definitive
+  error evidence; every other row's FAIL is absence-of-evidence, which
+  ambiguity correctly blocks. pins: boot-precedence-fail-beats-ambiguity
+  plus the mutant-precedence-* pair (ambiguity moved before the mixin
+  check turns the same log UNVERIFIED)
+- null-gui: an ambiguous alert line inside a valid operator window is
+  unverifiable evidence for the row (UNVERIFIED naming the lines),
+  pinned by null-gui-ambiguous-alert-in-window-unverified. the
+  previously missing-mod-list/watching absence FAILs keep their order
+- "counted nowhere" scoped: ambiguity applies to the four marker kinds
+  (watching/alert/stats/null-gui) only. the same-line mixin error scan
+  is not a marker scan: it still counts headerless and nested error
+  lines (multi-line stack entries carry no headers), and excludes only
+  chat-routed lines. wording fixed in the runbook too
+- malformed inner header: nested detection covers only FULLY recognized
+  inner headers; a payload starting with a malformed header still
+  counts (line 10 of the envelope fixture, pinned by
+  envelope-malformed-inner-counts-today). frozen known gap, not a
+  qualification
+- in the qualified corpus, chat-routed lines carry their own INFO
+  header, so a chat-routed line closes any open ERROR/WARN entry and
+  opens an INFO entry: it cannot join an error entry to manufacture a
+  window finding, pinned by envelope-chat-cannot-join-error-entry. the
+  pin covers the observed INFO chat shape only; WARN/ERROR-level
+  chat-routed forms are outside the qualified corpus
 
-## scorer implications - tested through the actual scorer
+## hardened behavior, pinned on these bounded fixtures
 
-- target-delivery: 5 echoed stats lines PASS the row (one echoed line
-  does not; the threshold is 5). test: lookalike-scorer-delivery-pass.
-- chat-capture: a single echoed alert PASSes the row.
-  test: lookalike-scorer-chat-capture-pass.
-- null-gui: an echoed begin/alert/end sequence PASSes the row.
-  test: lookalike-scorer-null-gui-pass.
-- boot: the combined fixture's echoed mixin error FAILs boot even with
-  watching true; the same log without the echoed error PASSes
-  (positive control). tests: lookalike-scorer-boot-fail,
-  lookalike-scorer-boot-control-pass.
+envelope rules (rig/proof/parsers.py docstring):
 
-## mutation families, labeled honestly
+- chat-routed lines - payload starts "[System] [CHAT] " (the real
+  client form, shape from committed captures) or "[CHAT] " (server-style
+  form) - are never scanned for markers or same-line mixin errors
+- a marker-shaped line with no recognizable header (bare), a malformed
+  header, or a payload that itself starts with a header (nested) is
+  AMBIGUOUS: recorded in ambiguous_markers, counted nowhere, and the
+  affected scorer row goes UNVERIFIED (boot / target-delivery /
+  chat-capture / null-gui, per marker kind)
+- real envelopes count: launcher [hh:mm:ss] [thread/LEVEL]: and log4j
+  direct ISO-header lines, watching via log4j direct included
+  (envelope-watching-log4j-counted)
 
-- chat-filter mutants (alert, watching) demonstrate SPOOF REMOVAL:
-  echoed markers stop counting while real-prefixed controls keep
-  counting (mutant-lookalike-alert-chatfilter-killed,
-  mutant-lookalike-watch-chatfilter-killed).
-- anchored/exact mutants are BEHAVIOR-CHANGE CONTROLS: over-strict on
-  purpose - they kill real prefixed lines too - proving only that the
-  pins change when parsing changes
-  (mutant-lookalike-alert-anchored-control,
-  mutant-lookalike-watch-exact-control).
+scorer-level pins: echoed stats x5 FAIL target-delivery, an echoed
+alert FAILs chat-capture, echoed null-gui markers leave the row
+UNVERIFIED (no windows), an echoed mixin error no longer FAILs boot
+(echo filtered), ambiguity turns the matching row UNVERIFIED with the
+offending line numbers, and the header-INFO window-negative stays
+(a chat header carrying ERROR text opens no error entry).
+
+## mutation protection
+
+- mutant-hardening-chatfilter-removed-killed: echoes count again
+- mutant-hardening-ambiguity-dropped-killed: ambiguous recording gone
+- mutant-hardening-nested-disabled-killed: nested-prefixed alert counts
+- mutant-precedence-ambiguity-first-killed: ambiguity scored before the
+  mixin-error check turns a real-failure log UNVERIFIED
 
 ## what this is not
 
-- no claim about other log writers, other marker orderings, or
-  real-world frequency: the statements above cover these bounded
-  fixtures only.
-- no parser hardening is included, and nothing here authenticates
-  markers: even a hardened [CHAT] filter would not authenticate
-  arbitrary log writers.
+- filtering does NOT authenticate the log: any non-chat writer can
+  still echo markers, and a compromised or forged log passes every
+  filter here. the rows remain log-surface checks.
+- nested-header detection covers fully recognized inner headers only;
+  a malformed inner header still counts (frozen known gap above)
+- no claim about log writers, marker orderings, or chat routing forms
+  beyond these fixtures; new envelope shapes should extend the corpus.

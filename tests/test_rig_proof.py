@@ -24,15 +24,15 @@ def expect(name, cond, detail=""):
 def ok_str(cond):
     return cond
 
-GOOD = """[main/INFO]: Loading Minecraft 26.3 with Fabric Loader 0.19.5
+GOOD = """[12:00:00] [main/INFO]: Loading Minecraft 26.3 with Fabric Loader 0.19.5
 \t- lookout 2.9.7.28-meshac-0.1.0
-[Render thread/INFO]: [lookout] watching (client-side companion to meshac)
-[Render thread/INFO]: [lookout-stats] entity=7 d=1.20 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=100 tp=200 grace=false
-[Render thread/INFO]: [lookout-stats] entity=7 d=0.80 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false
-[Render thread/INFO]: [lookout-stats] entity=7 d=2.10 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=110 tp=200 grace=false
-[Render thread/INFO]: [lookout-stats] entity=7 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=95 tp=200 grace=false
-[Render thread/INFO]: [lookout-stats] entity=7 d=1.00 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=105 tp=200 grace=false
-[Render thread/INFO]: [lookout] alert entity=7 check=killaura_facing
+[12:00:01] [Render thread/INFO]: [lookout] watching (client-side companion to meshac)
+[12:00:02] [Render thread/INFO]: [lookout-stats] entity=7 d=1.20 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=100 tp=200 grace=false
+[12:00:03] [Render thread/INFO]: [lookout-stats] entity=7 d=0.80 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false
+[12:00:04] [Render thread/INFO]: [lookout-stats] entity=7 d=2.10 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=110 tp=200 grace=false
+[12:00:05] [Render thread/INFO]: [lookout-stats] entity=7 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=95 tp=200 grace=false
+[12:00:06] [Render thread/INFO]: [lookout-stats] entity=7 d=1.00 dy=0.42 ground=true glide=false water=false vehicle=false exempt=false vel=105 tp=200 grace=false
+[12:00:07] [Render thread/INFO]: [lookout] alert entity=7 check=killaura_facing
 """
 
 # parser: mod entry needs the loader table line, not just the watching line
@@ -41,7 +41,7 @@ expect("parse-mod-listed", c.mod_listed)
 expect("parse-watching", c.watching)
 expect("parse-mixin-clean", c.mixin_errors == [])
 expect("parse-stats-count", c.stats == {7: 5}, f"got {c.stats}")
-_real_stats = ("[Render thread/INFO]: [lookout-stats] entity=7 d=1.20 dy=0.42"
+_real_stats = ("[12:00:02] [Render thread/INFO]: [lookout-stats] entity=7 d=1.20 dy=0.42"
                " ground=true glide=false water=false vehicle=false"
                " exempt=false vel=100 tp=200 grace=false")
 expect("parse-stats-negative-old-form",
@@ -52,9 +52,9 @@ expect("parse-stats-negative-suffix",
        parsers.parse_client_log(_real_stats + " extra=1\n").stats == {})
 expect("parse-stats-entity-separation",
        parsers.parse_client_log(
-           ("[lookout-stats] entity=7 d=1.20 dy=0.42 ground=true glide=false water=false"
+           ("[12:00:02] [Render thread/INFO]: [lookout-stats] entity=7 d=1.20 dy=0.42 ground=true glide=false water=false"
             " vehicle=false exempt=false vel=100 tp=200 grace=false\n") * 3 +
-           ("[lookout-stats] entity=9 d=0.50 dy=-0.10 ground=false glide=true water=false"
+           ("[12:00:03] [Render thread/INFO]: [lookout-stats] entity=9 d=0.50 dy=-0.10 ground=false glide=true water=false"
             " vehicle=false exempt=false vel=90 tp=200 grace=false\n") * 2).stats == {7: 3, 9: 2})
 expect("score-delivery-boundary-4",
        score.row_target_delivery(parsers.parse_client_log((_real_stats + "\n") * 4))[0] == "FAIL")
@@ -62,7 +62,7 @@ expect("score-delivery-boundary-5",
        score.row_target_delivery(parsers.parse_client_log((_real_stats + "\n") * 5))[0] == "PASS")
 expect("parse-stats-comma-decimal",
        parsers.parse_client_log(
-           "[lookout-stats] entity=7 d=1,20 dy=-0,10 ground=true glide=false"
+           "[12:00:02] [Render thread/INFO]: [lookout-stats] entity=7 d=1,20 dy=-0,10 ground=true glide=false"
            " water=false vehicle=false exempt=false vel=100 tp=200 grace=false\n"
        ).stats == {7: 1})
 expect("parse-alert-fields",
@@ -88,12 +88,14 @@ info_only = parsers.parse_client_log(
     "[main/INFO]: dev.lookout mixin ClientPacketListenerMixin applied 26 targets\n" + GOOD)
 expect("parse-mixin-info-not-error", info_only.mixin_errors == [])
 
-traced = parsers.parse_client_log("[lookout] trace alert entity=9 check=reach_rough\n")
+traced = parsers.parse_client_log("[12:00:02] [Render thread/INFO]: [lookout] trace alert entity=9 check=reach_rough\n")
 expect("parse-alert-trace-flag", traced.alerts and traced.alerts[0].trace)
 
 ng = parsers.parse_client_log(
-    "[lookout-proof] null-gui-window begin\n[lookout] alert entity=1 check=x\n"
-    "[lookout-proof] null-gui-window end\n[lookout-proof] null-gui-window begin\n")
+    "[12:00:10] [Render thread/INFO]: [lookout-proof] null-gui-window begin\n"
+    "[12:00:11] [Render thread/INFO]: [lookout] alert entity=1 check=x\n"
+    "[12:00:12] [Render thread/INFO]: [lookout-proof] null-gui-window end\n"
+    "[12:00:13] [Render thread/INFO]: [lookout-proof] null-gui-window begin\n")
 expect("parse-nullgui-window-paired", len(ng.null_gui_windows) == 1)
 expect("parse-nullgui-unclosed-dropped", True)  # the unclosed begin above is ignored
 
@@ -141,7 +143,7 @@ expect("score-delivery-pass-detail",
        and "sampled-stats smoke heuristic" in score.row_target_delivery(good)[1]
        and "packet flow observed" not in score.row_target_delivery(good)[1],
        score.row_target_delivery(good)[1])
-thin = parsers.parse_client_log("[Render thread/INFO]: [lookout-stats] entity=1 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false\n")
+thin = parsers.parse_client_log("[12:00:02] [Render thread/INFO]: [lookout-stats] entity=1 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false\n")
 expect("score-delivery-fail-thin", score.row_target_delivery(thin)[0] == "FAIL")
 expect("score-delivery-fail-detail",
        "stats lines" in score.row_target_delivery(thin)[1]
@@ -151,15 +153,17 @@ expect("score-delivery-fail-detail",
 
 expect("score-chat-pass", score.row_chat_capture(good)[0] == "PASS")
 expect("score-chat-fail-none",
-       score.row_chat_capture(parsers.parse_client_log("[Render thread/INFO]: [lookout-stats] entity=1 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false\n"))[0] == "FAIL")
+       score.row_chat_capture(parsers.parse_client_log("[12:00:02] [Render thread/INFO]: [lookout-stats] entity=1 d=0.50 dy=0.00 ground=true glide=false water=false vehicle=false exempt=false vel=90 tp=200 grace=false\n"))[0] == "FAIL")
 
 ng_client = parsers.parse_client_log(
-    GOOD + "[lookout-proof] null-gui-window begin\n[lookout] alert entity=7 check=reach_rough\n"
-           "[lookout-proof] null-gui-window end\n")
+    GOOD + "[12:00:10] [Render thread/INFO]: [lookout-proof] null-gui-window begin\n"
+           "[12:00:11] [Render thread/INFO]: [lookout] alert entity=7 check=reach_rough\n"
+           "[12:00:12] [Render thread/INFO]: [lookout-proof] null-gui-window end\n")
 expect("score-nullgui-pass", score.row_null_gui(ng_client)[0] == "PASS")
 expect("score-nullgui-unverified-no-markers", score.row_null_gui(good)[0] == "UNVERIFIED")
 quiet_window = parsers.parse_client_log(
-    GOOD + "[lookout-proof] null-gui-window begin\n[lookout-proof] null-gui-window end\n")
+    GOOD + "[12:00:10] [Render thread/INFO]: [lookout-proof] null-gui-window begin\n"
+           "[12:00:12] [Render thread/INFO]: [lookout-proof] null-gui-window end\n")
 expect("score-nullgui-fail-quiet-window", score.row_null_gui(quiet_window)[0] == "FAIL")
 
 expect("score-g3-pass", score.row_g3_receipt(["VictimA joined the game"])[0] == "PASS")
@@ -180,8 +184,9 @@ expect("dry-run-all-rows-pass",
 # live-mode negative: a boot log with mixin errors must fail the boot row
 with tempfile.TemporaryDirectory() as td:
     bad = pathlib.Path(td, "bad.log")
-    bad.write_text("[main/ERROR]: Mixin apply failed dev.lookout.mixin.ClientPacketListenerMixin\n"
-                   "\t- lookout 2.9.7.28-meshac-0.1.0\n" + parsers.WATCHING + "\n")
+    bad.write_text("[12:00:00] [main/ERROR]: Mixin apply failed dev.lookout.mixin.ClientPacketListenerMixin\n"
+                   "\t- lookout 2.9.7.28-meshac-0.1.0\n"
+                   "[12:00:01] [Render thread/INFO]: " + parsers.WATCHING + "\n")
     r = subprocess.run([sys.executable, "rig/proof/proof.py",
                         "--client-log", str(bad), "--row", "boot"],
                        cwd=ROOT, capture_output=True, text=True)
@@ -191,7 +196,10 @@ with tempfile.TemporaryDirectory() as td:
     # mutant: score.py without the mixin-error check must pass that bad log
     src = (ROOT / "rig/proof/score.py").read_text()
     block = '''    if client.mixin_errors:
-        problems.append(f"{len(client.mixin_errors)} dev.lookout mixin error lines")
+        detail = f"{len(client.mixin_errors)} dev.lookout mixin error lines"
+        if review:
+            detail += "; plus unreviewed window candidates: " + "; ".join(review)
+        return "FAIL", detail
 '''
     assert block in src, "mixin-error check missing from committed scorer"
     mut = pathlib.Path(td, "score_mut.py")
@@ -526,7 +534,7 @@ mutant_case("truncated-clean", f5,
 # m8: same-line scan bounded by the cap -> f10's line-31 match escapes
 mutant_case("sameline-bounded", f10,
             lambda l: not l.startswith("FAIL boot"),
-            parser_subs=[("        if is_mixin_error(line):\n"
+            parser_subs=[("        if is_mixin_error(line) and not chat_routed:\n"
                           "            out.mixin_errors.append((i, line.strip()))",
                           "        if is_mixin_error(line) and entry is not None and not entry.truncated and len(entry.lines) <= MAX_CONTINUATION:\n"
                           "            out.mixin_errors.append((i, line.strip()))")])
@@ -546,8 +554,8 @@ mutant_case("drop-window", f1,
 # m11: launcher-format-only grammar -> f16a's log4j entry invisible
 mutant_case("launcher-only-grammar", f16a,
             lambda l: l.startswith("PASS boot"),
-            parser_subs=[("    m = _HEADER_LAUNCHER.match(line) or _HEADER_LOG4J.match(line)",
-                          "    m = _HEADER_LAUNCHER.match(line)")])
+            parser_subs=[("        hm = _HEADER_LAUNCHER.match(line) or _HEADER_LOG4J.match(line)",
+                          "        hm = _HEADER_LAUNCHER.match(line)")])
 # m12: dedup removed -> f14a's entry double-reports (parser-level probe)
 with tempfile.TemporaryDirectory() as td:
     mutant_tree(td, parser_subs=[(
@@ -682,119 +690,191 @@ with tempfile.TemporaryDirectory() as td:
            "17 files carry receipts; the never-match mutant must mismatch exactly those")
 
 
-# --- lookalike corpus: chat-echoed marker lines (spoof surface). the
-# pins are a FROZEN CHARACTERIZATION of current parser behavior, to be
-# changed explicitly by a hardening diff - they are not requirements to
-# keep this parsing. documented in
-# docs/lead/log-surface-lookalike-notes.md and the runbook known limits.
+# --- lookalike corpus + hardening: chat-routed echoes are FILTERED
+# (negatives), headerless/nested/malformed-header marker lines are
+# AMBIGUOUS (counted nowhere, rows go UNVERIFIED). this block replaces
+# the r2 frozen characterization explicitly: the echoes that were
+# pinned as counted are now pinned as filtered.
 _LOOKALIKE = parsers.parse_client_log(
     (ROOT / "rig/proof/fixtures/client-lookalikes.log").read_text())
-expect("lookalike-alerts",
-       [(a.entity, a.check, a.trace) for a in _LOOKALIKE.alerts]
-       == [(21, "killaura_facing", False), (22, "reach", True), (23, "timer", False)],
+expect("lookalike-alerts-filtered", _LOOKALIKE.alerts == [],
        f"got {[(a.entity, a.check, a.trace) for a in _LOOKALIKE.alerts]}")
-expect("lookalike-watching-counted", _LOOKALIKE.watching is True)
-expect("lookalike-stats-counted", _LOOKALIKE.stats == {21: 1}, f"got {_LOOKALIKE.stats}")
-expect("lookalike-null-gui-window", _LOOKALIKE.null_gui_windows == [(5, 7)],
+expect("lookalike-watching-real-still-counted", _LOOKALIKE.watching is True)
+expect("lookalike-stats-filtered", _LOOKALIKE.stats == {}, f"got {_LOOKALIKE.stats}")
+expect("lookalike-null-gui-filtered", _LOOKALIKE.null_gui_windows == [],
        f"got {_LOOKALIKE.null_gui_windows}")
-expect("lookalike-mixin-error-counted",
-       [i for i, _ in _LOOKALIKE.mixin_errors] == [8])
+expect("lookalike-mixin-error-filtered", _LOOKALIKE.mixin_errors == [])
 expect("lookalike-no-window-findings", _LOOKALIKE.window_findings == [])
-
-# echo-only watching: no genuine watching line in the fixture at all
 _WATCH_ECHO = parsers.parse_client_log(
     (ROOT / "rig/proof/fixtures/client-lookalikes-watching-echo.log").read_text())
-expect("lookalike-watching-echo-only", _WATCH_ECHO.watching is True)
+expect("lookalike-watching-echo-filtered", _WATCH_ECHO.watching is False)
 expect("lookalike-watching-real-control",
        parsers.parse_client_log(
            "[12:00:00] [Render thread/INFO]: [lookout] watching"
            " (client-side companion to meshac)\n").watching is True)
 
-# scorer implications, tested through the actual scorer (isolated
-# cases, not deductions from the combined fixture):
+# scorer rows on filtered echoes: echoes must not satisfy any row
 echo_stats5 = parsers.parse_client_log(
     "".join(("[12:00:0%d] [Render thread/INFO]: [CHAT] <1057>"
              " [lookout-stats] entity=21 d=1.20 dy=0.42 ground=true glide=false"
              " water=false vehicle=false exempt=false vel=100 tp=200 grace=false\n")
             % i for i in range(5)))
-expect("lookalike-scorer-delivery-pass",
-       score.row_target_delivery(echo_stats5)[0] == "PASS",
+expect("lookalike-scorer-delivery-echo-filtered",
+       score.row_target_delivery(echo_stats5)[0] == "FAIL",
        score.row_target_delivery(echo_stats5)[1])
-expect("lookalike-scorer-chat-capture-pass",
+expect("lookalike-scorer-chat-capture-echo-filtered",
        score.row_chat_capture(parsers.parse_client_log(
            "[12:00:01] [Render thread/INFO]: [CHAT] <1057>"
-           " [lookout] alert entity=21 check=reach\n"))[0] == "PASS")
-expect("lookalike-scorer-null-gui-pass",
+           " [lookout] alert entity=21 check=reach\n"))[0] == "FAIL")
+expect("lookalike-scorer-null-gui-echo-filtered",
        score.row_null_gui(parsers.parse_client_log(
            "[12:00:05] [Render thread/INFO]: [CHAT] <1057> [lookout-proof] null-gui-window begin\n"
            "[12:00:06] [Render thread/INFO]: [CHAT] <1057> [lookout] alert entity=23 check=timer\n"
            "[12:00:07] [Render thread/INFO]: [CHAT] <1057> [lookout-proof] null-gui-window end\n"
-       ))[0] == "PASS")
+       ))[0] == "UNVERIFIED")
 _spoof_boot = parsers.parse_client_log(
     "\t- lookout 2.9.7.28\n"
     "[12:00:00] [Render thread/INFO]: [lookout] watching (client-side companion to meshac)\n"
     "[12:00:08] [Render thread/INFO]: [CHAT] <1057> ERROR Mixin apply failed dev.lookout.inject\n")
-expect("lookalike-scorer-boot-fail",
-       score.row_boot(_spoof_boot)[0] == "FAIL"
-       and "mixin error" in score.row_boot(_spoof_boot)[1],
-       score.row_boot(_spoof_boot)[1])
-expect("lookalike-scorer-boot-control-pass",
+expect("lookalike-scorer-boot-echo-filtered",
+       score.row_boot(_spoof_boot)[0] == "PASS", score.row_boot(_spoof_boot)[1])
+
+# --- envelope + ambiguity corpus: real-envelope positives, chat/system
+# negatives, bare/nested/malformed-header ambiguities
+_ENVELOPE = parsers.parse_client_log(
+    (ROOT / "rig/proof/fixtures/client-hardening-envelopes.log").read_text())
+expect("envelope-watching-log4j-counted", _ENVELOPE.watching is True)
+expect("envelope-real-alert-counted",
+       [(a.entity, a.check) for a in _ENVELOPE.alerts] == [(31, "reach"), (36, "reach")],
+       f"got {[(a.entity, a.check) for a in _ENVELOPE.alerts]}")
+# line 10 (0-based): valid outer header, MALFORMED inner header + alert -
+# nested detection covers only fully recognized inner headers, so this
+# counts today. frozen known-gap pin, not a qualification.
+expect("envelope-malformed-inner-counts-today",
+       any(a.entity == 36 for a in _ENVELOPE.alerts))
+expect("envelope-stats-echo-filtered", _ENVELOPE.stats == {})
+expect("envelope-ambiguous-alerts",
+       [(i, k) for i, k in _ENVELOPE.ambiguous_markers]
+       == [(5, "alert"), (6, "alert"), (7, "alert")],
+       f"got {_ENVELOPE.ambiguous_markers}")
+expect("envelope-no-mixin-errors", _ENVELOPE.mixin_errors == [])
+expect("envelope-no-window-findings", _ENVELOPE.window_findings == [])
+expect("envelope-scorer-chat-capture-unverified",
+       score.row_chat_capture(_ENVELOPE)[0] == "UNVERIFIED"
+       and "unclassified envelope" in score.row_chat_capture(_ENVELOPE)[1],
+       score.row_chat_capture(_ENVELOPE)[1])
+expect("envelope-scorer-delivery-fail-no-ambiguity",
+       score.row_target_delivery(_ENVELOPE)[0] == "FAIL")
+expect("envelope-scorer-delivery-ambiguous-unverified",
+       score.row_target_delivery(parsers.parse_client_log(
+           "[lookout-stats] entity=31 d=1.20 dy=0.42 ground=true glide=false"
+           " water=false vehicle=false exempt=false vel=100 tp=200 grace=false\n"))[0]
+       == "UNVERIFIED")
+expect("envelope-scorer-null-gui-ambiguous-unverified",
+       score.row_null_gui(parsers.parse_client_log(
+           "[lookout-proof] null-gui-window begin\n"))[0] == "UNVERIFIED")
+expect("envelope-scorer-boot-ambiguous-watching-unverified",
+       score.row_boot(parsers.parse_client_log(
+           "\t- lookout 2.9.7.28\n"
+           "[lookout] watching (client-side companion to meshac)\n"))[0] == "UNVERIFIED")
+# a chat-routed line always carries its own INFO header, so it closes
+# any open entry and opens an INFO entry: it cannot join an open ERROR
+# entry to manufacture a window finding
+expect("envelope-chat-cannot-join-error-entry",
+       parsers.parse_client_log(
+           "[12:00:10] [main/ERROR]: some unrelated failure\n"
+           "[12:00:11] [Render thread/INFO]: [System] [CHAT] dev.lookout inject failed\n"
+       ).window_findings == [])
+# precedence: definitive FAIL evidence is never masked by ambiguity
+_prec = parsers.parse_client_log(
+    "\t- lookout 2.9.7.28\n"
+    "[12:00:00] [Render thread/INFO]: [lookout] watching (client-side companion to meshac)\n"
+    "[12:00:01] [main/ERROR]: Mixin apply failed dev.lookout.mixin.ClientPacketListenerMixin\n"
+    "[lookout] watching (client-side companion to meshac)\n")
+expect("boot-precedence-fail-beats-ambiguity",
+       score.row_boot(_prec)[0] == "FAIL" and "mixin error" in score.row_boot(_prec)[1],
+       score.row_boot(_prec)[1])
+# null-gui: an ambiguous alert inside a valid window is unverifiable
+# evidence for the row
+_ng_amb = parsers.parse_client_log(
+    "[12:00:10] [Render thread/INFO]: [lookout-proof] null-gui-window begin\n"
+    "[lookout] alert entity=40 check=reach\n"
+    "[12:00:12] [Render thread/INFO]: [lookout-proof] null-gui-window end\n")
+expect("null-gui-ambiguous-alert-in-window-unverified",
+       score.row_null_gui(_ng_amb)[0] == "UNVERIFIED"
+       and "inside a null-gui window" in score.row_null_gui(_ng_amb)[1],
+       score.row_null_gui(_ng_amb)[1])
+expect("envelope-scorer-boot-clean-pass",
        score.row_boot(parsers.parse_client_log(
            "\t- lookout 2.9.7.28\n"
            "[12:00:00] [Render thread/INFO]: [lookout] watching"
            " (client-side companion to meshac)\n"))[0] == "PASS")
 
-# mutation protection. two families, labeled honestly:
-# - chat-filter mutants demonstrate SPOOF REMOVAL: echoed markers stop
-#   counting while real-prefixed controls keep counting
-# - anchored/exact mutants are BEHAVIOR-CHANGE CONTROLS: they are
-#   over-strict (they kill real prefixed lines too), proving only that
-#   the pins change when parsing changes
-_LOOKALIKE_SIG = ("import sys, pathlib; sys.path.insert(0, '.');"
-                  "from rig.proof import parsers;"
-                  f"c = parsers.parse_client_log(pathlib.Path({str(ROOT)!r},"
-                  " 'rig/proof/fixtures/client-lookalikes.log').read_text());"
-                  "r = parsers.parse_client_log("
-                  "'[12:00:00] [Render thread/INFO]:"
-                  " [lookout] alert entity=30 check=reach\\n');"
-                  "print(len(c.alerts), int(c.watching), sum(c.stats.values()),"
-                  " len(c.null_gui_windows), len(c.mixin_errors),"
-                  " len(c.window_findings), len(r.alerts))")
-_WATCH_SIG = ("import sys, pathlib; sys.path.insert(0, '.');"
-              "from rig.proof import parsers;"
-              f"e = parsers.parse_client_log(pathlib.Path({str(ROOT)!r},"
-              " 'rig/proof/fixtures/client-lookalikes-watching-echo.log').read_text());"
-              "r = parsers.parse_client_log("
-              "'[12:00:00] [Render thread/INFO]:"
-              " [lookout] watching (client-side companion to meshac)\\n');"
-              "print(int(e.watching), int(r.watching))")
-def lookalike_mutant(name, probe, subs, want_sig):
+# hardening mutation protection, changed output on the two fixtures
+# after a healthy baseline: removing the chat filter must re-count the
+# echoes, dropping ambiguity recording must erase the UNVERIFIED basis,
+# and disabling the nested-header check must count the nested line.
+_HARDEN_PROBE = ("import sys, pathlib; sys.path.insert(0, '.');"
+                 "from rig.proof import parsers;"
+                 f"R = {str(ROOT)!r};"
+                 "import pathlib as pl;"
+                 "a = parsers.parse_client_log(pl.Path(R,"
+                 " 'rig/proof/fixtures/client-lookalikes.log').read_text());"
+                 "b = parsers.parse_client_log(pl.Path(R,"
+                 " 'rig/proof/fixtures/client-hardening-envelopes.log').read_text());"
+                 "print(len(a.alerts), int(a.watching), sum(a.stats.values()),"
+                 " len(a.null_gui_windows), len(a.mixin_errors), len(a.ambiguous_markers));"
+                 "print(len(b.alerts), int(b.watching), sum(b.stats.values()),"
+                 " len(b.null_gui_windows), len(b.mixin_errors), len(b.ambiguous_markers))")
+def hardening_mutant(name, subs, want):
     with tempfile.TemporaryDirectory() as td:
         mutant_tree(td, parser_subs=subs)
-        r = subprocess.run([sys.executable, "-c", probe], cwd=td,
+        r = subprocess.run([sys.executable, "-c", _HARDEN_PROBE], cwd=td,
                            capture_output=True, text=True)
-        expect(name, r.returncode == 0 and r.stdout.split() == want_sig,
+        got = r.stdout.split()
+        expect(name, r.returncode == 0 and got == want,
+               "got " + " ".join(got) + r.stderr[-200:])
+hardening_mutant("mutant-hardening-baseline-healthy", [],
+                 ["0", "1", "0", "0", "0", "0", "2", "1", "0", "0", "0", "3"])
+hardening_mutant("mutant-hardening-chatfilter-removed-killed",
+                 [("            if not matched or chat_routed:",
+                   "            if not matched:")],
+                 ["3", "1", "1", "1", "0", "0", "3", "1", "1", "0", "0", "3"])
+hardening_mutant("mutant-hardening-ambiguity-dropped-killed",
+                 [("                out.ambiguous_markers.append((i, kind))",
+                   "                pass")],
+                 ["0", "1", "0", "0", "0", "0", "2", "1", "0", "0", "0", "0"])
+# precedence mutant: ambiguity checked BEFORE the definitive FAIL
+# evidence must turn the precedence regression log UNVERIFIED
+_PREC_PROBE = ("import sys, pathlib; sys.path.insert(0, '.');"
+               "from rig.proof import parsers, score;"
+               "c = parsers.parse_client_log("
+               "'\\t- lookout 2.9.7.28\\n"
+               "[12:00:00] [Render thread/INFO]: [lookout] watching"
+               " (client-side companion to meshac)\\n"
+               "[12:00:01] [main/ERROR]: Mixin apply failed"
+               " dev.lookout.mixin.ClientPacketListenerMixin\\n"
+               "[lookout] watching (client-side companion to meshac)\\n');"
+               "print(score.row_boot(c)[0])")
+def precedence_mutant(name, subs, want):
+    with tempfile.TemporaryDirectory() as td:
+        mutant_tree(td, score_subs=subs)
+        r = subprocess.run([sys.executable, "-c", _PREC_PROBE], cwd=td,
+                           capture_output=True, text=True)
+        expect(name, r.returncode == 0 and r.stdout.strip() == want,
                r.stdout[-120:] + r.stderr[-200:])
-lookalike_mutant("mutant-lookalike-baseline-healthy", _LOOKALIKE_SIG, [],
-                 ["3", "1", "1", "1", "1", "0", "1"])
-lookalike_mutant("mutant-lookalike-alert-chatfilter-killed", _LOOKALIKE_SIG,
-                 [("        m = ALERT.search(line)",
-                   "        m = None if '[CHAT]' in line else ALERT.search(line)")],
-                 ["0", "1", "1", "1", "1", "0", "1"])
-lookalike_mutant("mutant-lookalike-alert-anchored-control", _LOOKALIKE_SIG,
-                 [('ALERT = re.compile(r"\\[lookout\\] (trace )?alert entity=(\\d+) check=([a-z0-9_]+)")',
-                   'ALERT = re.compile(r"^\\[lookout\\] (trace )?alert entity=(\\d+) check=([a-z0-9_]+)")')],
-                 ["0", "1", "1", "1", "1", "0", "0"])
-lookalike_mutant("mutant-lookalike-watch-baseline-healthy", _WATCH_SIG, [],
-                 ["1", "1"])
-lookalike_mutant("mutant-lookalike-watch-chatfilter-killed", _WATCH_SIG,
-                 [("        if WATCHING in line:",
-                   "        if WATCHING in line and '[CHAT]' not in line:")],
-                 ["0", "1"])
-lookalike_mutant("mutant-lookalike-watch-exact-control", _WATCH_SIG,
-                 [("        if WATCHING in line:",
-                   "        if line == WATCHING:")],
-                 ["0", "0"])
+precedence_mutant("mutant-precedence-baseline-healthy", [], "FAIL")
+precedence_mutant("mutant-precedence-ambiguity-first-killed",
+                  [("    if client.mixin_errors:",
+                    "    amb = _ambiguous(client, \"watching\")\n"
+                    "    if amb:\n        return amb\n"
+                    "    if client.mixin_errors:")],
+                  "UNVERIFIED")
+hardening_mutant("mutant-hardening-nested-disabled-killed",
+                 [("        nested = bool(payload and (_HEADER_LAUNCHER.match(payload)\n"
+                   "                                   or _HEADER_LOG4J.match(payload)))",
+                   "        nested = False")],
+                 ["0", "1", "0", "0", "0", "0", "3", "1", "0", "0", "0", "2"])
 
 # --- format sync gate: parser formats pinned against the exact source
 # literals that emit them (a format change in lookout source breaks the
