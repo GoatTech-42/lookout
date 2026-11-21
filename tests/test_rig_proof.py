@@ -481,6 +481,25 @@ expect("win-f24-warn-chat-sameline-no-window",
        c24.mixin_errors == [] and c24.window_findings == [])
 expect("win-f24-boot-pass", score.row_boot(c24)[0] == "PASS")
 
+# f27: frozen characterization - a chat-routed ERROR header followed by
+# 30+ continuations still surfaces as a truncated entry and boot goes
+# UNVERIFIED. DELIBERATE, not a hole: chat-opened entries can carry
+# legitimate continuation evidence (win-f25), so their unscanned tails
+# remain UNQUALIFIED and flagged for review; in this bounded scenario
+# a chat participant can at most force review, never a PASS. the
+# mutant below uses filler-only continuations: it proves the lost
+# truncation caveat, not that hidden error content escapes.
+# WARN/ERROR chat forms are unobserved in real captures
+f27 = (BASE + "[12:10:00] [Render thread/ERROR]: [System] [CHAT] dev.lookout broke\n"
+       + _filler(31))
+c27 = parsers.parse_client_log(f27)
+expect("win-f27-chat-error-truncation-surfaced",
+       c27.truncated_error_entries == [(3, 33)], f"got {c27.truncated_error_entries}")
+expect("win-f27-boot-unverified-truncated",
+       score.row_boot(c27)[0] == "UNVERIFIED"
+       and "entry truncated at 30 continuations" in score.row_boot(c27)[1],
+       score.row_boot(c27)[1])
+
 # f25: paired positive (QA 8.7) - an ERROR chat-routed header carrying
 # package+vocabulary does NOT suppress independent window evidence in
 # the same entry's continuations: the dedup check mirrors the
@@ -640,6 +659,12 @@ mutant_case("chat-window-feed", f22,
                           "            voc = [i for i, l in entry.lines if _VOCAB.search(l) and not _chat_routed(l)]",
                           "            pkg = [i for i, l in entry.lines if _PACKAGE.search(l)]\n"
                           "            voc = [i for i, l in entry.lines if _VOCAB.search(l)]")])
+# m14: chat-opened entries excluded from truncation surfacing -> f27's
+# unscanned tail goes unqualified and boot PASSes over hidden evidence
+mutant_case("chat-truncation-excluded", f27,
+            lambda l: l.startswith("PASS boot"),
+            parser_subs=[("            if entry.truncated:",
+                          "            if entry.truncated and not _chat_routed(entry.lines[0][1]):")])
 # m13: dedup over UNFILTERED lines (chat header counts as a same-line
 # match) -> f25's independent window evidence is suppressed to PASS
 mutant_case("dedup-unfiltered", f25,

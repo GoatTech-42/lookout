@@ -61,10 +61,19 @@ own red-first pin:
   from findings via BOTH filters (the evidence filter empties pkg/voc
   on chat-only lines; dedup is the backstop for counted matches);
   win-f24 freezes that outcome with the mechanism named as both
-- open: the entry cap still applies to chat-opened ERROR/WARN entries -
-  30+ continuations after a chat-routed error-level header produce a
-  truncated entry and UNVERIFIED. this slice closes chat-fed window
-  evidence, not the truncation path
+- truncation path, pinned as DELIBERATE (win-f27): the entry cap still
+  applies to chat-opened ERROR/WARN entries - 30+ continuations after
+  a chat-routed error-level header produce a truncated entry and
+  UNVERIFIED. this is conservative, not a hole: chat-opened entries
+  can carry legitimate continuation evidence (win-f25), so their
+  unscanned tails remain UNQUALIFIED and flagged for review; in this
+  bounded scenario a chat participant can at most force review, never
+  a PASS. excluding chat-opened entries from truncation surfacing
+  would drop the truncation caveat: the mutant uses filler-only
+  continuations, so it proves the lost caveat, not that hidden error
+  content escapes (mutant-chat-truncation-excluded-killed). WARN/ERROR
+  chat forms are unobserved in real captures, so with observed
+  INFO-only chat the path is not manufacturable
 
 ## hardened behavior, pinned on these bounded fixtures
 
@@ -100,6 +109,10 @@ offending line numbers, and the header-INFO window-negative stays
   evidence turns f22's chat echo into a window finding
 - mutant-dedup-unfiltered-killed: dedup over unfiltered lines lets a
   chat header suppress f25's independent window evidence to PASS
+- mutant-chat-truncation-excluded-killed: excluding chat-opened entries
+  from truncation surfacing turns f27's UNVERIFIED into a PASS - the
+  mutant's fixture continuations are filler only, so the kill proves
+  the lost truncation caveat, not that hidden error content escapes
 
 ## what this is not
 
