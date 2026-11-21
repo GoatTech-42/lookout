@@ -56,4 +56,49 @@ sha256 (first 16 hex) per file.
 | docs/build-evidence/session-pong26.3/anchor-server.log | 95e1a046e544c7a8 |
 
 fixture (19th file, synthetic id-only): rig/proof/fixtures/server-good.log,
-sha256 (16) 1741ddb4ba07c850.
+sha256 (16) 0dd95610c2681165 (upgraded from the pre-hardening shorthand
+"entity N joined the game" to the observed real forms; the count of 2
+is one login line + one join line, not two distinct joins).
+
+## echo hardening (server-echoes slice)
+
+the old parser matched "joined the game" / "logged in with entity id"
+anywhere on any line, so a player chatting "X joined the game" (or the
+System chat form) produced a false receipt, and headerless
+receipt-shaped lines counted. parse_server_log now requires a
+recognized launcher/log4j header and matches only the two observed
+receipt forms anchored at payload start: "System chat: <handle> joined
+the game" and the verified login shape "<name>[/<address>] logged in
+with entity id <n> at (" where the name is \w{3,16} directly followed
+by the bracketed address. player chat logs as "<handle> ...": the join
+form requires the payload to start with "System chat: ", and the login
+form's name+bracketed-address shape cannot be satisfied by a
+"<handle>" chat prefix - including the minimal bypass form
+"<handle> logged in with entity id N at (...)", pinned as an isolated
+negative (srv-echo-login-minimal-negative) with the genuine login form
+pinned as a positive (srv-echo-login-genuine-positive). this is a
+bounded claim over the committed corpus formats, not a universal
+statement about server log shapes.
+
+- the characterization change is explicit: the pre-hardening behavior
+  (echoes + headerless lines counted) is captured as red evidence and
+  replaced by the pins srv-echo-real-forms-counted (exact line
+  content, synthetic fixture) and srv-echo-chat-and-headerless-
+  filtered
+- corpus regression: all 19 pinned counts unchanged
+- mutation protection after a healthy baseline:
+  mutant-srv-anchor-dropped-killed (unanchored join pattern + search
+  re-counts the two chat join echoes),
+  mutant-srv-login-shape-relaxed-killed (login shape relaxed to a bare
+  token re-counts the minimal chat echo),
+  mutant-srv-header-required-dropped-killed (headerless line scanned
+  as its own payload counts), mutant-srv-corpus-killed (both receipt
+  patterns disabled -> zero receipts -> exactly the 17 receipt-bearing
+  pins break; the 2 zero-receipt logs still match)
+- no ambiguity machinery on the server side: a receipt-shaped line
+  outside the anchored forms is simply excluded, not surfaced
+- g3's documented limit stands: any-player join lines, never a
+  per-target receipt
+
+fixture (synthetic id-only): rig/proof/fixtures/server-echoes.log,
+sha256 (16) 9d7ea1f25459af55.

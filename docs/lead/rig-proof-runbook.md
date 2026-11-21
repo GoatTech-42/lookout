@@ -70,6 +70,13 @@ does not authenticate the log: a non-chat writer can still echo
 markers, and rows satisfied by echoed markers prove nothing about
 lookout. g3 counts
 any-player join lines and is not a receipt for the intended target.
+receipts require the observed server-envelope forms anchored after a
+recognized header ("System chat: <handle> joined the game", and the
+verified login shape "<name>[/<address>] logged in with entity id");
+player chat logs as "<handle> ..." and its prefix satisfies neither
+form on the observed formats, and headerless receipt-shaped lines are
+excluded (bounded claim: the committed 26.3 corpus,
+docs/lead/server-receipt-corpus-notes.md).
 chat-capture scores the log surface, not visual chat rendering.
 target-delivery proves only that `[lookout-stats]` lines reached the log
 for some entity: not that it was the intended target, and not general

@@ -237,7 +237,29 @@ def parse_arm_counts(text):
         counts[arm] = int(m.group(2))
     return counts
 
-SERVER_RECEIPT = re.compile(r"joined the game|logged in with entity id")
+# server receipts, anchored at payload start after a recognized header.
+# observed real forms in the committed 26.3 server corpus:
+#   join:  System chat: <handle> joined the game
+#   login: <handle>[/<ip:port>] logged in with entity id <n> at (...)
+# player chat logs as "<handle> ...": the join form requires the
+# payload to start with "System chat: ", and the login form requires
+# the verified name + bracketed-address shape (\w{3,16}[/...]), which
+# a "<handle>" chat prefix cannot satisfy, so a player cannot echo a
+# receipt line (bounded claim: the observed corpus formats). a
+# headerless receipt-shaped line is not counted: no ambiguity
+# machinery on the server side, just excluded.
+_SERVER_JOIN = re.compile(r"^System chat: .+ joined the game\s*$")
+_SERVER_LOGIN = re.compile(r"^\w{3,16}\[/[^\]]+\] logged in with entity id \d+ at \(")
 
 def parse_server_log(text):
-    return [line.strip() for line in text.splitlines() if SERVER_RECEIPT.search(line)]
+    out = []
+    for line in text.splitlines():
+        hm = _HEADER_LAUNCHER.match(line)
+        if hm is None:
+            hm = _HEADER_LOG4J.match(line)
+        if hm is None:
+            continue
+        payload = line[hm.end():].lstrip()
+        if _SERVER_JOIN.match(payload) or _SERVER_LOGIN.match(payload):
+            out.append(line.strip())
+    return out

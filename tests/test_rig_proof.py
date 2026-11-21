@@ -116,7 +116,9 @@ expect("parse-arm-counts-unknown-arm-none", parsers.parse_arm_counts("arm=fly se
 expect("score-g4-invalid-counts-unverified",
        score.row_g4_coverage(parsers.parse_arm_counts("arm=reach sent=2\narm=reach sent=4\n"))[0] == "UNVERIFIED")
 expect("parse-server-receipt",
-       len(parsers.parse_server_log("[INFO]: VictimA joined the game\n[INFO]: noise\n")) == 1)
+       len(parsers.parse_server_log(
+           "[12:00:20] [Server thread/INFO]: System chat: entity 1042 joined the game\n"
+           "[12:00:21] [Server thread/INFO]: noise\n")) == 1)
 
 # scorer: verdict paths per row
 good = parsers.parse_client_log(GOOD)
@@ -702,9 +704,73 @@ for rel, want in sorted(SERVER_CORPUS.items()):
     expect(f"srv-corpus-{pathlib.Path(rel).parent.name}-{pathlib.Path(rel).stem}",
            got == want, f"got {got}")
 
-# server corpus mutation protection: a receipt regex that never matches
-# must break exactly the 17 receipt-bearing pins (the 2 zero-receipt
-# evidence logs still match and are not part of the kill count)
+# server receipt echo hardening: player chat logs as "<handle> ..." and
+# cannot echo a receipt; a headerless receipt-shaped line is excluded
+# (no ambiguity machinery on the server side). synthetic id-only fixture
+_ECHO = parsers.parse_server_log(
+    (ROOT / "rig/proof/fixtures/server-echoes.log").read_text())
+expect("srv-echo-real-forms-counted",
+       _ECHO == ["[12:00:19] [Server thread/INFO]: entity1042[/127.0.0.1:25565]"
+                 " logged in with entity id 1042 at (0.5, -60.0, 3.5)",
+                 "[12:00:20] [Server thread/INFO]: System chat: entity 1042 joined the game"],
+       f"got {_ECHO}")
+expect("srv-echo-chat-and-headerless-filtered", len(_ECHO) == 2)
+# isolated minimal bypass negative (QA 8.2): a chat prefix directly
+# followed by the bare login phrase must NOT count
+expect("srv-echo-login-minimal-negative",
+       parsers.parse_server_log(
+           "[12:00:32] [Server thread/INFO]: <entity1043> logged in with"
+           " entity id 1042 at (0.5, -60.0, 3.5)\n") == [])
+# genuine login positive: verified name + bracketed-address shape counts
+expect("srv-echo-login-genuine-positive",
+       parsers.parse_server_log(
+           "[12:00:19] [Server thread/INFO]: entity1042[/127.0.0.1:25565]"
+           " logged in with entity id 1042 at (0.5, -60.0, 3.5)\n")
+       == ["[12:00:19] [Server thread/INFO]: entity1042[/127.0.0.1:25565]"
+           " logged in with entity id 1042 at (0.5, -60.0, 3.5)"])
+
+# server echo-hardening mutants, changed output on the echo fixture
+# after a healthy baseline
+_ECHO_PROBE = ("import sys, pathlib; sys.path.insert(0, '.');"
+               "from rig.proof import parsers;"
+               f"R = {str(ROOT)!r};"
+               "import pathlib as pl;"
+               "print(len(parsers.parse_server_log(pl.Path(R,"
+               " 'rig/proof/fixtures/server-echoes.log').read_text())))")
+def srv_mutant(name, subs, want):
+    with tempfile.TemporaryDirectory() as td:
+        mutant_tree(td, parser_subs=subs)
+        r = subprocess.run([sys.executable, "-c", _ECHO_PROBE], cwd=td,
+                           capture_output=True, text=True)
+        expect(name, r.returncode == 0 and r.stdout.split() == want,
+               r.stdout[-100:] + r.stderr[-200:])
+srv_mutant("mutant-srv-echo-baseline-healthy", [], ["2"])
+# payload-start anchoring dropped (unanchored pattern + search): the
+# two chat join echoes re-count
+srv_mutant("mutant-srv-anchor-dropped-killed",
+           [('_SERVER_JOIN = re.compile(r"^System chat: .+ joined the game\\s*$")',
+             '_SERVER_JOIN = re.compile(r"joined the game")'),
+            ("        if _SERVER_JOIN.match(payload) or _SERVER_LOGIN.match(payload):",
+             "        if _SERVER_JOIN.search(payload) or _SERVER_LOGIN.search(payload):")],
+           ["4"])
+# login shape relaxed to a bare token: the minimal chat echo re-counts
+# (2 real + the <entity1043> minimal echo = 3; the spoofed-address echo
+# still fails: its second token is not the login phrase)
+srv_mutant("mutant-srv-login-shape-relaxed-killed",
+           [('_SERVER_LOGIN = re.compile(r"^\\w{3,16}\\[/[^\\]]+\\] logged in with entity id \\d+ at \\(")',
+             '_SERVER_LOGIN = re.compile(r"^\\S+ logged in with entity id \\d+ at \\(")')],
+           ["3"])
+# header requirement dropped (headerless line scanned as its own
+# payload): the headerless receipt-shaped line counts
+srv_mutant("mutant-srv-header-required-dropped-killed",
+           [("        if hm is None:\n            continue\n        payload = line[hm.end():].lstrip()",
+             "        payload = line[hm.end():].lstrip() if hm else line")],
+           ["3"])
+
+# server corpus mutation protection: both receipt patterns disabled ->
+# zero receipts anywhere, so exactly the 17 receipt-bearing pins break
+# (the 2 zero-receipt evidence logs still match and are not part of
+# the kill count)
 _SERVER_PINS = repr(sorted(SERVER_CORPUS.items()))
 _SERVER_PROBE = ("import sys, pathlib; sys.path.insert(0, '.');"
                  "from rig.proof import parsers;"
@@ -720,8 +786,10 @@ with tempfile.TemporaryDirectory() as td:
            r.stdout[-100:] + r.stderr[-200:])
 with tempfile.TemporaryDirectory() as td:
     mutant_tree(td, parser_subs=[(
-        'SERVER_RECEIPT = re.compile(r"joined the game|logged in with entity id")',
-        'SERVER_RECEIPT = re.compile(r"a-string-that-never-appears")')])
+        '_SERVER_JOIN = re.compile(r"^System chat: .+ joined the game\\s*$")',
+        '_SERVER_JOIN = re.compile(r"a-string-that-never-appears")'), (
+        '_SERVER_LOGIN = re.compile(r"^\\w{3,16}\\[/[^\\]]+\\] logged in with entity id \\d+ at \\(")',
+        '_SERVER_LOGIN = re.compile(r"another-string-that-never-appears")')])
     r = subprocess.run([sys.executable, "-c", _SERVER_PROBE], cwd=td,
                        capture_output=True, text=True)
     expect("mutant-srv-corpus-killed", r.returncode == 0 and r.stdout.split() == ["17"],

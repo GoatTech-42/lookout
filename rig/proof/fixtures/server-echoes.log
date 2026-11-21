@@ -1,0 +1,8 @@
+[12:00:19] [Server thread/INFO]: entity1042[/127.0.0.1:25565] logged in with entity id 1042 at (0.5, -60.0, 3.5)
+[12:00:20] [Server thread/INFO]: System chat: entity 1042 joined the game
+[12:00:30] [Server thread/INFO]: <entity1043> entity 1042 joined the game
+[12:00:31] [Server thread/INFO]: <entity1043> System chat: entity 1042 joined the game
+[12:00:32] [Server thread/INFO]: <entity1043> logged in with entity id 1042 at (0.5, -60.0, 3.5)
+[12:00:33] [Server thread/INFO]: <entity1043> entity1042[/127.0.0.1:25565] logged in with entity id 1042 at (0.5, -60.0, 3.5)
+System chat: entity 1042 joined the game
+[12:00:34] [Server thread/INFO]: System chat: entity 1042 has made the advancement [Stone Age]
