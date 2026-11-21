@@ -28,7 +28,8 @@ Recognized line formats (kept in sync with the lookout sources):
 
 envelope rules (the log surface is unauthenticated plain text):
 - chat-routed lines (payload starts "[System] [CHAT] " or "[CHAT] ")
-  are NEVER scanned for markers or same-line mixin errors: chat
+  are NEVER scanned for markers or same-line mixin errors, and never
+  contribute package/vocabulary evidence to window findings: chat
   participants can echo any marker format
 - a marker-shaped line (watching/alert/stats/null-gui only) with no
   recognizable header, or whose payload itself starts with a fully
@@ -64,6 +65,16 @@ ALERT = re.compile(r"\[lookout\] (trace )?alert entity=(\d+) check=([a-z0-9_]+)"
 # chat-routed payload: real client logs show "[System] [CHAT] ...";
 # server-style captures show "[CHAT] <name> ..."
 _CHAT_PAYLOAD = re.compile(r"^\[(?:System|CHAT)\] \[CHAT\] |^\[CHAT\] ")
+
+def _chat_routed(line):
+    # True when the line's payload is chat-routed; chat content never
+    # feeds markers, the same-line mixin scan, or window evidence
+    hm = _HEADER_LAUNCHER.match(line)
+    if hm is None:
+        hm = _HEADER_LOG4J.match(line)
+    if hm is None:
+        return False
+    return bool(_CHAT_PAYLOAD.match(line[hm.end():].lstrip()))
 STATS = re.compile(r"\[lookout-stats\] entity=(\d+)"
                   r" d=\d+[.,]\d+ dy=-?\d+[.,]\d+"
                   r" ground=(?:true|false) glide=(?:true|false) water=(?:true|false)"
@@ -138,11 +149,17 @@ def parse_client_log(text):
         if entry.severity in ("ERROR", "WARN"):
             if entry.truncated:
                 out.truncated_error_entries.append((entry.lines[0][0], entry.lines[-1][0]))
-            pkg = [i for i, l in entry.lines if _PACKAGE.search(l)]
-            voc = [i for i, l in entry.lines if _VOCAB.search(l)]
-            if pkg and voc and not any(is_mixin_error(l) for _, l in entry.lines):
-                # window-only finding: a same-line match in this entry is
-                # already FAIL evidence in mixin_errors, never counted twice
+            pkg = [i for i, l in entry.lines if _PACKAGE.search(l) and not _chat_routed(l)]
+            voc = [i for i, l in entry.lines if _VOCAB.search(l) and not _chat_routed(l)]
+            counted_sameline = any(is_mixin_error(l) and not _chat_routed(l)
+                                   for _, l in entry.lines)
+            if pkg and voc and not counted_sameline:
+                # window-only finding: a COUNTED same-line match in this
+                # entry is already FAIL evidence in mixin_errors, never
+                # counted twice. the dedup mirrors the same-line scan's
+                # eligibility exactly: chat-routed lines are excluded,
+                # so chat content can neither feed nor SUPPRESS window
+                # evidence
                 out.window_findings.append(WindowFinding(entry.lines[0][0], entry.lines[-1][0],
                                                          entry.severity, pkg, voc))
         entry = None

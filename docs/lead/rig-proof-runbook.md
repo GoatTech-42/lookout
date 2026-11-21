@@ -58,7 +58,7 @@ human reviews the block (see docs/lead/mixin-error-multiline-limits.md). null-gu
 window markers and does not prove the GUI was actually null. the
 scored log surface is unauthenticated plain text. chat-routed lines
 ("[System] [CHAT] " / "[CHAT] " payloads) are never scanned for
-markers, and marker-shaped lines with a bare, malformed or nested
+markers, never feed package/vocabulary evidence to window findings, and marker-shaped lines with a bare, malformed or nested
 header are ambiguous: counted as no marker kind
 (watching/alert/stats/null-gui; the same-line mixin error scan is not a
 marker scan and still counts headerless/nested error lines), and the

@@ -449,6 +449,68 @@ expect("win-f17-healthy-regression",
        parsers.parse_client_log(GOOD).window_findings == []
        and parsers.parse_client_log(GOOD).truncated_error_entries == [])
 
+# f22: chat-routed lines never feed the window detector - a WARN
+# chat-routed line carrying only the package plus an orphan
+# continuation carrying only the vocabulary must NOT manufacture a
+# window finding (WARN/ERROR chat forms are unobserved in real
+# captures; these pins qualify the synthetic shape)
+f22 = (BASE + "[12:10:00] [Render thread/WARN]: [System] [CHAT] dev.lookout broke\n"
+       "Caused by: callback failed\n")
+c22 = parsers.parse_client_log(f22)
+expect("win-f22-warn-chat-no-window",
+       c22.mixin_errors == [] and c22.window_findings == [])
+expect("win-f22-boot-pass", score.row_boot(c22)[0] == "PASS")
+
+# f23: same shape at ERROR level
+f23 = (BASE + "[12:10:00] [Render thread/ERROR]: [System] [CHAT] dev.lookout broke\n"
+       "Caused by: callback failed\n")
+c23 = parsers.parse_client_log(f23)
+expect("win-f23-error-chat-no-window",
+       c23.mixin_errors == [] and c23.window_findings == [])
+expect("win-f23-boot-pass", score.row_boot(c23)[0] == "PASS")
+
+# f24: a single chat-routed line carrying package + vocabulary on one
+# line at WARN: excluded from the same-line scan (chat filter) and no
+# window finding either. two filters produce that outcome: the
+# evidence filter empties pkg/voc on chat-only lines, and the dedup
+# check (counted same-line errors only) is the backstop for counted
+# matches. the pin freezes the outcome; the mechanism is both filters
+f24 = BASE + "[12:10:00] [Render thread/WARN]: [System] [CHAT] Mixin apply failed dev.lookout.mixin.X\n"
+c24 = parsers.parse_client_log(f24)
+expect("win-f24-warn-chat-sameline-no-window",
+       c24.mixin_errors == [] and c24.window_findings == [])
+expect("win-f24-boot-pass", score.row_boot(c24)[0] == "PASS")
+
+# f25: paired positive (QA 8.7) - an ERROR chat-routed header carrying
+# package+vocabulary does NOT suppress independent window evidence in
+# the same entry's continuations: the dedup check mirrors the
+# same-line scan's eligibility (counted errors only), so the
+# continuations' package-only / vocabulary-only lines still yield a
+# window finding
+f25 = (BASE + "[12:10:00] [Render thread/ERROR]: [System] [CHAT] Mixin apply"
+       " failed dev.lookout.mixin.X\n"
+       "Caused by: dev.lookout.client.AttackHooks\n"
+       "Caused by: callback failed\n")
+c25 = parsers.parse_client_log(f25)
+expect("win-f25-chat-header-keeps-window-evidence",
+       c25.mixin_errors == []
+       and [(f.start, f.end, f.package_lines, f.vocab_lines)
+            for f in c25.window_findings] == [(3, 5, [4], [5])],
+       f"got {c25.window_findings}")
+expect("win-f25-boot-unverified", score.row_boot(c25)[0] == "UNVERIFIED")
+
+# f26: suppression negative (paired with f25) - same chat header,
+# harmless continuations: chat content is not evidence and nothing
+# counted, so no finding
+f26 = (BASE + "[12:10:00] [Render thread/ERROR]: [System] [CHAT] Mixin apply"
+       " failed dev.lookout.mixin.X\n"
+       "just a stack line\n"
+       "another stack line\n")
+c26 = parsers.parse_client_log(f26)
+expect("win-f26-chat-header-no-evidence-no-window",
+       c26.mixin_errors == [] and c26.window_findings == [])
+expect("win-f26-boot-pass", score.row_boot(c26)[0] == "PASS")
+
 # f20: frozen blind spot (docs/lead/mixin-error-multiline-limits.md) -
 # package-less summary: an ERROR entry whose only failure signal is
 # mixin vocabulary, with dev.lookout nowhere in the log, is invisible
@@ -528,9 +590,9 @@ mutant_case("cap-counts-header", f4,
 # m3: package+vocab required on one line -> f1's split form invisible
 mutant_case("sameline-required", f1,
             lambda l: l.startswith("PASS boot"),
-            parser_subs=[("            pkg = [i for i, l in entry.lines if _PACKAGE.search(l)]\n"
-                          "            voc = [i for i, l in entry.lines if _VOCAB.search(l)]",
-                          "            pkg = [i for i, l in entry.lines if _PACKAGE.search(l) and _VOCAB.search(l)]\n"
+            parser_subs=[("            pkg = [i for i, l in entry.lines if _PACKAGE.search(l) and not _chat_routed(l)]\n"
+                          "            voc = [i for i, l in entry.lines if _VOCAB.search(l) and not _chat_routed(l)]",
+                          "            pkg = [i for i, l in entry.lines if _PACKAGE.search(l) and _VOCAB.search(l) and not _chat_routed(l)]\n"
                           "            voc = pkg")])
 # m4: severity gate dropped -> f13's INFO entry yields a finding
 mutant_case("severity-dropped", f13,
@@ -570,6 +632,22 @@ mutant_case("autofail", f15,
             lambda l: l.startswith("FAIL boot"),
             score_subs=[('        return "UNVERIFIED", ("mixin error window candidates need human block review: "',
                          '        return "FAIL", ("mixin error window candidates need human block review: "')])
+# m12: chat lines feed window evidence -> f22's chat echo manufactures
+# a window finding and boot goes UNVERIFIED
+mutant_case("chat-window-feed", f22,
+            lambda l: l.startswith("UNVERIFIED"),
+            parser_subs=[("            pkg = [i for i, l in entry.lines if _PACKAGE.search(l) and not _chat_routed(l)]\n"
+                          "            voc = [i for i, l in entry.lines if _VOCAB.search(l) and not _chat_routed(l)]",
+                          "            pkg = [i for i, l in entry.lines if _PACKAGE.search(l)]\n"
+                          "            voc = [i for i, l in entry.lines if _VOCAB.search(l)]")])
+# m13: dedup over UNFILTERED lines (chat header counts as a same-line
+# match) -> f25's independent window evidence is suppressed to PASS
+mutant_case("dedup-unfiltered", f25,
+            lambda l: l.startswith("PASS boot"),
+            parser_subs=[("            counted_sameline = any(is_mixin_error(l) and not _chat_routed(l)\n"
+                          "                                   for _, l in entry.lines)",
+                          "            counted_sameline = any(is_mixin_error(l)\n"
+                          "                                   for _, l in entry.lines)")])
 # m10: package requirement dropped from the same-line scan -> f20's
 # package-less summary becomes a mixin error and boot FAILs
 mutant_case("package-dropped", f20,
@@ -599,7 +677,7 @@ mutant_case("launcher-only-grammar", f16a,
 # m12: dedup removed -> f14a's entry double-reports (parser-level probe)
 with tempfile.TemporaryDirectory() as td:
     mutant_tree(td, parser_subs=[(
-        "            if pkg and voc and not any(is_mixin_error(l) for _, l in entry.lines):",
+        "            if pkg and voc and not counted_sameline:",
         "            if pkg and voc:")])
     probe = ("import sys; sys.path.insert(0, '.');"
              "from rig.proof import parsers;"

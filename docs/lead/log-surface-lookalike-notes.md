@@ -46,9 +46,25 @@ own red-first pin:
 - in the qualified corpus, chat-routed lines carry their own INFO
   header, so a chat-routed line closes any open ERROR/WARN entry and
   opens an INFO entry: it cannot join an error entry to manufacture a
-  window finding, pinned by envelope-chat-cannot-join-error-entry. the
-  pin covers the observed INFO chat shape only; WARN/ERROR-level
-  chat-routed forms are outside the qualified corpus
+  window finding, pinned by envelope-chat-cannot-join-error-entry
+- WARN/ERROR-level chat-routed forms (unobserved in real captures,
+  pinned on synthetic shapes): chat-routed lines never contribute
+  package/vocabulary evidence to window findings, so a chat line
+  carrying only the package plus an orphan continuation carrying only
+  the vocabulary cannot manufacture an UNVERIFIED (win-f22/f23).
+  chat content can also not SUPPRESS window evidence: the window dedup
+  check mirrors the same-line scan's eligibility and suppresses only
+  on counted same-line errors, so a chat-routed header carrying
+  package+vocabulary leaves independent continuation evidence intact
+  (win-f25 positive, win-f26 negative, mutant-dedup-unfiltered-killed)
+- a single chat line carrying package+vocabulary on one line is absent
+  from findings via BOTH filters (the evidence filter empties pkg/voc
+  on chat-only lines; dedup is the backstop for counted matches);
+  win-f24 freezes that outcome with the mechanism named as both
+- open: the entry cap still applies to chat-opened ERROR/WARN entries -
+  30+ continuations after a chat-routed error-level header produce a
+  truncated entry and UNVERIFIED. this slice closes chat-fed window
+  evidence, not the truncation path
 
 ## hardened behavior, pinned on these bounded fixtures
 
@@ -80,6 +96,10 @@ offending line numbers, and the header-INFO window-negative stays
 - mutant-hardening-nested-disabled-killed: nested-prefixed alert counts
 - mutant-precedence-ambiguity-first-killed: ambiguity scored before the
   mixin-error check turns a real-failure log UNVERIFIED
+- mutant-chat-window-feed-killed: letting chat lines feed window
+  evidence turns f22's chat echo into a window finding
+- mutant-dedup-unfiltered-killed: dedup over unfiltered lines lets a
+  chat header suppress f25's independent window evidence to PASS
 
 ## what this is not
 
